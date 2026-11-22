@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 
+/**
+ * Translated attributes (Astrotomic, current locale with fallback):
+ *
+ * @property-read string $name
+ * @property-read string $slug
+ * @property-read string|null $description
+ */
 class Brand extends Model implements HasMedia, TranslatableContract
 {
     use HasOptimizedImages, HasTranslations;

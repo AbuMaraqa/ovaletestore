@@ -1,7 +1,7 @@
 # Testing Report
 
-Last run: 2026-11-23 — `php artisan test` → **44 passed, 153 assertions, ~4 s** (Pest 5, SQLite in-memory).
-`vendor/bin/pint` → clean. `vendor/bin/phpstan analyse` (Larastan, level 5) → **no new errors**; 255 pre-existing findings recorded in `phpstan-baseline.neon` (mostly Astrotomic magic attributes and untyped Eloquent generics — to be reduced by adding `@property` annotations). `npx vue-tsc --noEmit` → clean. `npm run build` → OK.
+Last run: 2026-11-23 — `php artisan test` → **47 passed, 196 assertions, ~5 s** (Pest 5, SQLite in-memory).
+`vendor/bin/pint` → clean. `vendor/bin/phpstan analyse` (Larastan, level 5) → **no new errors**; 164 pre-existing findings (down from 255 after annotating translated attributes) recorded in `phpstan-baseline.neon` (mostly Astrotomic magic attributes and untyped Eloquent generics — to be reduced by adding `@property` annotations). `npx vue-tsc --noEmit` → clean. `npm run build` → OK.
 
 | Suite | Covers |
 |---|---|
@@ -11,6 +11,7 @@ Last run: 2026-11-23 — `php artisan test` → **44 passed, 153 assertions, ~4 
 | Localization/LocalizedRoutesTest | ar/en/he pages with correct `lang`/`dir`; legacy Arabic URL with diacritics; he→en→ar fallback; cross-locale slug 301; server-rendered canonical/hreflang/JSON-LD; sitemap content excludes private pages |
 | Security/SecurityTest | security headers; no-store on admin; disguised PHP upload rejected; safe generated filenames; login throttling (429); admin routes not leaked to storefront |
 | Migration/WooImporterTest | idempotent import (re-run updates, no duplicates); bilingual name split; Arabic slug preserved; HTML sanitized; duplicate SKU handling; TranslatePress 301; dry-run writes nothing; `-scaled` original preference |
+| Storefront/HomePageTest | all homepage sections present; best-sellers label only when backed by real orders (ranked by quantity); on-sale catalog filter |
 | Unit/BilingualNameTest | name-splitting edge cases (`Mr. Chef`, missing English, HTML entities, trailing Latin category names) |
 
 ## Manual / HTTP verification (local `php artisan serve`)

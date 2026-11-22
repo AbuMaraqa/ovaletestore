@@ -11,12 +11,13 @@ return [
     // Crawlers must always get Arabic on "/"; visitors choose explicitly via the switcher.
     'useAcceptLanguageHeader' => false,
 
-    // Arabic (default) lives at "/" so legacy WooCommerce URLs (/product/{slug}) keep working.
-    'hideDefaultLocaleInURL' => true,
+    // Every language is visible in the URL (/ar, /en, /he). Unprefixed URLs — including the legacy
+    // WooCommerce ones (/product/{slug}) — are 301-redirected to /ar/... by RedirectToLocalePrefix.
+    'hideDefaultLocaleInURL' => false,
 
     'localesOrder' => ['ar', 'en', 'he'],
     'localesMapping' => [],
     'utf8suffix' => env('LARAVELLOCALIZATION_UTF8SUFFIX', '.UTF-8'),
-    'urlsIgnored' => ['/up', '/sitemap*', '/robots.txt', '/media/*', '/storage/*', '/build/*'],
+    'urlsIgnored' => ['/up', '/sitemap*', '/sitemaps/*', '/robots.txt', '/media/*', '/storage/*', '/build/*', '/favicon.ico'],
     'httpMethodsIgnored' => ['POST', 'PUT', 'PATCH', 'DELETE'],
 ];

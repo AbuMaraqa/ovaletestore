@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\ImportProductImage;
+use App\Migration\Woo\RemoteImageDownloader;
 use App\Migration\Woo\WooImporter;
 use App\Models\Category;
 use App\Models\Product;
@@ -70,7 +70,7 @@ it('writes nothing in dry-run mode', function () {
 });
 
 it('prefers the original over the WordPress "-scaled" image', function () {
-    $candidates = ImportProductImage::originalCandidates('https://ovaletestore.com/wp-content/uploads/2025/05/cake-scaled.jpg');
+    $candidates = RemoteImageDownloader::originalCandidates('https://ovaletestore.com/wp-content/uploads/2025/05/cake-scaled.jpg');
 
     expect($candidates[0])->toEndWith('/cake.jpg')->and($candidates[1])->toEndWith('/cake-scaled.jpg');
 });

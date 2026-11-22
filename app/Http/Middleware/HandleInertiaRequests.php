@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Actions\Cart\ResolveCart;
+use App\Enums\OrderStatus;
 use App\Models\Category;
+use App\Models\Order;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
 use App\Support\Translations;
@@ -69,6 +71,11 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+
+            // Admin header badges (only for staff who may see orders).
+            'admin_badges' => fn () => $area === 'admin' && $user?->can('orders.view')
+                ? ['pending_orders' => Order::query()->where('status', OrderStatus::Pending)->count()]
+                : null,
 
             // Storefront navigation (top-level categories), sent once per locale.
             'nav_categories' => $area === 'storefront'

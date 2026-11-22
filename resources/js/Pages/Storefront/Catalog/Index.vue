@@ -10,7 +10,7 @@ const props = defineProps<{
     products: Paginated<ProductCard> & { meta: { total: number; links: PaginationLink[] } };
     category: { name: string; description: string | null; url: string } | null;
     categories: CategoryCard[];
-    filters: { q: string | null; sort: string; in_stock: boolean };
+    filters: { q: string | null; sort: string; in_stock: boolean; sale: boolean };
     sorts: string[];
 }>();
 
@@ -18,7 +18,7 @@ const { t } = useTrans();
 const baseUrl = computed(() => props.category?.url ?? route('storefront.shop'));
 const title = computed(() => props.category?.name ?? (props.filters.q ? t('storefront.results_for', { q: props.filters.q }) : t('storefront.shop')));
 
-function apply(changes: Partial<{ sort: string; in_stock: boolean }>): void {
+function apply(changes: Partial<{ sort: string; in_stock: boolean; sale: boolean }>): void {
     const next = { ...props.filters, ...changes };
     router.get(
         baseUrl.value,
@@ -26,6 +26,7 @@ function apply(changes: Partial<{ sort: string; in_stock: boolean }>): void {
             ...(next.q ? { q: next.q } : {}),
             ...(next.sort !== 'newest' ? { sort: next.sort } : {}),
             ...(next.in_stock ? { in_stock: 1 } : {}),
+            ...(next.sale ? { sale: 1 } : {}),
         },
         { preserveState: true, preserveScroll: false },
     );
@@ -61,6 +62,10 @@ function apply(changes: Partial<{ sort: string; in_stock: boolean }>): void {
         <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-b border-stone-200 pb-5">
             <p class="text-sm text-stone-500">{{ t('storefront.products_count', { count: products.meta.total }) }}</p>
             <div class="flex flex-wrap items-center gap-3">
+                <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm">
+                    <input type="checkbox" class="size-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500" :checked="filters.sale" @change="apply({ sale: ($event.target as HTMLInputElement).checked })" />
+                    {{ t('storefront.on_sale_only') }}
+                </label>
                 <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm">
                     <input type="checkbox" class="size-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500" :checked="filters.in_stock" @change="apply({ in_stock: ($event.target as HTMLInputElement).checked })" />
                     {{ t('storefront.in_stock_only') }}

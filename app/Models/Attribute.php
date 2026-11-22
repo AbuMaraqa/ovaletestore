@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property-read string $name
+ *
  * Global attribute (product_id = null, reusable across products) or a custom attribute owned by one product.
  */
 class Attribute extends Model implements TranslatableContract

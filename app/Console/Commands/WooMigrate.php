@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\ImportProductImage;
+use App\Jobs\ImportRemoteImage;
 use App\Migration\Woo\StoreApiClient;
 use App\Migration\Woo\WooImporter;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -31,7 +33,18 @@ class WooMigrate extends Command
             Cache::forget(self::CHECKPOINT);
         }
 
-        $this->components->task('Categories', fn () => $importer->importCategories($client->categories()) >= 0);
+        $categories = $client->categories();
+        $this->components->task('Categories', fn () => $importer->importCategories($categories) >= 0);
+
+        if ($this->option('images') && ! $dryRun) {
+            foreach ($categories as $row) {
+                $id = Category::query()->where('source_id', $row['id'])->value('id');
+                if ($id && ! empty($row['image']['src'])) {
+                    $job = new ImportRemoteImage(Category::class, $id, (string) $row['image']['src'], 'image');
+                    $this->option('sync-images') ? dispatch_sync($job) : dispatch($job);
+                }
+            }
+        }
 
         $totals = $client->productTotals();
         $startPage = $dryRun ? 1 : (int) Cache::get(self::CHECKPOINT, 0) + 1;
@@ -85,7 +98,7 @@ class WooMigrate extends Command
     private function dispatchImages(int $productId, array $row): int
     {
         foreach (array_values($row['images'] ?? []) as $position => $image) {
-            $job = new ImportProductImage($productId, (string) $image['src'], $position, $image['alt'] ?: null);
+            $job = new ImportRemoteImage(Product::class, $productId, (string) $image['src'], 'gallery', $position, $image['alt'] ?: null);
             $this->option('sync-images') ? dispatch_sync($job) : dispatch($job);
         }
 

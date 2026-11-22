@@ -1,19 +1,18 @@
 /*
  * Shared typography + brand tokens (admin and storefront).
- * Fonts are self-hosted; the browser downloads only the scripts a page actually renders (unicode-range).
+ * Tajawal (Arabic + Latin) is the brand typeface; Hebrew glyphs fall back to IBM Plex Sans Hebrew.
+ * Self-hosted: the browser downloads only the scripts a page renders (unicode-range).
  */
-@import '@fontsource-variable/inter/index.css';
-@import '@fontsource/ibm-plex-sans-arabic/400.css';
-@import '@fontsource/ibm-plex-sans-arabic/500.css';
-@import '@fontsource/ibm-plex-sans-arabic/600.css';
-@import '@fontsource/ibm-plex-sans-arabic/700.css';
+@import '@fontsource/tajawal/400.css';
+@import '@fontsource/tajawal/500.css';
+@import '@fontsource/tajawal/700.css';
+@import '@fontsource/tajawal/800.css';
 @import '@fontsource/ibm-plex-sans-hebrew/400.css';
 @import '@fontsource/ibm-plex-sans-hebrew/500.css';
-@import '@fontsource/ibm-plex-sans-hebrew/600.css';
 @import '@fontsource/ibm-plex-sans-hebrew/700.css';
 
 @theme {
-    --font-sans: 'Inter Variable', 'IBM Plex Sans Arabic', 'IBM Plex Sans Hebrew', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Tajawal', 'IBM Plex Sans Hebrew', ui-sans-serif, system-ui, sans-serif;
 
     /* Brand: warm cocoa ink, cream surfaces, caramel accent. */
     --color-brand-50: oklch(0.98 0.012 70);
@@ -32,8 +31,11 @@
     --color-cream: oklch(0.985 0.008 80);
 }
 
-/* Arabic/Hebrew read better slightly larger with more leading. */
+/* Tajawal has small x-height: slightly larger base + generous leading reads better. */
+body {
+    font-size: 1.0625rem;
+}
 :lang(ar) body,
 :lang(he) body {
-    line-height: 1.7;
+    line-height: 1.75;
 }

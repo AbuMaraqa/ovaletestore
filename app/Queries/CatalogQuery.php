@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Storefront product listing: published products, whitelisted filters/sorts, eager-loaded for cards (no N+1).
  *
- * @phpstan-type CatalogFilters array{q?:string|null, sort?:string|null, in_stock?:bool, category?:Category|null, brand_id?:int|null}
+ * @phpstan-type CatalogFilters array{q?:string|null, sort?:string|null, in_stock?:bool, on_sale?:bool, category?:Category|null, brand_id?:int|null}
  */
 class CatalogQuery
 {
@@ -43,6 +43,10 @@ class CatalogQuery
         if ($category = $filters['category'] ?? null) {
             $ids = $category->descendantAndSelfIds();
             $query->whereHas('categories', fn (Builder $q) => $q->whereIn('categories.id', $ids));
+        }
+
+        if ($filters['on_sale'] ?? false) {
+            $query->whereHas('activeVariants', fn (Builder $q) => $q->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'regular_price'));
         }
 
         if ($brandId = $filters['brand_id'] ?? null) {

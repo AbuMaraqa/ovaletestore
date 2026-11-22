@@ -19,6 +19,16 @@ use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
+/**
+ * Translated attributes (Astrotomic, current locale with fallback):
+ *
+ * @property-read string $name
+ * @property-read string $slug
+ * @property-read string|null $short_description
+ * @property-read string|null $description
+ * @property-read string|null $meta_title
+ * @property-read string|null $meta_description
+ */
 class Product extends Model implements HasMedia, TranslatableContract
 {
     use HasOptimizedImages, HasTranslations, LogsActivity, SoftDeletes;

@@ -3,6 +3,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { onBeforeUnmount, watch } from 'vue';
 import Icon from '@/Components/Storefront/Icon.vue';
 import { useLocale } from '@/Composables/useLocale';
+import { lockScroll } from '@/Composables/useMotion';
 import { useTrans } from '@/Composables/useTrans';
 
 const open = defineModel<boolean>('open', { required: true });
@@ -11,7 +12,10 @@ defineProps<{ categories: { id: number; name: string; url: string }[] }>();
 const { t } = useTrans();
 const { current, available } = useLocale();
 
-watch(open, (value) => document.documentElement.classList.toggle('overflow-hidden', value));
+watch(open, (value) => {
+    document.documentElement.classList.toggle('overflow-hidden', value);
+    lockScroll(value);
+});
 const off = router.on('start', () => (open.value = false));
 onBeforeUnmount(() => {
     off();
@@ -45,7 +49,7 @@ onBeforeUnmount(() => {
                         <Icon name="close" class="size-6" />
                     </button>
                 </div>
-                <nav class="flex-1 overflow-y-auto px-2 py-4">
+                <nav class="flex-1 overflow-y-auto px-2 py-4" data-lenis-prevent>
                     <Link :href="route('storefront.home')" class="block rounded-xl px-3 py-3 font-medium hover:bg-stone-100">{{ t('common.home') }}</Link>
                     <Link :href="route('storefront.shop')" class="block rounded-xl px-3 py-3 font-medium hover:bg-stone-100">{{ t('storefront.shop') }}</Link>
                     <p class="mt-4 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-500">{{ t('storefront.categories') }}</p>

@@ -3,7 +3,7 @@
 use Illuminate\Http\UploadedFile;
 
 it('sends baseline security headers', function () {
-    $this->get('/')->assertHeader('X-Content-Type-Options', 'nosniff')
+    $this->get('/ar')->assertHeader('X-Content-Type-Options', 'nosniff')
         ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
         ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 });
@@ -46,5 +46,5 @@ it('throttles repeated login attempts', function () {
 });
 
 it('does not expose the admin route map to storefront visitors', function () {
-    $this->get('/')->assertOk()->assertDontSee('admin.products.update', false);
+    $this->get('/ar')->assertOk()->assertDontSee('admin.products.update', false);
 });

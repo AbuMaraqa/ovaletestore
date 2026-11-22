@@ -28,7 +28,7 @@ class CatalogController extends Controller
             ->forCurrentRoute(['page']);
 
         // Search result pages are thin/duplicate content.
-        if ($filters['q'] || $filters['sort'] !== 'newest' || $filters['in_stock']) {
+        if ($filters['q'] || $filters['sort'] !== 'newest' || $filters['in_stock'] || $filters['on_sale']) {
             $seo->noindex();
         }
 
@@ -57,7 +57,7 @@ class CatalogController extends Controller
                 ['name' => $category->name, 'url' => route('storefront.category', ['slug' => $category->slug])],
             ]));
 
-        if ($filters['q'] || $filters['sort'] !== 'newest' || $filters['in_stock']) {
+        if ($filters['q'] || $filters['sort'] !== 'newest' || $filters['in_stock'] || $filters['on_sale']) {
             $seo->noindex();
         }
 
@@ -80,6 +80,7 @@ class CatalogController extends Controller
                 'q' => $filters['q'],
                 'sort' => $filters['sort'],
                 'in_stock' => $filters['in_stock'],
+                'sale' => $filters['on_sale'],
             ],
             'sorts' => CatalogQuery::SORTS,
             'seo' => $seo,
@@ -92,6 +93,7 @@ class CatalogController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
             'sort' => ['nullable', Rule::in(CatalogQuery::SORTS)],
             'in_stock' => ['nullable', 'boolean'],
+            'sale' => ['nullable', 'boolean'],
             'page' => ['nullable', 'integer', 'min:1', 'max:10000'],
         ]);
 
@@ -99,6 +101,7 @@ class CatalogController extends Controller
             'q' => $validated['q'] ?? null,
             'sort' => $validated['sort'] ?? 'newest',
             'in_stock' => (bool) ($validated['in_stock'] ?? false),
+            'on_sale' => (bool) ($validated['sale'] ?? false),
         ];
     }
 

@@ -28,13 +28,15 @@ Multilingual: **ar (default, RTL)**, en (LTR), he (RTL). Currency: ILS (stored i
 ## Translations
 - DB content: astrotomic/laravel-translatable (`*_translations` tables, `HasTranslations` trait in `app/Models/Concerns`). Fallback chain: he→en→ar, en→ar, ar→en.
 - Slugs are per-locale on translation rows, unicode-preserving (`Str::slug($v, '-', null)`), unique per locale.
-- Routing: mcamara/laravel-localization, default `ar` hidden from URL (`/product/{slug}`, `/en/product/{slug}`, `/he/...`) — preserves the old WooCommerce Arabic URLs.
+- Routing: mcamara/laravel-localization, **every** language prefixed (`/ar/...`, `/en/...`, `/he/...`). Unprefixed URLs (incl. legacy WooCommerce `/product/{slug}/`) get one 301 to `/ar/...` (`RedirectToLocalePrefix`). In tests call `$this->useRouteLocale('en')` before hitting `/en` routes (Pest beforeEach sets `ar`).
 - UI strings: `lang/{ar,en,he}.json` → shared once to Vue → `useTrans()` composable. Never hardcode UI text in Vue.
 - RTL: use logical utilities (`ms-/me-/ps-/pe-/start-/end-`, `rtl:` variants). Never `ml-/mr-/left-/right-` for layout.
 
 ## Frontend
 - Admin = Metronic/KTUI classes (`kt-btn`, `kt-card`, `kt-input`, …) wrapped in Vue components under `resources/js/Components/UI`. Do not add another UI framework. Do not load KTUI JS that mutates the DOM under Vue — reimplement behaviour (drawer, dropdown, accordion) in Vue.
-- Storefront = own Tailwind design system (`resources/css/storefront.css`), tokens shared with admin.
+- Storefront = own Tailwind design system (`resources/css/storefront.css`), tokens shared with admin. Font: Tajawal (+ IBM Plex Sans Hebrew fallback).
+- Motion: GSAP + ScrollTrigger + Lenis only via `Composables/useMotion.ts` (`useGsap(root, ...)` auto-reverts on unmount; `[data-reveal]` + `revealOnScroll`). Always respect reduced motion. No libraries that write inline `style` attributes (strict CSP) — Vue `:style` / GSAP use CSSOM and are fine.
+- Homepage content (hero, brand logos, spotlight) lives in `HomeSettings`; `php artisan woo:import-home-assets` imports the source visuals as WebP.
 - Keep components < ~200 lines; extract composables (`resources/js/Composables`).
 - Images: always `<ResponsiveImage>` (srcset, width/height, lazy unless `priority`).
 

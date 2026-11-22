@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { adminMenu } from '@/Components/Navigation/adminMenu';
+import AdminSearch from '@/Components/Navigation/AdminSearch.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
 import { onClickOutside } from '@/Composables/onClickOutside';
 import { useLocale } from '@/Composables/useLocale';
@@ -8,54 +10,104 @@ import { useTheme } from '@/Composables/useTheme';
 import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
 
+/** Port of the Metronic demo1 header + topbar (search, notifications, language, theme, user dropdown). */
 const emit = defineEmits<{ openSidebar: [] }>();
-const page = usePage<SharedProps>();
+const page = usePage<SharedProps & { admin_badges: { pending_orders: number } | null }>();
 const { t } = useTrans();
 const { available, current } = useLocale();
 const { isDark, toggle } = useTheme();
 
-const menuOpen = ref(false);
-const menu = ref<HTMLElement | null>(null);
-onClickOutside(menu, () => (menuOpen.value = false));
+const user = computed(() => page.props.auth.user);
+const pending = computed(() => page.props.admin_badges?.pending_orders ?? 0);
+const title = computed(() => {
+    const active = adminMenu.flatMap((s) => s.items).find((i) =>
+        i.children ? i.children.some((c) => route().current(c.match)) : i.match && route().current(i.match),
+    );
+    return active ? t(active.label) : t('admin.dashboard');
+});
 
+const searchOpen = ref(false);
+const userMenu = ref(false);
+const userRoot = ref<HTMLElement | null>(null);
+onClickOutside(userRoot, () => (userMenu.value = false));
 const logout = () => router.post(route('logout'));
 </script>
 
 <template>
-    <header class="kt-header fixed end-0 top-0 z-10 flex h-[70px] items-stretch border-b border-border bg-background/95 backdrop-blur start-0">
-        <div class="kt-container-fixed flex w-full items-center justify-between gap-4 px-4 lg:px-8">
-            <div class="flex items-center gap-2">
-                <button type="button" class="kt-btn kt-btn-icon kt-btn-ghost lg:hidden" :aria-label="t('common.menu')" @click="emit('openSidebar')">
-                    <KtIcon name="burger-menu-2" />
+    <header id="header" class="kt-header fixed end-0 top-0 z-10 flex shrink-0 items-stretch border-b border-border bg-background/95 backdrop-blur start-0">
+        <div id="headerContainer" class="kt-container-fixed flex items-stretch justify-between lg:gap-4">
+            <!-- Mobile logo + drawer toggle -->
+            <div class="-ms-1 flex items-center gap-2.5 lg:hidden">
+                <Link :href="route('admin.dashboard')" class="shrink-0">
+                    <img v-if="page.props.site.logo" :src="page.props.site.logo" alt="" class="max-h-[30px] w-auto" />
+                </Link>
+                <button type="button" class="kt-btn kt-btn-icon kt-btn-ghost" :aria-label="t('common.menu')" @click="emit('openSidebar')">
+                    <KtIcon name="menu" />
                 </button>
-                <slot name="title" />
             </div>
 
-            <div class="flex items-center gap-1.5">
-                <a :href="route('storefront.home')" target="_blank" rel="noopener" class="kt-btn kt-btn-ghost kt-btn-sm hidden sm:inline-flex">
-                    <KtIcon name="shop" /> {{ t('admin.view_store') }}
-                </a>
-                <a v-for="locale in available" :key="locale.code" :href="locale.url" :class="['kt-btn kt-btn-sm', locale.code === current ? 'kt-btn-secondary' : 'kt-btn-ghost']" :lang="locale.code">
-                    {{ locale.code.toUpperCase() }}
-                </a>
-                <button type="button" class="kt-btn kt-btn-icon kt-btn-ghost" :aria-label="t('admin.theme_toggle')" @click="toggle">
-                    <KtIcon :name="isDark ? 'sun' : 'moon'" />
+            <!-- Breadcrumb -->
+            <div class="hidden items-center gap-1.25 text-sm lg:flex">
+                <Link :href="route('admin.dashboard')" class="text-secondary-foreground hover:text-primary">{{ t('admin.panel') }}</Link>
+                <KtIcon name="right" class="text-[10px] text-muted-foreground rtl:rotate-180" />
+                <span class="font-medium text-mono">{{ title }}</span>
+            </div>
+
+            <!-- Topbar -->
+            <div class="flex items-center gap-2.5">
+                <button type="button" class="group kt-btn kt-btn-ghost kt-btn-icon size-9 rounded-full hover:bg-primary/10" :aria-label="t('common.search')" @click="searchOpen = true">
+                    <KtIcon name="magnifier" class="text-lg group-hover:text-primary" />
                 </button>
 
-                <div v-if="page.props.auth.user" ref="menu" class="relative">
-                    <button type="button" class="flex items-center gap-2 rounded-full p-0.5 ring-1 ring-border" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">
-                        <img :src="page.props.auth.user.avatar" :alt="page.props.auth.user.name" class="size-9 rounded-full" width="36" height="36" />
+                <Link
+                    v-if="page.props.admin_badges"
+                    :href="`${route('admin.orders.index')}?filter[status]=pending`"
+                    class="group kt-btn kt-btn-ghost kt-btn-icon relative size-9 rounded-full hover:bg-primary/10"
+                    :aria-label="`${t('admin.stats_pending')}: ${pending}`"
+                >
+                    <KtIcon name="notification-status" class="text-lg group-hover:text-primary" />
+                    <span v-if="pending" class="kt-badge kt-badge-xs kt-badge-destructive absolute -end-0.5 -top-0.5 min-w-4 justify-center rounded-full px-1 tabular-nums">{{ pending > 99 ? '99+' : pending }}</span>
+                </Link>
+
+                <button type="button" class="group kt-btn kt-btn-ghost kt-btn-icon size-9 rounded-full hover:bg-primary/10" :aria-label="t('admin.theme_toggle')" @click="toggle">
+                    <KtIcon :name="isDark ? 'sun' : 'moon'" class="text-lg group-hover:text-primary" />
+                </button>
+
+                <!-- User dropdown (Metronic kt-dropdown-menu markup) -->
+                <div v-if="user" ref="userRoot" class="relative shrink-0">
+                    <button type="button" class="shrink-0 cursor-pointer" :aria-expanded="userMenu" aria-haspopup="menu" @click="userMenu = !userMenu">
+                        <img :src="user.avatar" :alt="user.name" class="size-9 shrink-0 rounded-full border-2 border-green-500" width="36" height="36" />
                     </button>
-                    <div v-if="menuOpen" class="absolute end-0 top-full z-50 mt-2 w-60 rounded-xl border border-border bg-popover p-2 shadow-lg">
-                        <div class="border-b border-border px-3 pb-3 pt-1">
-                            <p class="truncate text-sm font-semibold text-mono">{{ page.props.auth.user.name }}</p>
+                    <div :class="['kt-dropdown-menu absolute end-0 top-full z-50 mt-2.5 w-[260px]', { open: userMenu }]" role="menu">
+                        <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5">
+                            <div class="flex items-center gap-2">
+                                <img :src="user.avatar" alt="" class="size-9 shrink-0 rounded-full border-2 border-green-500" />
+                                <span class="text-sm font-semibold leading-none text-foreground">{{ user.name }}</span>
+                            </div>
+                            <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline">{{ t('admin.panel') }}</span>
                         </div>
-                        <button type="button" class="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-accent" @click="logout">
-                            <KtIcon name="exit-right" /> {{ t('common.logout') }}
-                        </button>
+                        <ul class="kt-dropdown-menu-sub">
+                            <li><div class="kt-dropdown-menu-separator" /></li>
+                            <li>
+                                <a :href="route('storefront.home')" target="_blank" rel="noopener" class="kt-dropdown-menu-link"><KtIcon name="shop" /> {{ t('admin.view_store') }}</a>
+                            </li>
+                            <li v-for="locale in available" :key="locale.code">
+                                <a :href="locale.url" :lang="locale.code" class="kt-dropdown-menu-link">
+                                    <KtIcon name="geolocation" />
+                                    {{ locale.native }}
+                                    <KtIcon v-if="locale.code === current" name="check" class="ms-auto text-primary" />
+                                </a>
+                            </li>
+                            <li><div class="kt-dropdown-menu-separator" /></li>
+                        </ul>
+                        <div class="px-2.5 pt-1.5 pb-2.5">
+                            <button type="button" class="kt-btn kt-btn-outline w-full justify-center" @click="logout">{{ t('common.logout') }}</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </header>
+
+    <AdminSearch v-model:open="searchOpen" />
 </template>

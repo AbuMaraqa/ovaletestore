@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLegacyRedirects;
+use App\Http\Middleware\RedirectToLocalePrefix;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Runs before routing: unprefixed page URLs → 301 to /ar/...
+        $middleware->prepend(RedirectToLocalePrefix::class);
+
         $middleware->web(
             prepend: [HandleLegacyRedirects::class],
             append: [

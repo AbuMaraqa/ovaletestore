@@ -3,10 +3,10 @@
 No ranking promises — this documents what is technically in place.
 
 ## URL strategy (SEO continuity)
-- Arabic (default) has **no prefix**: `/product/{slug}`, `/product-category/{slug}` — identical to the WooCommerce URLs. `woo:verify` confirmed **0 slug mismatches across 859 products**.
-- English `/en/...`, Hebrew `/he/...`. English slugs are ASCII (e.g. `/en/product/red-fondant-1-kg`).
-- Old TranslatePress URLs (`/en/product/{arabic-slug}`) → **301** to the new English slug (856 product + category redirects in the `redirects` table, served by `HandleLegacyRedirects` only when a request would 404).
-- A slug from another locale 301s to the canonical slug of the requested locale. `/ar/...` redirects to the prefix-less URL. WordPress trailing slashes are normalized by the web server.
+- Every language is visible in the URL: `/ar/...`, `/en/...`, `/he/...` (owner decision, 2026-11-23).
+- Legacy WooCommerce URLs (`/product/{arabic-slug}/`, `/product-category/{slug}/`, `/`) receive **one 301** to the same path under `/ar` (`RedirectToLocalePrefix`, runs before routing). Arabic slugs are byte-identical to WooCommerce (`woo:verify`: 0 mismatches), so link equity passes through a single permanent redirect.
+- English slugs are ASCII (e.g. `/en/product/red-fondant-1-kg`). Old TranslatePress URLs (`/en/product/{arabic-slug}`) → **301** to the new English slug (856 rows in `redirects`, served when a request would 404).
+- A slug from another locale 301s to the canonical slug of the requested locale.
 
 ## Head tags (server-rendered, no JS needed)
 `app.blade.php` renders from the page's `seo` prop: `<title>`, meta description (160 chars), robots, canonical, `hreflang` for ar/en/he + `x-default` (Arabic), Open Graph (type, title, description, url, site_name, locale, image), Twitter card. `<SeoHead>` keeps them in sync on client-side navigation (same `inertia`/`head-key` ids, no duplicates).

@@ -14,6 +14,7 @@ pest()->extend(TestCase::class)
     ->beforeEach(function () {
         Storage::fake('public');
         $this->seed(RolesAndPermissionsSeeder::class);
+        $this->useRouteLocale('ar'); // every page URL is locale-prefixed (/ar, /en, /he)
     })
     ->in('Feature');
 

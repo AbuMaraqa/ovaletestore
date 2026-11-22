@@ -14,6 +14,15 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 
+/**
+ * Translated attributes (Astrotomic, current locale with fallback):
+ *
+ * @property-read string $name
+ * @property-read string $slug
+ * @property-read string|null $description
+ * @property-read string|null $meta_title
+ * @property-read string|null $meta_description
+ */
 class Category extends Model implements HasMedia, TranslatableContract
 {
     use HasOptimizedImages, HasTranslations, LogsActivity;

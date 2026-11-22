@@ -1,6 +1,7 @@
 /* Storefront bundle: lightweight Tailwind design system (no admin CSS shipped to shoppers). */
 @import 'tailwindcss';
 @import './theme.css';
+@import 'lenis/dist/lenis.css';
 
 @source '../js/Layouts/StorefrontLayout.vue';
 @source '../js/Pages/Storefront/**/*.vue';

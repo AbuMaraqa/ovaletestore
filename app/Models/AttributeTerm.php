@@ -7,6 +7,11 @@ use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Translated attributes (Astrotomic, current locale with fallback):
+ *
+ * @property-read string $name
+ */
 class AttributeTerm extends Model implements TranslatableContract
 {
     use HasTranslations;

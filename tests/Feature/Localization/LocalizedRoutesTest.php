@@ -5,17 +5,21 @@ use App\Models\Product;
 it('serves Arabic at the root and English/Hebrew under prefixes with correct lang and dir', function (string $url, string $lang, string $dir) {
     makeSimpleProduct();
 
-    ($lang === 'ar' ? $this : $this->useRouteLocale($lang))->get($url)->assertOk()->assertSee("lang=\"{$lang}\" dir=\"{$dir}\"", false);
+    $this->useRouteLocale($lang)->get($url)->assertOk()->assertSee("lang=\"{$lang}\" dir=\"{$dir}\"", false);
 })->with([
-    'arabic' => ['/', 'ar', 'rtl'],
+    'arabic' => ['/ar', 'ar', 'rtl'],
     'english' => ['/en', 'en', 'ltr'],
     'hebrew' => ['/he', 'he', 'rtl'],
 ]);
 
-it('keeps the legacy WooCommerce Arabic product URL working', function () {
+it('301-redirects legacy unprefixed WooCommerce URLs to the /ar URL', function () {
     makeSimpleProduct(overrides: ['translations' => ['ar' => ['name' => 'عجينة سكر', 'slug' => 'عجينة-سكّر-احمر']]]);
 
-    $this->get('/product/'.rawurlencode('عجينة-سكّر-احمر'))->assertOk()
+    $this->get('/product/'.rawurlencode('عجينة-سكّر-احمر').'/')
+        ->assertStatus(301)
+        ->assertRedirect(url('/ar/product/'.rawurlencode('عجينة-سكّر-احمر')));
+
+    $this->get('/ar/product/'.rawurlencode('عجينة-سكّر-احمر'))->assertOk()
         ->assertInertia(fn ($page) => $page->component('Storefront/Products/Show'));
 });
 
