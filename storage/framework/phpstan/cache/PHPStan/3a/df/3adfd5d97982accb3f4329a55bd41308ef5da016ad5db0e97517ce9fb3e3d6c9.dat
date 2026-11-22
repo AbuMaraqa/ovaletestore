@@ -1,0 +1,1 @@
+O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:74:"v2-01966aa5b953f5e0eaa6728c4d029d10a72e23b5122e0af4d1545759cb801540-8.4.23";s:4:"data";a:3:{s:7:"classes";a:1:{s:41:"spatie\querybuilder\concerns\filtersquery";b:1;}s:9:"functions";a:0:{}s:9:"constants";a:0:{}}}

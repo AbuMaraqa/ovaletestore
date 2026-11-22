@@ -1,0 +1,168 @@
+O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:83:"v2-48321ff129b3526ead6f8d27b72b5460de1426c6ccd8c391815482423b7840f0-8.4.23-6.75.0.6";s:4:"data";a:22:{s:13:"locatedSource";a:2:{s:5:"class";s:60:"PHPStan\BetterReflection\SourceLocator\Located\LocatedSource";s:4:"data";a:2:{s:4:"name";s:22:"Spatie\SchemaOrg\Brand";s:8:"filename";s:83:"C:/xampp/htdocs/projects/ovalete/vendor/composer/../spatie/schema-org/src/Brand.php";}}s:9:"namespace";s:16:"Spatie\SchemaOrg";s:4:"name";s:22:"Spatie\SchemaOrg\Brand";s:9:"shortName";s:5:"Brand";s:11:"isInterface";b:0;s:7:"isTrait";b:0;s:6:"isEnum";b:0;s:12:"isBackedEnum";b:0;s:9:"modifiers";i:0;s:10:"docComment";s:164:"/**
+ * A brand is a name used by an organization or business person for labeling a
+ * product, product group, or similar.
+ *
+ * @see https://schema.org/Brand
+ *
+ */";s:10:"attributes";a:0:{}s:9:"startLine";i:16;s:7:"endLine";i:280;s:11:"startColumn";i:1;s:9:"endColumn";i:1;s:15:"parentClassName";s:25:"Spatie\SchemaOrg\BaseType";s:20:"implementsClassNames";a:3:{i:0;s:40:"Spatie\SchemaOrg\Contracts\BrandContract";i:1;s:45:"Spatie\SchemaOrg\Contracts\IntangibleContract";i:2;s:40:"Spatie\SchemaOrg\Contracts\ThingContract";}s:15:"traitClassNames";a:0:{}s:18:"immediateConstants";a:0:{}s:19:"immediateProperties";a:0:{}s:16:"immediateMethods";a:17:{s:14:"additionalType";a:20:{s:4:"name";s:14:"additionalType";s:10:"parameters";a:1:{s:14:"additionalType";a:14:{s:4:"name";s:14:"additionalType";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:36;s:7:"endLine";i:36;s:11:"startColumn";i:36;s:9:"endColumn";i:50;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:733:"/**
+ * An additional type for the item, typically used for adding more specific
+ * types from external vocabularies in microdata syntax. This is a
+ * relationship between something and a class that the thing is in.
+ * Typically the value is a URI-identified RDF class, and in this case
+ * corresponds to the
+ *     use of rdf:type in RDF. Text values can be used sparingly, for cases
+ * where useful information can be added without their being an appropriate
+ * schema to reference. In the case of text values, the class label should
+ * follow the schema.org [style
+ * guide](https://schema.org/docs/styleguide.html).
+ *
+ * @param string|string[] $additionalType
+ *
+ * @return static
+ *
+ * @see https://schema.org/additionalType
+ */";s:9:"startLine";i:36;s:7:"endLine";i:39;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:15:"aggregateRating";a:20:{s:4:"name";s:15:"aggregateRating";s:10:"parameters";a:1:{s:15:"aggregateRating";a:14:{s:4:"name";s:15:"aggregateRating";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:51;s:7:"endLine";i:51;s:11:"startColumn";i:37;s:9:"endColumn";i:52;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:294:"/**
+ * The overall rating, based on a collection of reviews or ratings, of the
+ * item.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\AggregateRatingContract|\Spatie\SchemaOrg\Contracts\AggregateRatingContract[] $aggregateRating
+ *
+ * @return static
+ *
+ * @see https://schema.org/aggregateRating
+ */";s:9:"startLine";i:51;s:7:"endLine";i:54;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:13:"alternateName";a:20:{s:4:"name";s:13:"alternateName";s:10:"parameters";a:1:{s:13:"alternateName";a:14:{s:4:"name";s:13:"alternateName";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:65;s:7:"endLine";i:65;s:11:"startColumn";i:35;s:9:"endColumn";i:48;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:142:"/**
+ * An alias for the item.
+ *
+ * @param string|string[] $alternateName
+ *
+ * @return static
+ *
+ * @see https://schema.org/alternateName
+ */";s:9:"startLine";i:65;s:7:"endLine";i:68;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:11:"description";a:20:{s:4:"name";s:11:"description";s:10:"parameters";a:1:{s:11:"description";a:14:{s:4:"name";s:11:"description";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:79;s:7:"endLine";i:79;s:11:"startColumn";i:33;s:9:"endColumn";i:44;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:238:"/**
+ * A description of the item.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\TextObjectContract|\Spatie\SchemaOrg\Contracts\TextObjectContract[]|string|string[] $description
+ *
+ * @return static
+ *
+ * @see https://schema.org/description
+ */";s:9:"startLine";i:79;s:7:"endLine";i:82;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:25:"disambiguatingDescription";a:20:{s:4:"name";s:25:"disambiguatingDescription";s:10:"parameters";a:1:{s:25:"disambiguatingDescription";a:14:{s:4:"name";s:25:"disambiguatingDescription";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:96;s:7:"endLine";i:96;s:11:"startColumn";i:47;s:9:"endColumn";i:72;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:389:"/**
+ * A sub property of description. A short description of the item used to
+ * disambiguate from other, similar items. Information from other properties
+ * (in particular, name) may be necessary for the description to be useful
+ * for disambiguation.
+ *
+ * @param string|string[] $disambiguatingDescription
+ *
+ * @return static
+ *
+ * @see https://schema.org/disambiguatingDescription
+ */";s:9:"startLine";i:96;s:7:"endLine";i:99;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:10:"identifier";a:20:{s:4:"name";s:10:"identifier";s:10:"parameters";a:1:{s:10:"identifier";a:14:{s:4:"name";s:10:"identifier";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:114;s:7:"endLine";i:114;s:11:"startColumn";i:32;s:9:"endColumn";i:42;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:548:"/**
+ * The identifier property represents any kind of identifier for any kind of
+ * [[Thing]], such as ISBNs, GTIN codes, UUIDs etc. Schema.org provides
+ * dedicated properties for representing many of these, either as textual
+ * strings or as URL (URI) links. See [background
+ * notes](/docs/datamodel.html#identifierBg) for more details.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\PropertyValueContract|\Spatie\SchemaOrg\Contracts\PropertyValueContract[]|string|string[] $identifier
+ *
+ * @return static
+ *
+ * @see https://schema.org/identifier
+ */";s:9:"startLine";i:114;s:7:"endLine";i:117;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:5:"image";a:20:{s:4:"name";s:5:"image";s:10:"parameters";a:1:{s:5:"image";a:14:{s:4:"name";s:5:"image";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:129;s:7:"endLine";i:129;s:11:"startColumn";i:27;s:9:"endColumn";i:32;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:286:"/**
+ * An image of the item. This can be a [[URL]] or a fully described
+ * [[ImageObject]].
+ *
+ * @param \Spatie\SchemaOrg\Contracts\ImageObjectContract|\Spatie\SchemaOrg\Contracts\ImageObjectContract[]|string|string[] $image
+ *
+ * @return static
+ *
+ * @see https://schema.org/image
+ */";s:9:"startLine";i:129;s:7:"endLine";i:132;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:4:"logo";a:20:{s:4:"name";s:4:"logo";s:10:"parameters";a:1:{s:4:"logo";a:14:{s:4:"name";s:4:"logo";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:143;s:7:"endLine";i:143;s:11:"startColumn";i:26;s:9:"endColumn";i:30;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:219:"/**
+ * An associated logo.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\ImageObjectContract|\Spatie\SchemaOrg\Contracts\ImageObjectContract[]|string|string[] $logo
+ *
+ * @return static
+ *
+ * @see https://schema.org/logo
+ */";s:9:"startLine";i:143;s:7:"endLine";i:146;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:16:"mainEntityOfPage";a:20:{s:4:"name";s:16:"mainEntityOfPage";s:10:"parameters";a:1:{s:16:"mainEntityOfPage";a:14:{s:4:"name";s:16:"mainEntityOfPage";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:159;s:7:"endLine";i:159;s:11:"startColumn";i:38;s:9:"endColumn";i:54;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:408:"/**
+ * Indicates a page (or other CreativeWork) for which this thing is the main
+ * entity being described. See [background
+ * notes](/docs/datamodel.html#mainEntityBackground) for details.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\CreativeWorkContract|\Spatie\SchemaOrg\Contracts\CreativeWorkContract[]|string|string[] $mainEntityOfPage
+ *
+ * @return static
+ *
+ * @see https://schema.org/mainEntityOfPage
+ */";s:9:"startLine";i:159;s:7:"endLine";i:162;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:4:"name";a:20:{s:4:"name";s:4:"name";s:10:"parameters";a:1:{s:4:"name";a:14:{s:4:"name";s:4:"name";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:173;s:7:"endLine";i:173;s:11:"startColumn";i:26;s:9:"endColumn";i:30;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:123:"/**
+ * The name of the item.
+ *
+ * @param string|string[] $name
+ *
+ * @return static
+ *
+ * @see https://schema.org/name
+ */";s:9:"startLine";i:173;s:7:"endLine";i:176;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:5:"owner";a:20:{s:4:"name";s:5:"owner";s:10:"parameters";a:1:{s:5:"owner";a:14:{s:4:"name";s:5:"owner";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:188;s:7:"endLine";i:188;s:11:"startColumn";i:27;s:9:"endColumn";i:32;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:381:"/**
+ * A person or organization who owns this Thing.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\OrganizationContract|\Spatie\SchemaOrg\Contracts\OrganizationContract[]|\Spatie\SchemaOrg\Contracts\PersonContract|\Spatie\SchemaOrg\Contracts\PersonContract[] $owner
+ *
+ * @return static
+ *
+ * @see https://schema.org/owner
+ * @link https://github.com/schemaorg/schemaorg/issues/4603
+ */";s:9:"startLine";i:188;s:7:"endLine";i:191;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:15:"potentialAction";a:20:{s:4:"name";s:15:"potentialAction";s:10:"parameters";a:1:{s:15:"potentialAction";a:14:{s:4:"name";s:15:"potentialAction";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:203;s:7:"endLine";i:203;s:11:"startColumn";i:37;s:9:"endColumn";i:52;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:313:"/**
+ * Indicates a potential Action, which describes an idealized action in
+ * which this thing would play an 'object' role.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\ActionContract|\Spatie\SchemaOrg\Contracts\ActionContract[] $potentialAction
+ *
+ * @return static
+ *
+ * @see https://schema.org/potentialAction
+ */";s:9:"startLine";i:203;s:7:"endLine";i:206;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:6:"review";a:20:{s:4:"name";s:6:"review";s:10:"parameters";a:1:{s:6:"review";a:14:{s:4:"name";s:6:"review";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:217;s:7:"endLine";i:217;s:11:"startColumn";i:28;s:9:"endColumn";i:34;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:199:"/**
+ * A review of the item.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\ReviewContract|\Spatie\SchemaOrg\Contracts\ReviewContract[] $review
+ *
+ * @return static
+ *
+ * @see https://schema.org/review
+ */";s:9:"startLine";i:217;s:7:"endLine";i:220;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:6:"sameAs";a:20:{s:4:"name";s:6:"sameAs";s:10:"parameters";a:1:{s:6:"sameAs";a:14:{s:4:"name";s:6:"sameAs";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:233;s:7:"endLine";i:233;s:11:"startColumn";i:28;s:9:"endColumn";i:34;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:269:"/**
+ * URL of a reference Web page that unambiguously indicates the item's
+ * identity. E.g. the URL of the item's Wikipedia page, Wikidata entry, or
+ * official website.
+ *
+ * @param string|string[] $sameAs
+ *
+ * @return static
+ *
+ * @see https://schema.org/sameAs
+ */";s:9:"startLine";i:233;s:7:"endLine";i:236;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:6:"slogan";a:20:{s:4:"name";s:6:"slogan";s:10:"parameters";a:1:{s:6:"slogan";a:14:{s:4:"name";s:6:"slogan";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:247;s:7:"endLine";i:247;s:11:"startColumn";i:28;s:9:"endColumn";i:34;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:149:"/**
+ * A slogan or motto associated with the item.
+ *
+ * @param string|string[] $slogan
+ *
+ * @return static
+ *
+ * @see https://schema.org/slogan
+ */";s:9:"startLine";i:247;s:7:"endLine";i:250;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:9:"subjectOf";a:20:{s:4:"name";s:9:"subjectOf";s:10:"parameters";a:1:{s:9:"subjectOf";a:14:{s:4:"name";s:9:"subjectOf";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:262;s:7:"endLine";i:262;s:11:"startColumn";i:31;s:9:"endColumn";i:40;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:383:"/**
+ * A CreativeWork or Event about this Thing.
+ *
+ * @param \Spatie\SchemaOrg\Contracts\CreativeWorkContract|\Spatie\SchemaOrg\Contracts\CreativeWorkContract[]|\Spatie\SchemaOrg\Contracts\EventContract|\Spatie\SchemaOrg\Contracts\EventContract[] $subjectOf
+ *
+ * @return static
+ *
+ * @see https://schema.org/subjectOf
+ * @link https://github.com/schemaorg/schemaorg/issues/1670
+ */";s:9:"startLine";i:262;s:7:"endLine";i:265;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}s:3:"url";a:20:{s:4:"name";s:3:"url";s:10:"parameters";a:1:{s:3:"url";a:14:{s:4:"name";s:3:"url";s:7:"default";N;s:4:"type";N;s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"docComment";N;s:10:"attributes";a:0:{}s:9:"startLine";i:276;s:7:"endLine";i:276;s:11:"startColumn";i:25;s:9:"endColumn";i:28;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:116:"/**
+ * URL of the item.
+ *
+ * @param string|string[] $url
+ *
+ * @return static
+ *
+ * @see https://schema.org/url
+ */";s:9:"startLine";i:276;s:7:"endLine";i:279;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:16:"Spatie\SchemaOrg";s:18:"declaringClassName";s:22:"Spatie\SchemaOrg\Brand";s:21:"implementingClassName";s:22:"Spatie\SchemaOrg\Brand";s:16:"currentClassName";s:22:"Spatie\SchemaOrg\Brand";s:9:"aliasName";N;}}s:10:"traitsData";a:4:{s:7:"aliases";a:0:{}s:9:"modifiers";a:0:{}s:11:"precedences";a:0:{}s:6:"hashes";a:0:{}}}}

@@ -1,0 +1,18 @@
+@custom-variant light (&:not(.dark *));
+
+.appearance-none {
+	background-image: none !important;
+	box-shadow: none;
+	background-color: transparent;
+	border: 0;
+	width: 0;
+	height: 0;
+}
+
+/* Metronic component styles used by the admin (vendor-specific ones removed until needed). */
+@import './container.css';
+@import './menu.css';
+@import './range.css';
+@import './rating.css';
+@import './scrollable.css';
+@import './image-input.css';

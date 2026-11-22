@@ -1,0 +1,40 @@
+O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:83:"v2-38f9d592179cae828bc8e8314ed16f01d5e278a486c807413cc8b9470bed9296-8.4.23-6.75.0.6";s:4:"data";a:22:{s:13:"locatedSource";a:2:{s:5:"class";s:60:"PHPStan\BetterReflection\SourceLocator\Located\LocatedSource";s:4:"data";a:2:{s:4:"name";s:55:"Mcamara\LaravelLocalization\Facades\LaravelLocalization";s:8:"filename";s:144:"C:/xampp/htdocs/projects/ovalete/vendor/composer/../mcamara/laravel-localization/src/Mcamara/LaravelLocalization/Facades/LaravelLocalization.php";}}s:9:"namespace";s:35:"Mcamara\LaravelLocalization\Facades";s:4:"name";s:55:"Mcamara\LaravelLocalization\Facades\LaravelLocalization";s:9:"shortName";s:19:"LaravelLocalization";s:11:"isInterface";b:0;s:7:"isTrait";b:0;s:6:"isEnum";b:0;s:12:"isBackedEnum";b:0;s:9:"modifiers";i:0;s:10:"docComment";s:2108:"/**
+ * @method static string setLocale(string $locale = null)
+ * @method static bool isHiddenDefault(string $locale)
+ * @method static void setSupportedLocales(array $locales)
+ * @method static string localizeUrl(string $url = null, string|bool $locale = null)
+ * @method static string|false getLocalizedUrl(string|bool $locale = null, string|false $url = null, array $attributes = [], bool $forceDefaultLocation = false)
+ * @method static string|false getURLFromRouteNameTranslated(string|bool $locale, string $transKeyName, array $attributes = [], bool $forceDefaultLocation = false)
+ * @method static string getNonLocalizedURL(string|false $url = null)
+ * @method static string getDefaultLocale()
+ * @method static array getLocalesMapping()
+ * @method static string|null getLocaleFromMapping(string|null $locale)
+ * @method static string|null getInversedLocaleFromMapping(string|null $locale)
+ * @method static array getSupportedLocales()
+ * @method static array getLocalesOrder()
+ * @method static string getCurrentLocaleName()
+ * @method static string getCurrentLocaleNative()
+ * @method static string getCurrentLocaleDirection()
+ * @method static string getCurrentLocaleScript()
+ * @method static string getCurrentLocaleNativeReading()
+ * @method static string getCurrentLocale()
+ * @method static string getCurrentLocaleRegional()
+ * @method static array getSupportedLanguagesKeys()
+ * @method static bool checkLocaleInSupportedLocales(string|bool $locale)
+ * @method static void setRouteName(string $routeName)
+ * @method static string transRoute(string $routeName)
+ * @method static string|false getRouteNameFromAPath(string $path)
+ * @method static \Illuminate\Config\Repository getConfigRepository()
+ * @method static bool hideUrlAndAcceptHeader()
+ * @method static bool hideDefaultLocaleInURL()
+ * @method static string createUrlFromUri(string $uri)
+ * @method static void setBaseUrl(string $url)
+ * @method static string getSerializedTranslatedRoutes()
+ * @method static void setSerializedTranslatedRoutes(string $serializedRoutes)
+ *
+ * @see \Mcamara\LaravelLocalization\LaravelLocalization
+ */";s:10:"attributes";a:0:{}s:9:"startLine";i:43;s:7:"endLine";i:54;s:11:"startColumn";i:1;s:9:"endColumn";i:1;s:15:"parentClassName";s:33:"Illuminate\Support\Facades\Facade";s:20:"implementsClassNames";a:0:{}s:15:"traitClassNames";a:0:{}s:18:"immediateConstants";a:0:{}s:19:"immediateProperties";a:0:{}s:16:"immediateMethods";a:1:{s:17:"getFacadeAccessor";a:20:{s:4:"name";s:17:"getFacadeAccessor";s:10:"parameters";a:0:{}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:73:"/**
+ * Get the registered name of the component.
+ *
+ * @return string
+ */";s:9:"startLine";i:50;s:7:"endLine";i:53;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:18;s:9:"namespace";s:35:"Mcamara\LaravelLocalization\Facades";s:18:"declaringClassName";s:55:"Mcamara\LaravelLocalization\Facades\LaravelLocalization";s:21:"implementingClassName";s:55:"Mcamara\LaravelLocalization\Facades\LaravelLocalization";s:16:"currentClassName";s:55:"Mcamara\LaravelLocalization\Facades\LaravelLocalization";s:9:"aliasName";N;}}s:10:"traitsData";a:4:{s:7:"aliases";a:0:{}s:9:"modifiers";a:0:{}s:11:"precedences";a:0:{}s:6:"hashes";a:0:{}}}}

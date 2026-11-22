@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\OrderStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
+
+class Order extends Model
+{
+    use LogsActivity;
+
+    protected $fillable = [
+        'number', 'user_id', 'status', 'customer_name', 'customer_email', 'customer_phone',
+        'shipping_city', 'shipping_address', 'customer_note', 'currency',
+        'subtotal', 'discount_total', 'shipping_total', 'total', 'locale', 'placed_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => OrderStatus::class,
+            'subtotal' => 'integer',
+            'discount_total' => 'integer',
+            'shipping_total' => 'integer',
+            'total' => 'integer',
+            'placed_at' => 'datetime',
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(OrderNote::class)->latest();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logOnly(['status'])->logOnlyDirty();
+    }
+}

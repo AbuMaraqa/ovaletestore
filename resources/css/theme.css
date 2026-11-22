@@ -1,0 +1,39 @@
+/*
+ * Shared typography + brand tokens (admin and storefront).
+ * Fonts are self-hosted; the browser downloads only the scripts a page actually renders (unicode-range).
+ */
+@import '@fontsource-variable/inter/index.css';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource/ibm-plex-sans-arabic/700.css';
+@import '@fontsource/ibm-plex-sans-hebrew/400.css';
+@import '@fontsource/ibm-plex-sans-hebrew/500.css';
+@import '@fontsource/ibm-plex-sans-hebrew/600.css';
+@import '@fontsource/ibm-plex-sans-hebrew/700.css';
+
+@theme {
+    --font-sans: 'Inter Variable', 'IBM Plex Sans Arabic', 'IBM Plex Sans Hebrew', ui-sans-serif, system-ui, sans-serif;
+
+    /* Brand: warm cocoa ink, cream surfaces, caramel accent. */
+    --color-brand-50: oklch(0.98 0.012 70);
+    --color-brand-100: oklch(0.95 0.03 68);
+    --color-brand-200: oklch(0.9 0.06 62);
+    --color-brand-300: oklch(0.82 0.1 58);
+    --color-brand-400: oklch(0.72 0.14 52);
+    --color-brand-500: oklch(0.62 0.15 45);
+    --color-brand-600: oklch(0.54 0.14 40);
+    --color-brand-700: oklch(0.45 0.12 38);
+    --color-brand-800: oklch(0.36 0.09 36);
+    --color-brand-900: oklch(0.28 0.06 35);
+    --color-brand-950: oklch(0.2 0.04 35);
+
+    --color-cocoa: oklch(0.24 0.03 40);
+    --color-cream: oklch(0.985 0.008 80);
+}
+
+/* Arabic/Hebrew read better slightly larger with more leading. */
+:lang(ar) body,
+:lang(he) body {
+    line-height: 1.7;
+}

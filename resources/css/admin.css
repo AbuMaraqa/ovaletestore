@@ -1,0 +1,35 @@
+/* Admin bundle: Tailwind 4 + Metronic 9.5 design system (KTUI component CSS, demo1 layout). */
+@import 'tailwindcss';
+@import './theme.css';
+
+@source '../js/Layouts/AdminLayout.vue';
+@source '../js/Pages/Admin/**/*.vue';
+@source '../js/Pages/Auth/**/*.vue';
+@source '../js/Components/**/*.vue';
+@source '../views/**/*.blade.php';
+
+/* Metronic theme tokens (light/dark) */
+@import './metronic/config.ktui.css';
+
+/* KTUI component styles (MIT) — behaviour is implemented in Vue, KTUI JS is not loaded. */
+@import '@keenthemes/ktui/styles.css';
+
+/* Metronic components + demo1 layout (sidebar/header) */
+@import './metronic/components/index.css';
+@import './metronic/demo1.css';
+
+/* Keenicons */
+@import './vendors/keenicons/styles.bundle.css';
+
+/* Brand primary overrides Metronic blue. */
+:root {
+    --primary: var(--color-brand-600);
+    --primary-foreground: var(--color-white);
+}
+.dark {
+    --primary: var(--color-brand-500);
+}
+
+[v-cloak] {
+    display: none;
+}
