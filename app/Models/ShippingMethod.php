@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
+ * @property string|null $code stable key used by ShippingMethodSeeder (inside, west_bank, jerusalem, pickup)
  * @property ShippingMethodType $type
  * @property int $cost minor units
  * @property int|null $free_over minor units
@@ -27,7 +28,7 @@ class ShippingMethod extends Model implements TranslatableContract
     /** @var list<string> */
     public array $translatedAttributes = ['name', 'description'];
 
-    protected $fillable = ['type', 'cost', 'free_over', 'min_order', 'is_active', 'sort_order'];
+    protected $fillable = ['code', 'type', 'cost', 'free_over', 'min_order', 'is_active', 'sort_order'];
 
     protected function casts(): array
     {

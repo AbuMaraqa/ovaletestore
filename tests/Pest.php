@@ -5,6 +5,7 @@ use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\ShippingMethodSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
         Storage::fake('public');
-        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seed([RolesAndPermissionsSeeder::class, ShippingMethodSeeder::class]);
         $this->useRouteLocale('ar'); // every page URL is locale-prefixed (/ar, /en, /he)
     })
     ->in('Feature');

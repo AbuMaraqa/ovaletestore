@@ -14,7 +14,7 @@ function checkoutPayload(): array
     return [
         'customer_name' => 'محمد أحمد',
         'customer_phone' => '0599 123 456',
-        'shipping_method_id' => ShippingMethod::query()->where('type', 'delivery')->value('id'),
+        'shipping_method_id' => ShippingMethod::query()->where('code', 'west_bank')->value('id'),
         'shipping_city' => 'رام الله',
         'shipping_address' => 'شارع الإرسال 12',
     ];
@@ -104,7 +104,7 @@ it('enforces order status transitions and restocks on cancellation', function ()
 });
 
 it('charges the chosen shipping method, free above the threshold, and snapshots its name', function () {
-    $delivery = ShippingMethod::query()->where('type', 'delivery')->sole();
+    $delivery = ShippingMethod::query()->where('code', 'west_bank')->sole();
     $delivery->update(['cost' => 2500, 'free_over' => 10000]);
     $product = makeSimpleProduct(price: '40.00');
 
@@ -115,7 +115,7 @@ it('charges the chosen shipping method, free above the threshold, and snapshots 
     expect($order->shipping_total)->toBe(2500)
         ->and($order->total)->toBe(8000 + 2500)
         ->and($order->shipping_method_id)->toBe($delivery->id)
-        ->and($order->shipping_method_name)->toBe('توصيل للمنزل');
+        ->and($order->shipping_method_name)->toBe('توصيل للضفة الغربية');
 
     // 3 × 40 = 120 ≥ 100 → free.
     $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 3]);
@@ -140,7 +140,7 @@ it('allows store pickup without an address', function () {
 });
 
 it('rejects inactive methods and methods below their minimum order', function () {
-    $delivery = ShippingMethod::query()->where('type', 'delivery')->sole();
+    $delivery = ShippingMethod::query()->where('code', 'west_bank')->sole();
     $product = makeSimpleProduct(price: '10.00');
     $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
 
@@ -171,11 +171,12 @@ it('renders the shipping options at checkout and the admin shipping pages', func
 
     $this->get(route('storefront.checkout'))->assertOk()->assertInertia(fn ($page) => $page
         ->component('Storefront/Checkout/Index')
-        ->has('shipping_options', 2)
-        ->where('shipping_options.1.requires_address', false));
+        ->has('shipping_options', 4)
+        ->where('shipping_options.0.name', 'توصيل للداخل')
+        ->where('shipping_options.3.requires_address', false));
 
-    $method = ShippingMethod::query()->first();
+    $method = ShippingMethod::query()->where('code', 'jerusalem')->sole();
     $this->actingAs(staffUser('admin'));
-    $this->get(route('admin.shipping-methods.index'))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Index')->has('methods', 2));
-    $this->get(route('admin.shipping-methods.edit', $method))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Form')->where('method.translations.ar.name', 'توصيل للمنزل'));
+    $this->get(route('admin.shipping-methods.index'))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Index')->has('methods', 4));
+    $this->get(route('admin.shipping-methods.edit', $method))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Form')->where('method.translations.ar.name', 'توصيل للقدس'));
 });

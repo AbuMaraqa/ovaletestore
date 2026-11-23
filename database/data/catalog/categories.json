@@ -1,0 +1,715 @@
+[
+    {
+        "source_id": 42,
+        "parent_source_id": null,
+        "sort_order": 0,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "مثبتات ومحسنات",
+                "slug": "مثبتات-ومحسنات-stabilizers-and-enhancers",
+                "description": null
+            },
+            "en": {
+                "name": "Stabilizers & Enhancers",
+                "slug": "stabilizers-and-enhancers",
+                "description": null
+            },
+            "he": {
+                "name": "מייצבים ומשפרים",
+                "slug": "מייצבים-ומשפרים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 43,
+        "parent_source_id": null,
+        "sort_order": 1,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "آيسات",
+                "slug": "آيسات-iced-drinks",
+                "description": null
+            },
+            "en": {
+                "name": "Iced Drinks",
+                "slug": "iced-drinks",
+                "description": null
+            },
+            "he": {
+                "name": "משקאות קרים",
+                "slug": "משקאות-קרים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 44,
+        "parent_source_id": null,
+        "sort_order": 2,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "بوظة ومفرزات",
+                "slug": "بوظة-ومفرزات-ice-cream-and-frozen-fruit",
+                "description": null
+            },
+            "en": {
+                "name": "Ice Cream & Frozen Fruit",
+                "slug": "ice-cream-and-frozen-fruit",
+                "description": null
+            },
+            "he": {
+                "name": "גלידות ופירות קפואים",
+                "slug": "גלידות-ופירות-קפואים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 45,
+        "parent_source_id": null,
+        "sort_order": 3,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "موهيتو",
+                "slug": "موهيتو-mojito",
+                "description": null
+            },
+            "en": {
+                "name": "Mojito",
+                "slug": "mojito",
+                "description": null
+            },
+            "he": {
+                "name": "מוחיטו",
+                "slug": "מוחיטו",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 46,
+        "parent_source_id": null,
+        "sort_order": 4,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "سموذي, توبينج و ريفريشر",
+                "slug": "سموذي-توبينج-و-ريفريشر-ٍsmoothies-toppings-refreshers",
+                "description": null
+            },
+            "en": {
+                "name": "Smoothies, Toppings & Refreshers",
+                "slug": "smoothies-toppings-refreshers",
+                "description": null
+            },
+            "he": {
+                "name": "סמותי, תוספות וריפרשרים",
+                "slug": "סמותי-תוספות-וריפרשרים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 47,
+        "parent_source_id": null,
+        "sort_order": 5,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "قهوة بن اسبريسو",
+                "slug": "قهوة-بن-اسبريسو-espresso-coffee-beans",
+                "description": null
+            },
+            "en": {
+                "name": "Espresso Coffee Beans",
+                "slug": "espresso-coffee-beans",
+                "description": null
+            },
+            "he": {
+                "name": "פולי קפה אספרסו",
+                "slug": "פולי-קפה-אספרסו",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 48,
+        "parent_source_id": null,
+        "sort_order": 6,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "ميلك شيك",
+                "slug": "ميلك-شيك-milkshake",
+                "description": null
+            },
+            "en": {
+                "name": "Milkshake",
+                "slug": "milkshake",
+                "description": null
+            },
+            "he": {
+                "name": "מילקשייק",
+                "slug": "מילקשייק",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 49,
+        "parent_source_id": null,
+        "sort_order": 7,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "ديكور جل",
+                "slug": "ديكور-جل-jell-glaze",
+                "description": null
+            },
+            "en": {
+                "name": "Gel Glaze",
+                "slug": "jell-glaze",
+                "description": null
+            },
+            "he": {
+                "name": "ג'ל זיגוג",
+                "slug": "ג-ל-זיגוג",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 50,
+        "parent_source_id": null,
+        "sort_order": 8,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "حشوات",
+                "slug": "حشوات-fillings-and-spreads",
+                "description": null
+            },
+            "en": {
+                "name": "Fillings & Spreads",
+                "slug": "fillings-and-spreads",
+                "description": null
+            },
+            "he": {
+                "name": "מליות וממרחים",
+                "slug": "מליות-וממרחים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 51,
+        "parent_source_id": null,
+        "sort_order": 9,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "مشروبات ساخنة",
+                "slug": "مشروبات-ساخنة-hot-drinks",
+                "description": null
+            },
+            "en": {
+                "name": "Hot Drinks",
+                "slug": "hot-drinks",
+                "description": null
+            },
+            "he": {
+                "name": "משקאות חמים",
+                "slug": "משקאות-חמים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 52,
+        "parent_source_id": null,
+        "sort_order": 10,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "عجائن وخلائط",
+                "slug": "عجائن-وخلائط-pastry-and-dessert-mixes",
+                "description": null
+            },
+            "en": {
+                "name": "Pastry & Dessert Mixes",
+                "slug": "pastry-and-dessert-mixes",
+                "description": null
+            },
+            "he": {
+                "name": "בצקים ותערובות",
+                "slug": "בצקים-ותערובות",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 53,
+        "parent_source_id": null,
+        "sort_order": 11,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "شوكولاتة حبيبات",
+                "slug": "شوكولاتة-حبيبات-chocolate",
+                "description": null
+            },
+            "en": {
+                "name": "Chocolate & Chips",
+                "slug": "chocolate",
+                "description": null
+            },
+            "he": {
+                "name": "שוקולד ושבבים",
+                "slug": "שוקולד-ושבבים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 54,
+        "parent_source_id": null,
+        "sort_order": 12,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "كريما و ألبان",
+                "slug": "كريما-creams",
+                "description": null
+            },
+            "en": {
+                "name": "Creams & Dairy",
+                "slug": "creamsdairy",
+                "description": null
+            },
+            "he": {
+                "name": "שמנת ומוצרי חלב",
+                "slug": "שמנת-ומוצרי-חלב",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 55,
+        "parent_source_id": null,
+        "sort_order": 13,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "بلاستيكيات",
+                "slug": "بلاستيكيات-plastics",
+                "description": null
+            },
+            "en": {
+                "name": "Plastics & Disposables",
+                "slug": "plastics",
+                "description": null
+            },
+            "he": {
+                "name": "כלים חד־פעמיים",
+                "slug": "כלים-חד-פעמיים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 56,
+        "parent_source_id": null,
+        "sort_order": 14,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "سيروبات",
+                "slug": "سيروبات-syrups",
+                "description": null
+            },
+            "en": {
+                "name": "Syrups",
+                "slug": "syrups",
+                "description": null
+            },
+            "he": {
+                "name": "סירופים",
+                "slug": "סירופים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 57,
+        "parent_source_id": null,
+        "sort_order": 15,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "منكهات",
+                "slug": "منكهات-flavorings",
+                "description": null
+            },
+            "en": {
+                "name": "Flavorings",
+                "slug": "flavorings",
+                "description": null
+            },
+            "he": {
+                "name": "תמציות טעם",
+                "slug": "תמציות-טעם",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 58,
+        "parent_source_id": null,
+        "sort_order": 16,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "زينة",
+                "slug": "زينة-decoration",
+                "description": null
+            },
+            "en": {
+                "name": "Decoration",
+                "slug": "decoration",
+                "description": null
+            },
+            "he": {
+                "name": "קישוטים",
+                "slug": "קישוטים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 59,
+        "parent_source_id": null,
+        "sort_order": 17,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "كنافة",
+                "slug": "كنافة-kunafa",
+                "description": null
+            },
+            "en": {
+                "name": "Kunafa",
+                "slug": "kunafa",
+                "description": null
+            },
+            "he": {
+                "name": "כנאפה",
+                "slug": "כנאפה",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 60,
+        "parent_source_id": null,
+        "sort_order": 18,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "سمنة وزبدة وزيوت",
+                "slug": "سمنة-وزبدة-وزيوت-ghee",
+                "description": null
+            },
+            "en": {
+                "name": "Ghee, Butter & Oils",
+                "slug": "ghee",
+                "description": null
+            },
+            "he": {
+                "name": "סמנה, חמאה ושמנים",
+                "slug": "סמנה-חמאה-ושמנים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 63,
+        "parent_source_id": null,
+        "sort_order": 19,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "تارت+مكرون",
+                "slug": "تارتمكرون-tart-biscuitsmacarons",
+                "description": null
+            },
+            "en": {
+                "name": "Tart Shells & Macarons",
+                "slug": "tart-biscuitsmacarons",
+                "description": null
+            },
+            "he": {
+                "name": "טארטים ומקרונים",
+                "slug": "טארטים-ומקרונים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 64,
+        "parent_source_id": null,
+        "sort_order": 20,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "مكسرات",
+                "slug": "مكسرات-nuts",
+                "description": null
+            },
+            "en": {
+                "name": "Nuts",
+                "slug": "nuts",
+                "description": null
+            },
+            "he": {
+                "name": "אגוזים",
+                "slug": "אגוזים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 65,
+        "parent_source_id": null,
+        "sort_order": 21,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "سكريات",
+                "slug": "سكر-sugar",
+                "description": null
+            },
+            "en": {
+                "name": "Sugars",
+                "slug": "sugars",
+                "description": null
+            },
+            "he": {
+                "name": "סוכרים",
+                "slug": "סוכרים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 66,
+        "parent_source_id": null,
+        "sort_order": 22,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "مواد حافظة",
+                "slug": "مواد-حافظة-food-preservatives",
+                "description": null
+            },
+            "en": {
+                "name": "Food Preservatives",
+                "slug": "food-preservatives",
+                "description": null
+            },
+            "he": {
+                "name": "חומרים משמרים",
+                "slug": "חומרים-משמרים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 67,
+        "parent_source_id": null,
+        "sort_order": 23,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "صبغات عذائية",
+                "slug": "صبغات-عذائية-food-dyes",
+                "description": null
+            },
+            "en": {
+                "name": "Food Coloring",
+                "slug": "food-dyes",
+                "description": null
+            },
+            "he": {
+                "name": "צבעי מאכל",
+                "slug": "צבעי-מאכל",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 70,
+        "parent_source_id": null,
+        "sort_order": 24,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "صوصات",
+                "slug": "صوصات-sauces",
+                "description": null
+            },
+            "en": {
+                "name": "Sauces",
+                "slug": "sauces",
+                "description": null
+            },
+            "he": {
+                "name": "רטבים",
+                "slug": "רטבים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 71,
+        "parent_source_id": null,
+        "sort_order": 25,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "بذور",
+                "slug": "بذور-seeds",
+                "description": null
+            },
+            "en": {
+                "name": "Seeds",
+                "slug": "seeds",
+                "description": null
+            },
+            "he": {
+                "name": "זרעים",
+                "slug": "זרעים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 72,
+        "parent_source_id": null,
+        "sort_order": 26,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "فواكه مجففة",
+                "slug": "فواكه-مجففة-dried-fruit",
+                "description": null
+            },
+            "en": {
+                "name": "Dried fruit",
+                "slug": "dried-fruit",
+                "description": null
+            },
+            "he": {
+                "name": "פירות יבשים",
+                "slug": "פירות-יבשים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 73,
+        "parent_source_id": null,
+        "sort_order": 27,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "بسكويت",
+                "slug": "بسكويت-biscuit",
+                "description": null
+            },
+            "en": {
+                "name": "Biscuits",
+                "slug": "biscuit",
+                "description": null
+            },
+            "he": {
+                "name": "ביסקוויטים",
+                "slug": "ביסקוויטים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 74,
+        "parent_source_id": null,
+        "sort_order": 28,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "عجينة سكّر",
+                "slug": "عجينة-سكّر-sugar-paste",
+                "description": null
+            },
+            "en": {
+                "name": "Sugar paste",
+                "slug": "sugar-paste",
+                "description": null
+            },
+            "he": {
+                "name": "בצק סוכר",
+                "slug": "בצק-סוכר",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 76,
+        "parent_source_id": null,
+        "sort_order": 29,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "أدوات",
+                "slug": "أدوات-tools",
+                "description": null
+            },
+            "en": {
+                "name": "Tools",
+                "slug": "tools",
+                "description": null
+            },
+            "he": {
+                "name": "כלים ואביזרים",
+                "slug": "כלים-ואביזרים",
+                "description": null
+            }
+        }
+    },
+    {
+        "source_id": 77,
+        "parent_source_id": null,
+        "sort_order": 30,
+        "is_active": true,
+        "translations": {
+            "ar": {
+                "name": "بيوريه",
+                "slug": "بيوريه-puree",
+                "description": null
+            },
+            "en": {
+                "name": "Purée",
+                "slug": "puree",
+                "description": null
+            },
+            "he": {
+                "name": "מחית פירות",
+                "slug": "מחית-פירות",
+                "description": null
+            }
+        }
+    }
+]
