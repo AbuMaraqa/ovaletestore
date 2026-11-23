@@ -8,6 +8,8 @@ export interface MenuLink {
     match: string;
     permission: string;
     params?: Record<string, string>;
+    /** Leaves the admin SPA with a full page load (another area with its own CSS bundle, e.g. the POS). */
+    external?: boolean;
 }
 
 export interface MenuItem extends Partial<MenuLink> {
@@ -47,6 +49,8 @@ export const adminMenu: MenuSection[] = [
         heading: 'admin.sales',
         items: [
             { label: 'admin.orders', icon: 'handcart', route: 'admin.orders.index', match: 'admin.orders.*', permission: 'orders.view', badge: 'pending_orders' },
+            { label: 'admin.pos', icon: 'tablet', route: 'pos.index', match: 'pos.*', permission: 'pos.access', external: true },
+            { label: 'admin.companies', icon: 'office-bag', route: 'admin.companies.index', match: 'admin.companies.*', permission: 'companies.manage' },
             { label: 'admin.shipping_methods', icon: 'delivery', route: 'admin.shipping-methods.index', match: 'admin.shipping-methods.*', permission: 'settings.manage' },
         ],
     },

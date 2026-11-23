@@ -27,6 +27,7 @@ export interface AuthUser {
     avatar: Avatar;
     is_staff: boolean;
     admin_url: string | null;
+    pos_url: string | null;
 }
 
 export interface SeoAlternate {

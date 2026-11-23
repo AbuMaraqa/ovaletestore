@@ -4,6 +4,9 @@
 @import 'lenis/dist/lenis.css';
 
 @source '../js/Layouts/StorefrontLayout.vue';
+@source '../js/Layouts/PosLayout.vue';
+@source '../js/Pages/Pos/**/*.vue';
+@source '../js/Components/Pos/**/*.vue';
 @source '../js/Pages/Storefront/**/*.vue';
 @source '../js/Components/Storefront/**/*.vue';
 @source '../js/Components/Common/**/*.vue';

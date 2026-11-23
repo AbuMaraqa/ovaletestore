@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\CategoryTranslation;
 use App\Models\Product;
 use App\Models\ProductTranslation;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Observers\CatalogCacheObserver;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -48,7 +49,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureAuthorization();
         $this->configureRateLimiting();
 
-        foreach ([Product::class, Category::class, ProductTranslation::class, CategoryTranslation::class] as $model) {
+        // ProductVariant too: prices and stock shown in the POS catalog.
+        foreach ([Product::class, ProductVariant::class, Category::class, ProductTranslation::class, CategoryTranslation::class] as $model) {
             $model::observe(CatalogCacheObserver::class);
         }
     }
@@ -58,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn (User $user) => $user->hasRole('super-admin') ? true : null);
 
         Gate::define('access-admin', fn (User $user) => $user->is_active && $user->can('admin.access'));
+        Gate::define('access-pos', fn (User $user) => $user->is_active && $user->can('pos.access'));
     }
 
     private function configureRateLimiting(): void

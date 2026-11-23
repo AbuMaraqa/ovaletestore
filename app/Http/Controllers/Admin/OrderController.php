@@ -27,6 +27,8 @@ class OrderController extends Controller
             ->withCount('items')
             ->allowedFilters(...[
                 AllowedFilter::exact('status'),
+                AllowedFilter::exact('channel'),
+                AllowedFilter::exact('company_id'),
                 AllowedFilter::callback('search', function (Builder $q, $term) {
                     $like = '%'.addcslashes((string) $term, '%_\\').'%';
                     $q->where(fn ($w) => $w->where('number', 'like', $like)
@@ -47,6 +49,7 @@ class OrderController extends Controller
                 'phone' => $o->customer_phone,
                 'city' => $o->shipping_city,
                 'status' => $o->status->value,
+                'channel' => $o->channel->value,
                 'items_count' => $o->items_count,
                 'total' => Money::format($o->total, $o->currency),
                 'date' => $o->placed_at->format('Y-m-d H:i'),
@@ -59,7 +62,7 @@ class OrderController extends Controller
     public function show(Order $order): Response
     {
         $this->authorize('view', $order);
-        $order->load(['items', 'notes.author']);
+        $order->load(['items', 'notes.author', 'salesRep:id,name']);
 
         return Inertia::render('Admin/Orders/Show', [
             'order' => [
@@ -73,6 +76,10 @@ class OrderController extends Controller
                 'shipping_city' => $order->shipping_city,
                 'shipping_address' => $order->shipping_address,
                 'shipping_method' => $order->shipping_method_name,
+                'channel' => $order->channel->value,
+                'payment_method' => $order->payment_method->value,
+                'company_id' => $order->company_id,
+                'sales_rep' => $order->salesRep?->getAttribute('name'),
                 'customer_note' => $order->customer_note,
                 'subtotal' => Money::format($order->subtotal, $order->currency),
                 'shipping_total' => Money::format($order->shipping_total, $order->currency),

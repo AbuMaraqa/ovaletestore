@@ -21,9 +21,10 @@ const pages = computed(() => {
 
 watch(open, (v) => v && (q.value = ''));
 
-function go(url: string): void {
+function go(url: string, external = false): void {
     open.value = false;
-    router.visit(url);
+    if (external) window.location.assign(url);
+    else router.visit(url);
 }
 </script>
 
@@ -45,7 +46,7 @@ function go(url: string): void {
                 </button>
             </li>
             <li v-for="link in pages" :key="link.label + JSON.stringify(link.params ?? {})">
-                <button type="button" class="kt-dropdown-menu-link w-full" @click="go(route(link.route, link.params ?? {}))">
+                <button type="button" class="kt-dropdown-menu-link w-full" @click="go(route(link.route, link.params ?? {}), link.external)">
                     <KtIcon name="arrow-right" class="rtl:rotate-180" /> {{ t(link.label) }}
                 </button>
             </li>

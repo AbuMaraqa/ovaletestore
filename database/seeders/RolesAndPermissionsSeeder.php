@@ -14,6 +14,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'products.view', 'products.create', 'products.update', 'products.delete',
         'categories.manage', 'attributes.manage', 'brands.manage',
         'orders.view', 'orders.update',
+        'companies.manage', 'pos.access',
         'users.manage',
         'settings.manage',
     ];
@@ -24,7 +25,9 @@ class RolesAndPermissionsSeeder extends Seeder
         'product-manager' => ['admin.access', 'products.view', 'products.create', 'products.update', 'products.delete', 'categories.manage', 'attributes.manage', 'brands.manage'],
         'content-manager' => ['admin.access', 'products.view', 'products.update', 'categories.manage', 'brands.manage', 'settings.manage'],
         'customer' => [], // storefront account only — no admin access
-        'order-manager' => ['admin.access', 'orders.view', 'orders.update', 'products.view'],
+        'order-manager' => ['admin.access', 'orders.view', 'orders.update', 'products.view', 'companies.manage'],
+        // iPad POS only: places on-account orders for companies; no admin panel.
+        'sales-rep' => ['pos.access'],
     ];
 
     public function run(): void

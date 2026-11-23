@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Pos;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Storefront;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,15 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::put('/profile', [Storefront\AccountController::class, 'updateProfile'])->name('profile.update');
         });
 
+        // iPad POS for sales reps: orders for companies, on account.
+        Route::prefix('pos')->name('pos.')->middleware(['auth', 'can:access-pos'])->group(function () {
+            Route::get('/', [Pos\PosController::class, 'index'])->name('index');
+            Route::get('/company/{company}', [Pos\PosController::class, 'create'])->name('create');
+            Route::post('/orders', [Pos\PosController::class, 'store'])->middleware('throttle:30,1')->name('orders.store');
+            Route::get('/orders', [Pos\PosController::class, 'orders'])->name('orders');
+            Route::get('/orders/{order}', [Pos\PosController::class, 'show'])->name('orders.show');
+        });
+
         Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])->group(function () {
             Route::get('/', Admin\DashboardController::class)->name('dashboard');
             Route::patch('notifications/{id}/read', [Admin\NotificationController::class, 'read'])->name('notifications.read');
@@ -74,6 +84,9 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::resource('attributes', Admin\AttributeController::class)->except('show');
             Route::resource('brands', Admin\BrandController::class)->except('show');
             Route::resource('shipping-methods', Admin\ShippingMethodController::class)->except('show');
+            Route::resource('companies', Admin\CompanyController::class);
+            Route::post('companies/{company}/payments', [Admin\CompanyPaymentController::class, 'store'])->name('companies.payments.store');
+            Route::delete('companies/{company}/payments/{payment}', [Admin\CompanyPaymentController::class, 'destroy'])->name('companies.payments.destroy');
 
             Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');

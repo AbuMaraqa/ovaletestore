@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import OrderStatusBadge from '@/Components/Admin/OrderStatusBadge.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
@@ -11,7 +11,8 @@ const props = defineProps<{
     order: {
         id: number; number: string; status: string; allowed_statuses: string[];
         customer_name: string; customer_phone: string; customer_email: string | null;
-        shipping_city: string | null; shipping_address: string | null; shipping_method: string | null; customer_note: string | null;
+        shipping_city: string | null; shipping_address: string | null; shipping_method: string | null;
+        channel: 'web' | 'pos'; payment_method: 'cod' | 'on_account'; company_id: number | null; sales_rep: string | null; customer_note: string | null;
         subtotal: string; shipping_total: string; total: string; placed_at: string;
         items: { id: number; name: string; variant_label: string | null; sku: string | null; quantity: number; unit_price: string; line_total: string }[];
         notes: { id: number; body: string; author: string | null; date: string }[];
@@ -76,6 +77,9 @@ const submit = () => form.patch(route('admin.orders.status', props.order.id), { 
                     <div><dt class="text-muted-foreground">{{ t('admin.name') }}</dt><dd class="font-medium">{{ order.customer_name }}</dd></div>
                     <div><dt class="text-muted-foreground">{{ t('admin.phone') }}</dt><dd><a :href="`tel:${order.customer_phone}`" class="text-primary" dir="ltr">{{ order.customer_phone }}</a></dd></div>
                     <div v-if="order.customer_email"><dt class="text-muted-foreground">Email</dt><dd dir="ltr">{{ order.customer_email }}</dd></div>
+                    <div><dt class="text-muted-foreground">{{ t('admin.channel') }}</dt><dd class="font-medium">{{ t(`admin.channel_${order.channel}`) }}<span v-if="order.sales_rep"> — {{ order.sales_rep }}</span></dd></div>
+                    <div><dt class="text-muted-foreground">{{ t('admin.payment_method') }}</dt><dd class="font-medium">{{ t(`admin.pay_${order.payment_method}`) }}</dd></div>
+                    <div v-if="order.company_id"><dt class="text-muted-foreground">{{ t('admin.company') }}</dt><dd><Link :href="route('admin.companies.show', order.company_id)" class="font-medium text-primary">{{ order.customer_name }}</Link></dd></div>
                     <div><dt class="text-muted-foreground">{{ t('admin.shipping_method') }}</dt><dd class="font-medium">{{ order.shipping_method ?? '—' }}</dd></div>
                     <div v-if="order.shipping_city || order.shipping_address"><dt class="text-muted-foreground">{{ t('orders.delivery') }}</dt><dd>{{ [order.shipping_city, order.shipping_address].filter(Boolean).join(' — ') }}</dd></div>
                     <div v-if="order.customer_note"><dt class="text-muted-foreground">{{ t('orders.customer_note') }}</dt><dd class="whitespace-pre-line">{{ order.customer_note }}</dd></div>

@@ -100,7 +100,8 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
 
                             <!-- Single link -->
                             <div v-else :class="['kt-menu-item', { active: isItemActive(item) }]">
-                                <Link
+                                <component
+                                    :is="item.external ? 'a' : Link"
                                     :href="route(item.route!, item.params ?? {})"
                                     class="kt-menu-link flex grow items-center gap-[10px] border border-transparent py-[6px] ps-[10px] pe-[10px] kt-menu-item-active:rounded-lg kt-menu-item-active:bg-accent/60 hover:rounded-lg hover:bg-accent/60"
                                     :aria-current="isItemActive(item) ? 'page' : undefined"
@@ -109,7 +110,7 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
                                     <span class="kt-menu-icon w-[20px] items-start text-muted-foreground kt-menu-item-active:text-primary"><KtIcon :name="item.icon" class="text-lg" /></span>
                                     <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-link-hover:!text-primary">{{ t(item.label) }}</span>
                                     <span v-if="badge(item)" class="kt-menu-badge ms-auto"><span class="kt-badge kt-badge-sm kt-badge-destructive rounded-full tabular-nums">{{ badge(item) }}</span></span>
-                                </Link>
+                                </component>
                             </div>
                         </template>
                     </template>

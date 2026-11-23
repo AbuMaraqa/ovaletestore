@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Cache;
 final class Translations
 {
     private const GROUPS = [
-        'storefront' => ['common', 'storefront', 'cart', 'account', 'orders', 'http-statuses'],
+        'storefront' => ['common', 'storefront', 'cart', 'account', 'orders', 'http-statuses', 'pos'],
         'admin' => ['common', 'admin', 'orders'],
+        'pos' => ['common', 'pos', 'orders', 'cart', 'account'],
     ];
 
     /** @return array<string, mixed> */

@@ -13,6 +13,16 @@ use Spatie\MediaLibrary\HasMedia;
 /**
  * The purchasable unit. Simple products own exactly one variant (signature '').
  * Prices are integer minor units (agorot).
+ *
+ * @property int $id
+ * @property int $product_id
+ * @property string|null $sku
+ * @property int $regular_price
+ * @property int|null $sale_price
+ * @property StockStatus $stock_status
+ * @property bool $manage_stock
+ * @property int|null $stock_quantity
+ * @property-read Product|null $product null when the product is soft-deleted
  */
 class ProductVariant extends Model implements HasMedia
 {
@@ -39,6 +49,7 @@ class ProductVariant extends Model implements HasMedia
         ];
     }
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

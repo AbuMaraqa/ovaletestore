@@ -9,7 +9,7 @@ use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-/** After login/registration: staff → admin panel, customers → their account (or the page they came from). */
+/** After login/registration: staff → admin panel, sales reps → POS, customers → their account (or the page they came from). */
 class AuthRedirectResponse implements LoginResponse, RegisterResponse, TwoFactorLoginResponse
 {
     /** @param Request $request */
@@ -19,7 +19,12 @@ class AuthRedirectResponse implements LoginResponse, RegisterResponse, TwoFactor
             return new JsonResponse(['two_factor' => false]);
         }
 
-        $default = $request->user()?->can('access-admin') ? route('admin.dashboard') : route('account.dashboard');
+        $user = $request->user();
+        $default = match (true) {
+            (bool) $user?->can('access-admin') => route('admin.dashboard'),
+            (bool) $user?->can('access-pos') => route('pos.index'),
+            default => route('account.dashboard'),
+        };
 
         return redirect()->intended($default);
     }

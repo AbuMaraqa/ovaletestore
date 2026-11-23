@@ -31,7 +31,11 @@ class HandleInertiaRequests extends Middleware
     {
         $locale = app()->getLocale();
         $user = $request->user();
-        $area = $request->routeIs('admin.*') ? 'admin' : 'storefront';
+        $area = match (true) {
+            $request->routeIs('admin.*') => 'admin',
+            $request->routeIs('pos.*') => 'pos',
+            default => 'storefront',
+        };
 
         return [
             ...parent::share($request),
@@ -44,6 +48,7 @@ class HandleInertiaRequests extends Middleware
                     'is_staff' => $isStaff = $user->can('access-admin'),
                     // Admin routes are excluded from the storefront Ziggy list, so the URL is sent to staff only.
                     'admin_url' => $isStaff ? route('admin.dashboard') : null,
+                    'pos_url' => $user->can('access-pos') ? route('pos.index') : null,
                 ] : null,
                 // Permission names drive menu visibility only — every action is re-authorized server-side.
                 'permissions' => fn () => $user && $request->routeIs('admin.*') ? $user->getAllPermissions()->pluck('name') : [],

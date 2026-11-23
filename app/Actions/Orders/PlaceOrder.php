@@ -3,16 +3,14 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Cart\CalculateCartTotals;
+use App\Enums\OrderChannel;
 use App\Enums\OrderStatus;
-use App\Enums\StockStatus;
+use App\Enums\PaymentMethod;
 use App\Events\OrderPlaced;
 use App\Models\Cart;
 use App\Models\Order;
-use App\Models\ProductVariant;
 use App\Settings\StoreSettings;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -27,6 +25,7 @@ class PlaceOrder
     public function __construct(
         private readonly StoreSettings $settings,
         private readonly CalculateCartTotals $totals,
+        private readonly BuildOrderLines $buildLines,
     ) {}
 
     /** @param CustomerInput $customer */
@@ -39,33 +38,11 @@ class PlaceOrder
                 throw ValidationException::withMessages(['cart' => __('cart.empty')]);
             }
 
-            /** @var Collection<int, ProductVariant> $variants */
-            $variants = ProductVariant::query()
-                ->whereIn('id', $cart->items->pluck('product_variant_id'))
-                ->with(['product.translations', 'terms.translations'])
-                ->lockForUpdate()
-                ->get()
-                ->keyBy('id');
-
-            $lines = [];
+            $quantities = [];
             foreach ($cart->items as $item) {
-                $variant = $variants->get($item->product_variant_id);
-                $this->assertOrderable($variant, $item->quantity);
-
-                $unitPrice = $variant->effectivePrice();
-                $lines[] = [
-                    'product_id' => $variant->product_id,
-                    'product_variant_id' => $variant->id,
-                    'name' => $variant->product->translate(app()->getLocale())?->name ?? (string) $variant->product->name,
-                    'variant_label' => $variant->terms->isNotEmpty() ? $variant->label() : null,
-                    'sku' => $variant->sku,
-                    'unit_price' => $unitPrice,
-                    'quantity' => $item->quantity,
-                    'line_total' => $unitPrice * $item->quantity,
-                ];
-
-                $this->decrementStock($variant, $item->quantity);
+                $quantities[$item->product_variant_id] = ($quantities[$item->product_variant_id] ?? 0) + $item->quantity;
             }
+            $lines = $this->buildLines->handle($quantities);
 
             $subtotal = array_sum(array_column($lines, 'line_total'));
             if ($subtotal < $this->settings->min_order_total) {
@@ -93,9 +70,11 @@ class PlaceOrder
                 'shipping_address' => $needsAddress ? ($customer['shipping_address'] ?? null) : null,
                 'shipping_method_id' => $method->id,
                 'shipping_method_name' => $method->name,
-                'number' => $this->generateNumber(),
+                'number' => BuildOrderLines::generateNumber(),
                 'user_id' => $userId,
                 'status' => OrderStatus::Pending,
+                'channel' => OrderChannel::Web,
+                'payment_method' => PaymentMethod::CashOnDelivery,
                 'currency' => $this->settings->currency,
                 'subtotal' => $totals['subtotal'],
                 'discount_total' => $totals['discount_total'],
@@ -112,39 +91,5 @@ class PlaceOrder
 
             return $order;
         });
-    }
-
-    private function assertOrderable(?ProductVariant $variant, int $quantity): void
-    {
-        if (! $variant || ! $variant->product?->isPublished() || ! $variant->isPurchasable()) {
-            throw ValidationException::withMessages(['cart' => __('cart.item_unavailable')]);
-        }
-
-        $available = $variant->availableQuantity();
-        if ($available !== null && $quantity > $available) {
-            throw ValidationException::withMessages(['cart' => __('cart.insufficient_stock', ['count' => $available])]);
-        }
-    }
-
-    private function decrementStock(ProductVariant $variant, int $quantity): void
-    {
-        if (! $variant->manage_stock) {
-            return;
-        }
-
-        $variant->stock_quantity = (int) $variant->stock_quantity - $quantity;
-        if ($variant->stock_quantity <= 0 && $variant->stock_status === StockStatus::InStock) {
-            $variant->stock_status = StockStatus::OutOfStock;
-        }
-        $variant->save();
-    }
-
-    private function generateNumber(): string
-    {
-        do {
-            $number = 'OV-'.now()->format('ymd').'-'.Str::upper(Str::random(5));
-        } while (Order::query()->where('number', $number)->exists());
-
-        return $number;
     }
 }

@@ -9,7 +9,7 @@ import { useDebounce } from '@/Composables/useDebounce';
 import { useTrans } from '@/Composables/useTrans';
 import type { PaginationLink } from '@/types';
 
-interface Row { id: number; number: string; customer: string; phone: string; city: string; status: string; items_count: number; total: string; date: string }
+interface Row { id: number; number: string; customer: string; phone: string | null; city: string | null; status: string; channel: 'web' | 'pos'; items_count: number; total: string; date: string }
 const props = defineProps<{
     orders: { data: Row[]; links: PaginationLink[]; total: number; from: number | null; to: number | null };
     filters: { filter?: { status?: string; search?: string } };
@@ -53,7 +53,11 @@ watch(status, reload);
                 <tbody>
                     <tr v-for="o in orders.data" :key="o.id">
                         <td><Link :href="route('admin.orders.show', o.id)" class="font-mono text-sm font-medium text-primary" dir="ltr">{{ o.number }}</Link></td>
-                        <td>{{ o.customer }} <span class="block text-xs text-muted-foreground">{{ o.city }}</span></td>
+                        <td>
+                            {{ o.customer }}
+                            <span v-if="o.channel === 'pos'" class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline ms-1">POS</span>
+                            <span class="block text-xs text-muted-foreground">{{ o.city }}</span>
+                        </td>
                         <td dir="ltr" class="text-sm">{{ o.phone }}</td>
                         <td class="text-center tabular-nums">{{ o.items_count }}</td>
                         <td><OrderStatusBadge :status="o.status" /></td>

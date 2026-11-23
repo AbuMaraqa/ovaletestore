@@ -69,16 +69,19 @@ class Product extends Model implements HasMedia, TranslatableContract
         return $this->hasMany(Attribute::class);
     }
 
+    /** @return HasMany<ProductVariant, $this> */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    /** @return HasMany<ProductVariant, $this> */
     public function activeVariants(): HasMany
     {
         return $this->variants()->where('is_active', true);
     }
 
+    /** @return HasOne<ProductVariant, $this> */
     public function defaultVariant(): HasOne
     {
         return $this->hasOne(ProductVariant::class)->where('is_default', true);
