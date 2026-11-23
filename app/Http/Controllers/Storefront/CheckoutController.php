@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Storefront\CheckoutRequest;
 use App\Http\Resources\Storefront\CartResource;
 use App\Models\Order;
+use App\Settings\StoreSettings;
 use App\Support\Money;
 use App\Support\Seo\SeoData;
 use Illuminate\Http\RedirectResponse;
@@ -22,8 +23,12 @@ class CheckoutController extends Controller
 {
     public function __construct(private readonly ResolveCart $resolveCart) {}
 
-    public function show(Request $request, CalculateCartTotals $totals): Response|RedirectResponse
+    public function show(Request $request, CalculateCartTotals $totals, StoreSettings $store): Response|RedirectResponse
     {
+        if (! $store->guest_checkout && ! $request->user()) {
+            return redirect()->guest(route('login'));
+        }
+
         $cart = $this->resolveCart->handle($request, create: false);
 
         if (! $cart || $cart->items()->doesntExist()) {
@@ -38,8 +43,10 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(CheckoutRequest $request, PlaceOrder $placeOrder): RedirectResponse
+    public function store(CheckoutRequest $request, PlaceOrder $placeOrder, StoreSettings $store): RedirectResponse
     {
+        abort_if(! $store->guest_checkout && ! $request->user(), 403);
+
         $cart = $this->resolveCart->handle($request, create: false);
         abort_unless($cart, 404);
 

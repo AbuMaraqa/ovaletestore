@@ -16,7 +16,7 @@ import type { CategoryCard, ProductCard } from '@/types';
 /** Same sections as the original store, in the same order — redesigned. */
 defineProps<{
     hero: { title: string; subtitle: string; image: { src: string; srcset: string } | null };
-    brands: string[];
+    brands: { id: number; name: string; url: string; logo: string | null }[];
     categories: CategoryCard[];
     featured: ProductCard[];
     spotlight: { title: string; text: string | null; url: string; images: string[]; products: ProductCard[] } | null;
@@ -33,7 +33,7 @@ useGsap(root, ({ root: el }) => revealOnScroll(el));
     <div ref="root">
         <HeroSection v-bind="hero" />
         <UspStrip />
-        <BrandMarquee :logos="brands" />
+        <BrandMarquee :brands="brands" />
         <CategoryRail :categories="categories" />
 
         <section class="container-store mt-24">

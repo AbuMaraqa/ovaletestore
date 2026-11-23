@@ -14,3 +14,8 @@ it('splits Arabic and English parts at the separating dot', function (string $ra
 it('optionally splits trailing Latin words (category names)', function () {
     expect(BilingualName::split('آيسات Iced Drinks', allowTrailingLatin: true))->toBe(['ar' => 'آيسات', 'en' => 'Iced Drinks']);
 });
+
+it('ignores stray diacritics after the separating dot', function () {
+    expect(BilingualName::split('سموذي, توبينج و ريفريشر.ٍSmoothies, Toppings &amp; Refreshers'))
+        ->toBe(['ar' => 'سموذي, توبينج و ريفريشر', 'en' => 'Smoothies, Toppings & Refreshers']);
+});

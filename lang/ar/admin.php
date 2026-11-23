@@ -144,4 +144,9 @@ return [
     'health_on_sale' => 'خيارات عليها تخفيض',
     'top_categories' => 'أكبر الأقسام',
     'no_orders_yet' => 'لا توجد طلبات بعد. ستظهر هنا فور وصول أول طلب.',
+    'notifications' => 'الإشعارات',
+    'mark_all_read' => 'تعليم الكل كمقروء',
+    'new_order_from' => 'طلبية جديدة من :name',
+    'new_order' => 'طلبية جديدة',
+    'no_notifications' => 'لا توجد إشعارات.',
 ];

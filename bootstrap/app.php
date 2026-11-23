@@ -41,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: []);
         $middleware->trustProxies(at: env('TRUSTED_PROXIES') ? explode(',', (string) env('TRUSTED_PROXIES')) : null);
         $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
+        $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->can('access-admin') ? route('admin.dashboard') : route('account.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Branded, localized error pages for storefront visitors in production.

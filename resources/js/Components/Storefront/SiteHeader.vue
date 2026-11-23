@@ -1,101 +1,182 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import UserAvatar from '@/Components/Common/UserAvatar.vue';
 import Icon from '@/Components/Storefront/Icon.vue';
-import LanguageSwitcher from '@/Components/Storefront/LanguageSwitcher.vue';
 import MobileMenu from '@/Components/Storefront/MobileMenu.vue';
-import SearchForm from '@/Components/Storefront/SearchForm.vue';
+import SearchOverlay from '@/Components/Storefront/SearchOverlay.vue';
+import SocialIcon from '@/Components/Storefront/SocialIcon.vue';
+import { onClickOutside } from '@/Composables/onClickOutside';
+import { useLocale } from '@/Composables/useLocale';
 import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
 
+/** Header modelled on the original store: dark top bar (slogan · language · currency · socials) + white main bar. */
 const page = usePage<SharedProps & { nav_categories: { id: number; name: string; url: string }[] }>();
 const { t } = useTrans();
+const { current, available } = useLocale();
 
 const site = computed(() => page.props.site);
+const user = computed(() => page.props.auth.user);
 const categories = computed(() => page.props.nav_categories ?? []);
 const cartCount = computed(() => page.props.cart_count);
-const megaOpen = ref(false);
+const socials = computed(() => Object.entries(site.value.social ?? {}));
+
+const searchOpen = ref(false);
 const mobileOpen = ref(false);
+const openMenu = ref<'lang' | 'categories' | 'about' | 'account' | null>(null);
+const header = ref<HTMLElement | null>(null);
+onClickOutside(header, () => (openMenu.value = null));
+const toggle = (menu: typeof openMenu.value) => (openMenu.value = openMenu.value === menu ? null : menu);
+
+const nav = computed(() => [
+    { label: t('common.home'), href: route('storefront.home'), active: route().current('storefront.home') },
+    { label: t('storefront.products'), href: route('storefront.shop'), active: route().current('storefront.shop') || route().current('storefront.product') },
+]);
+const isActive = (name: string) => route().current(name);
+const logout = () => router.post(route('logout'));
 </script>
 
 <template>
-    <header class="sticky top-0 z-40">
-        <div class="bg-cocoa text-xs text-white/85">
-            <div class="container-store flex h-9 items-center justify-center gap-2 sm:justify-between">
-                <p class="truncate">{{ site.tagline }}</p>
-                <a v-if="site.phone" :href="`tel:${site.phone}`" class="hidden font-medium tabular-nums hover:text-white sm:block" dir="ltr">{{ site.phone }}</a>
+    <header ref="header" class="sticky top-0 z-40">
+        <!-- Top bar -->
+        <div class="bg-[#2b160f] text-[13px] text-white/85">
+            <div class="container-store flex h-10 items-center justify-between gap-4">
+                <p class="flex min-w-0 items-center gap-2 font-semibold">
+                    <span class="size-2.5 shrink-0 rounded-full bg-[#c9a24d] ring-2 ring-[#c9a24d]/30" aria-hidden="true" />
+                    <span class="truncate">{{ site.tagline }}</span>
+                </p>
+                <div class="hidden items-center gap-4 md:flex">
+                    <div class="relative">
+                        <button type="button" class="inline-flex items-center gap-1.5 hover:text-white" :aria-expanded="openMenu === 'lang'" @click="toggle('lang')">
+                            <Icon name="globe" class="size-4" />
+                            {{ available.find((l) => l.code === current)?.native }}
+                            <Icon name="chevron" class="size-3 rotate-90" />
+                        </button>
+                        <ul v-if="openMenu === 'lang'" class="absolute end-0 top-full z-50 mt-2 w-40 rounded-xl bg-white p-1.5 text-cocoa shadow-lift ring-1 ring-stone-100">
+                            <li v-for="l in available" :key="l.code">
+                                <a :href="l.url" :lang="l.code" :class="['flex items-center justify-between rounded-lg px-3 py-2 hover:bg-stone-50', l.code === current && 'font-bold text-brand-700']">
+                                    {{ l.native }} <Icon v-if="l.code === current" name="check" class="size-4" />
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5">{{ t('storefront.currency') }} <b class="font-bold text-white">{{ site.currency }}</b></span>
+                    <span v-if="socials.length || site.phone" class="h-4 w-px bg-white/20" aria-hidden="true" />
+                    <div class="flex items-center gap-3.5 text-[#e4cfa3]">
+                        <a v-for="[network, url] in socials" :key="network" :href="url" target="_blank" rel="noopener" :aria-label="network" class="transition hover:scale-110 hover:text-white">
+                            <SocialIcon :name="network" class="size-4" />
+                        </a>
+                        <a v-if="site.whatsapp" :href="`https://wa.me/${site.whatsapp}`" target="_blank" rel="noopener" aria-label="WhatsApp" class="transition hover:scale-110 hover:text-white"><SocialIcon name="whatsapp" class="size-4" /></a>
+                        <a v-if="site.phone" :href="`tel:${site.phone}`" :aria-label="site.phone" class="transition hover:scale-110 hover:text-white"><SocialIcon name="phone" class="size-4" /></a>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="border-b border-stone-200/70 bg-cream/90 backdrop-blur-md supports-[backdrop-filter]:bg-cream/75">
-            <div class="container-store flex h-16 items-center gap-3 lg:h-20 lg:gap-8">
+        <!-- Main bar -->
+        <div class="border-b border-stone-200/70 bg-white/95 backdrop-blur-md">
+            <div class="container-store flex h-[4.5rem] items-center gap-4 lg:h-[5.25rem] lg:gap-10">
                 <button type="button" class="-ms-2 inline-flex size-11 items-center justify-center rounded-full hover:bg-stone-100 lg:hidden" :aria-label="t('common.menu')" @click="mobileOpen = true">
                     <Icon name="menu" class="size-6" />
                 </button>
 
-                <Link :href="route('storefront.home')" class="flex shrink-0 items-center gap-2" :aria-label="site.name">
-                    <img v-if="site.logo" :src="site.logo" :alt="site.name" class="h-10 w-auto lg:h-12" width="48" height="48" />
-                    <span class="text-lg font-bold tracking-tight lg:text-xl">{{ site.name }}</span>
+                <Link :href="route('storefront.home')" class="shrink-0" :aria-label="site.name">
+                    <img v-if="site.logo" :src="site.logo" :alt="site.name" class="h-12 w-auto lg:h-14" width="56" height="56" />
+                    <span v-else class="text-xl font-extrabold">{{ site.name }}</span>
                 </Link>
 
-                <nav class="hidden items-center gap-1 lg:flex" @mouseleave="megaOpen = false">
-                    <Link :href="route('storefront.shop')" class="rounded-full px-4 py-2 text-sm font-medium hover:bg-stone-100">{{ t('storefront.shop') }}</Link>
+                <nav class="hidden items-center gap-8 text-[15px] font-semibold text-cocoa lg:flex" aria-label="Main">
+                    <Link
+                        v-for="item in nav"
+                        :key="item.href"
+                        :href="item.href"
+                        :class="['relative py-2 transition hover:text-brand-700', item.active && 'text-cocoa after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#c9a24d]']"
+                    >
+                        {{ item.label }}
+                    </Link>
+
                     <div class="relative">
                         <button
                             type="button"
-                            class="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium hover:bg-stone-100"
-                            :aria-expanded="megaOpen"
-                            aria-haspopup="true"
-                            @click="megaOpen = !megaOpen"
-                            @mouseenter="megaOpen = true"
+                            :class="['relative inline-flex items-center gap-1 py-2 transition hover:text-brand-700', isActive('storefront.category') && 'after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#c9a24d]']"
+                            :aria-expanded="openMenu === 'categories'"
+                            @click="toggle('categories')"
                         >
-                            {{ t('storefront.categories') }}
-                            <Icon name="chevron" :class="['size-4 transition-transform', megaOpen ? 'rotate-90' : 'rtl:-scale-x-100']" />
+                            {{ t('storefront.categories_nav') }}
                         </button>
                         <Transition enter-active-class="transition duration-150" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-100" leave-to-class="opacity-0">
-                            <div v-if="megaOpen" class="absolute start-0 top-full w-[min(56rem,calc(100vw-4rem))] pt-3">
-                                <div class="grid grid-cols-3 gap-1 rounded-3xl bg-white p-4 shadow-lift ring-1 ring-stone-100">
-                                    <Link
-                                        v-for="category in categories"
-                                        :key="category.id"
-                                        :href="category.url"
-                                        class="rounded-xl px-3 py-2.5 text-sm text-stone-700 transition hover:bg-brand-50 hover:text-brand-800"
-                                        @click="megaOpen = false"
-                                    >
-                                        {{ category.name }}
+                            <div v-if="openMenu === 'categories'" class="absolute start-0 top-full z-50 w-[min(52rem,calc(100vw-3rem))] pt-4">
+                                <div class="grid grid-cols-3 gap-1 rounded-3xl bg-white p-4 shadow-lift ring-1 ring-stone-100" data-lenis-prevent>
+                                    <Link v-for="c in categories" :key="c.id" :href="c.url" class="rounded-xl px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-800" @click="openMenu = null">
+                                        {{ c.name }}
                                     </Link>
                                 </div>
                             </div>
                         </Transition>
                     </div>
+
+                    <Link :href="route('storefront.contact')" :class="['relative py-2 transition hover:text-brand-700', isActive('storefront.contact') && 'after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#c9a24d]']">
+                        {{ t('storefront.contact_us') }}
+                    </Link>
+
+                    <div class="relative">
+                        <button type="button" class="inline-flex items-center gap-1 py-2 transition hover:text-brand-700" :aria-expanded="openMenu === 'about'" @click="toggle('about')">
+                            {{ t('storefront.about_us') }} <Icon name="chevron" class="size-3.5 rotate-90" />
+                        </button>
+                        <ul v-if="openMenu === 'about'" class="absolute start-0 top-full z-50 mt-3 w-52 rounded-2xl bg-white p-1.5 text-sm shadow-lift ring-1 ring-stone-100">
+                            <li><Link :href="route('storefront.about')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.our_story') }}</Link></li>
+                            <li><Link :href="route('storefront.brands')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.brands') }}</Link></li>
+                            <li><Link :href="route('storefront.contact')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.contact_us') }}</Link></li>
+                        </ul>
+                    </div>
                 </nav>
 
-                <div class="hidden flex-1 lg:block">
-                    <SearchForm />
-                </div>
-
-                <div class="ms-auto flex items-center gap-1 lg:ms-0">
-                    <LanguageSwitcher />
-                    <Link
-                        :href="route('storefront.cart')"
-                        class="relative inline-flex size-11 items-center justify-center rounded-full hover:bg-stone-100"
-                        :aria-label="`${t('cart.title')} (${cartCount})`"
+                <div class="ms-auto flex items-center gap-2.5">
+                    <!-- Search pill (opens the full-screen search) -->
+                    <button
+                        type="button"
+                        class="hidden h-11 w-56 items-center gap-2.5 rounded-full bg-[#f7efe2] px-4 text-sm text-stone-500 ring-1 ring-[#eadfcb] transition hover:ring-[#c9a24d] md:inline-flex xl:w-64"
+                        @click="searchOpen = true"
                     >
-                        <Icon name="cart" class="size-6" />
-                        <span
-                            v-if="cartCount > 0"
-                            class="absolute end-0.5 top-0.5 flex min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[11px] font-bold leading-5 text-white tabular-nums"
-                        >
+                        <Icon name="search" class="size-5 text-cocoa" />
+                        {{ t('storefront.search_product') }}
+                    </button>
+                    <button type="button" class="inline-flex size-11 items-center justify-center rounded-full bg-[#f7efe2] text-cocoa md:hidden" :aria-label="t('common.search')" @click="searchOpen = true">
+                        <Icon name="search" class="size-5" />
+                    </button>
+
+                    <!-- Account -->
+                    <div class="relative">
+                        <Link v-if="!user" :href="route('login')" class="inline-flex size-11 items-center justify-center rounded-full bg-[#f7efe2] text-stone-400 ring-1 ring-[#eadfcb] hover:text-cocoa" :aria-label="t('common.login')">
+                            <svg viewBox="0 0 24 24" class="size-6" fill="currentColor" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z" /></svg>
+                        </Link>
+                        <template v-else>
+                            <button type="button" class="block rounded-full" :aria-expanded="openMenu === 'account'" :aria-label="user.name" @click="toggle('account')">
+                                <UserAvatar :avatar="user.avatar" :name="user.name" size="size-11" :ring="false" />
+                            </button>
+                            <div v-if="openMenu === 'account'" class="absolute end-0 top-full z-50 mt-3 w-60 rounded-2xl bg-white p-2 text-sm shadow-lift ring-1 ring-stone-100">
+                                <p class="truncate px-3 pb-2 pt-1 font-bold text-cocoa">{{ user.name }}</p>
+                                <Link :href="route('account.dashboard')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_account') }}</Link>
+                                <Link :href="route('account.orders')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_orders') }}</Link>
+                                <a v-if="user.is_staff" :href="route('admin.dashboard')" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
+                                <button type="button" class="mt-1 block w-full rounded-xl px-3 py-2.5 text-start text-red-600 hover:bg-red-50" @click="logout">{{ t('common.logout') }}</button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Cart -->
+                    <Link :href="route('storefront.cart')" class="relative inline-flex size-11 items-center justify-center rounded-full bg-[#4a2216] text-white transition hover:bg-[#3a190f]" :aria-label="`${t('cart.title')} (${cartCount})`">
+                        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /><path d="M9.5 13.5 11 15l3.5-3.5" stroke-linecap="round" /></svg>
+                        <span v-if="cartCount > 0" class="absolute -start-1 -top-1 flex min-w-5 items-center justify-center rounded-full bg-[#c9a24d] px-1 text-[11px] font-bold leading-5 text-[#2b160f] tabular-nums ring-2 ring-white">
                             {{ cartCount > 99 ? '99+' : cartCount }}
                         </span>
                     </Link>
                 </div>
             </div>
-            <div class="container-store pb-3 lg:hidden">
-                <SearchForm />
-            </div>
         </div>
 
         <MobileMenu v-model:open="mobileOpen" :categories="categories" />
+        <SearchOverlay v-model:open="searchOpen" />
     </header>
 </template>

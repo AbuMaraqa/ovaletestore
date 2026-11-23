@@ -15,7 +15,7 @@ const { t } = useTrans();
 const localized = (key: string): Localized => Object.fromEntries(props.locales.map((l) => [l, (props.values[key] as Localized | undefined)?.[l] ?? '']));
 const initial: Record<string, any> = {
     general: { site_name: localized('site_name'), tagline: localized('tagline'), logo: null, favicon: null },
-    contact: { phone: props.values.phone ?? '', whatsapp: props.values.whatsapp ?? '', email: props.values.email ?? '', address: localized('address'), social_links: { facebook: '', instagram: '', tiktok: '', ...(props.values.social_links ?? {}) } },
+    contact: { phone: props.values.phone ?? '', whatsapp: props.values.whatsapp ?? '', email: props.values.email ?? '', address: localized('address'), social_links: { facebook: '', instagram: '', snapchat: '', tiktok: '', telegram: '', ...(props.values.social_links ?? {}) } },
     store: { ...props.values },
     seo: { home_title: localized('home_title'), home_description: localized('home_description'), og_image: null, allow_indexing: props.values.allow_indexing },
 }[props.group];
@@ -73,7 +73,7 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                         <FormField v-for="l in locales" :id="`ad-${l}`" :key="l" :label="`${t('admin.address')} (${l})`" :error="errors[`address.${l}`]">
                             <input :id="`ad-${l}`" v-model="form.address[l]" class="kt-input" :dir="dirFor(l)" />
                         </FormField>
-                        <FormField v-for="net in ['facebook', 'instagram', 'tiktok']" :id="`sl-${net}`" :key="net" :label="net" :error="errors[`social_links.${net}`]">
+                        <FormField v-for="net in ['facebook', 'instagram', 'snapchat', 'tiktok', 'telegram']" :id="`sl-${net}`" :key="net" :label="net" :error="errors[`social_links.${net}`]">
                             <input :id="`sl-${net}`" v-model="form.social_links[net]" type="url" class="kt-input" dir="ltr" placeholder="https://" />
                         </FormField>
                     </div>

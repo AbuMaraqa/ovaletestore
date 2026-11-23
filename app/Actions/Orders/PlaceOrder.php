@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Enums\OrderStatus;
 use App\Enums\StockStatus;
+use App\Events\OrderPlaced;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\ProductVariant;
@@ -90,6 +91,8 @@ class PlaceOrder
 
             $order->items()->createMany($lines);
             $cart->items()->delete();
+
+            OrderPlaced::dispatch($order);
 
             return $order;
         });

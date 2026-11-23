@@ -15,10 +15,16 @@ export interface LocaleOption {
     url: string;
 }
 
+export interface Avatar {
+    url: string | null;
+    initials: string;
+    color: string;
+}
+
 export interface AuthUser {
     id: number;
     name: string;
-    avatar: string;
+    avatar: Avatar;
     is_staff: boolean;
 }
 
@@ -40,7 +46,7 @@ export interface Seo {
 export interface SharedProps {
     auth: { user: AuthUser | null; permissions: string[] };
     locale: { current: 'ar' | 'en' | 'he'; dir: 'rtl' | 'ltr'; available: LocaleOption[] };
-    site: { name: string; tagline: string | null; logo: string | null; whatsapp: string | null; phone: string | null };
+    site: { name: string; tagline: string | null; logo: string | null; whatsapp: string | null; phone: string | null; social: Record<string, string>; currency: string };
     cart_count: number;
     flash: { success: string | null; error: string | null };
     translations: Record<string, Record<string, unknown>>;
@@ -75,6 +81,7 @@ export interface ProductCard {
     on_sale: boolean;
     in_stock: boolean;
     default_variant_id: number | null;
+    category: string | null;
 }
 
 export interface CategoryCard {

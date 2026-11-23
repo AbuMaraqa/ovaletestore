@@ -6,32 +6,31 @@ import SectionHeading from '@/Components/Storefront/SectionHeading.vue';
 import { useTrans } from '@/Composables/useTrans';
 import type { CategoryCard } from '@/types';
 
+/** "Shop by category" circles (compact, many visible at once) — the pattern used by large marketplaces. */
 defineProps<{ categories: CategoryCard[] }>();
 const { t } = useTrans();
 </script>
 
 <template>
-    <section id="categories" class="container-store mt-24 scroll-mt-32">
-        <SectionHeading data-reveal :title="t('storefront.categories')" :link="route('storefront.shop')" :link-label="t('storefront.view_all')" />
-        <ScrollRail :label="t('storefront.categories')" class="mt-8">
+    <section id="categories" class="container-store mt-20 scroll-mt-32">
+        <SectionHeading data-reveal :title="t('storefront.shop_by_category')" :link="route('storefront.shop')" :link-label="t('storefront.view_all')" />
+        <ScrollRail :label="t('storefront.categories')" class="mt-6">
             <Link
                 v-for="category in categories"
                 :key="category.id"
                 :href="category.url"
                 data-reveal
-                class="group relative aspect-[3/4] w-[44%] shrink-0 snap-start overflow-hidden rounded-[1.75rem] bg-brand-100 sm:w-[30%] lg:w-[18%]"
+                class="group flex w-[5.5rem] shrink-0 snap-start flex-col items-center gap-2 text-center sm:w-24 lg:w-[6.5rem]"
             >
-                <ResponsiveImage
-                    :image="category.image"
-                    :alt="category.name"
-                    sizes="(min-width: 1024px) 18vw, (min-width: 640px) 30vw, 44vw"
-                    img-class="absolute inset-0 size-full object-cover transition duration-700 ease-out group-hover:scale-110"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-cocoa/85 via-cocoa/20 to-transparent" aria-hidden="true" />
-                <div class="absolute inset-x-0 bottom-0 p-4">
-                    <p class="line-clamp-2 text-base font-bold leading-snug text-white">{{ category.name }}</p>
-                    <p class="mt-1 text-xs text-white/70 tabular-nums">{{ t('storefront.products_count', { count: category.products_count ?? 0 }) }}</p>
-                </div>
+                <span class="relative block size-[4.75rem] overflow-hidden rounded-full bg-brand-50 ring-1 ring-stone-200 transition duration-300 group-hover:ring-2 group-hover:ring-brand-500 sm:size-20 lg:size-[5.5rem]">
+                    <ResponsiveImage
+                        :image="category.image"
+                        :alt="category.name"
+                        sizes="96px"
+                        img-class="size-full object-cover transition duration-500 group-hover:scale-110"
+                    />
+                </span>
+                <span class="line-clamp-2 text-xs font-semibold leading-snug text-cocoa group-hover:text-brand-700 sm:text-[13px]">{{ category.name }}</span>
             </Link>
         </ScrollRail>
     </section>

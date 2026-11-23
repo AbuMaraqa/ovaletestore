@@ -85,7 +85,7 @@ class ProductController extends Controller
         return Product::query()->published()
             ->whereKeyNot($product->id)
             ->whereHas('categories', fn ($q) => $q->whereIn('categories.id', $categoryIds))
-            ->with(['translations', 'activeVariants', 'media'])
+            ->with(['translations', 'activeVariants', 'media', 'categories.translations'])
             ->inRandomOrder()
             ->limit(8)
             ->get();

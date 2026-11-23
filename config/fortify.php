@@ -162,7 +162,8 @@ return [
     */
 
     'features' => [
-        // No public registration: staff accounts are created by administrators; shoppers use guest checkout.
+        // Customers self-register (role: customer). Staff accounts are created by administrators.
+        Features::registration(),
         Features::resetPasswords(),
         Features::updatePasswords(),
         Features::twoFactorAuthentication([

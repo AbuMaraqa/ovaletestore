@@ -33,3 +33,9 @@
 [v-cloak] {
     display: none;
 }
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0); }
+    20%, 60% { transform: rotate(-14deg); }
+    40%, 80% { transform: rotate(14deg); }
+}

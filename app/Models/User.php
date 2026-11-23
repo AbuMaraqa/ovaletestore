@@ -49,15 +49,25 @@ class User extends Authenticatable implements HasMedia
         $this->addMediaConversion('avatar')->width(160)->height(160)->format('webp')->nonQueued();
     }
 
-    /** Uploaded avatar, otherwise a Laravolt initials SVG (renders Arabic/Hebrew initials via browser fonts). */
-    public function avatarUrl(): string
+    /** Brand-palette backgrounds for initials avatars (white text passes WCAG AA on all of them). */
+    private const AVATAR_COLORS = ['#9a4a24', '#7a3d1f', '#b4542a', '#5b6b2f', '#2f5d62', '#4b3f72', '#8a3b52', '#3d5a80'];
+
+    /**
+     * Uploaded photo, otherwise initials rendered as HTML by the frontend (<UserAvatar>), so they use the
+     * site font (Tajawal) — an SVG <img> cannot load page fonts. Laravolt computes the initials (Arabic-aware).
+     *
+     * @return array{url: ?string, initials: string, color: string}
+     */
+    public function avatar(): array
     {
         $media = $this->getFirstMedia('avatar');
+        $generator = Avatar::create((string) $this->name);
+        $generator->toSvg(); // builds the initials
 
-        if ($media) {
-            return $media->getUrl('avatar');
-        }
-
-        return 'data:image/svg+xml;base64,'.base64_encode(Avatar::create($this->name)->setDimension(80)->setFontSize(32)->toSvg());
+        return [
+            'url' => $media?->getUrl('avatar'),
+            'initials' => $generator->getInitial(),
+            'color' => self::AVATAR_COLORS[crc32((string) $this->name) % count(self::AVATAR_COLORS)],
+        ];
     }
 }

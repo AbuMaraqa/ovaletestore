@@ -23,6 +23,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'admin' => self::PERMISSIONS,
         'product-manager' => ['admin.access', 'products.view', 'products.create', 'products.update', 'products.delete', 'categories.manage', 'attributes.manage', 'brands.manage'],
         'content-manager' => ['admin.access', 'products.view', 'products.update', 'categories.manage', 'brands.manage', 'settings.manage'],
+        'customer' => [], // storefront account only — no admin access
         'order-manager' => ['admin.access', 'orders.view', 'orders.update', 'products.view'],
     ];
 

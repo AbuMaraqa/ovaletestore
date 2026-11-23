@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
+use App\Settings\StoreSettings;
 use App\Support\Translations;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,7 +40,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'avatar' => $user->avatarUrl(),
+                    'avatar' => $user->avatar(),
                     'is_staff' => $user->can('access-admin'),
                 ] : null,
                 // Permission names drive menu visibility only — every action is re-authorized server-side.
@@ -62,6 +63,8 @@ class HandleInertiaRequests extends Middleware
                 'logo' => ($logo = app(GeneralSettings::class)->logo_path) ? asset('storage/'.$logo) : null,
                 'whatsapp' => app(ContactSettings::class)->whatsapp,
                 'phone' => app(ContactSettings::class)->phone,
+                'social' => array_filter(app(ContactSettings::class)->social_links),
+                'currency' => app(StoreSettings::class)->currency,
             ],
 
             'cart_count' => fn () => $request->routeIs('admin.*') ? 0
@@ -76,6 +79,19 @@ class HandleInertiaRequests extends Middleware
             'admin_badges' => fn () => $area === 'admin' && $user?->can('orders.view')
                 ? ['pending_orders' => Order::query()->where('status', OrderStatus::Pending)->count()]
                 : null,
+
+            // Staff notifications (new orders) for the header bell; polled by the admin layout.
+            'admin_notifications' => fn () => $area === 'admin' && $user ? [
+                'unread' => $user->unreadNotifications()->count(),
+                'items' => $user->notifications()->latest()->limit(8)->get()->map(fn ($n) => [
+                    'id' => $n->id,
+                    'number' => $n->data['number'] ?? null,
+                    'customer' => $n->data['customer'] ?? null,
+                    'total' => $n->data['total'] ?? null,
+                    'read' => $n->read_at !== null,
+                    'time' => $n->created_at->diffForHumans(),
+                ]),
+            ] : null,
 
             // Storefront navigation (top-level categories), sent once per locale.
             'nav_categories' => $area === 'storefront'

@@ -18,7 +18,8 @@ final class BilingualName
         $offset = 0;
         while (($pos = mb_strpos($name, '.', $offset)) !== false) {
             $before = trim(mb_substr($name, 0, $pos));
-            $after = trim(mb_substr($name, $pos + 1));
+            // Stray Arabic diacritics typed right after the dot (e.g. ".ٍSmoothies") belong to neither part.
+            $after = trim((string) preg_replace('/^[\p{Mn}\s]+/u', '', mb_substr($name, $pos + 1)));
 
             if ($before !== '' && self::hasArabic($before) && self::isLatinText($after)) {
                 return ['ar' => $before, 'en' => $after];

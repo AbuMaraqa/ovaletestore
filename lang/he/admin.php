@@ -144,4 +144,9 @@ return [
     'health_on_sale' => 'וריאציות במבצע',
     'top_categories' => 'הקטגוריות הגדולות',
     'no_orders_yet' => 'אין עדיין הזמנות. הן יופיעו כאן ברגע שתגיע הראשונה.',
+    'notifications' => 'התראות',
+    'mark_all_read' => 'סמן הכל כנקרא',
+    'new_order_from' => 'הזמנה חדשה מ־:name',
+    'new_order' => 'הזמנה חדשה',
+    'no_notifications' => 'אין התראות.',
 ];

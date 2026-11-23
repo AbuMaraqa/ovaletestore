@@ -7,11 +7,12 @@ import KtCard from '@/Components/UI/KtCard.vue';
 import KtPagination from '@/Components/UI/KtPagination.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useTrans } from '@/Composables/useTrans';
-import type { PaginationLink } from '@/types';
+import UserAvatar from '@/Components/Common/UserAvatar.vue';
+import type { Avatar, PaginationLink } from '@/types';
 
 defineProps<{
     users: {
-        data: { id: number; name: string; email: string; avatar: string; is_active: boolean; roles: string[]; two_factor: boolean }[];
+        data: { id: number; name: string; email: string; avatar: Avatar; is_active: boolean; roles: string[]; two_factor: boolean }[];
         links: PaginationLink[]; total: number; from: number | null; to: number | null;
     };
 }>();
@@ -30,7 +31,7 @@ const { t } = useTrans();
                     <tr v-for="u in users.data" :key="u.id">
                         <td>
                             <div class="flex items-center gap-3">
-                                <img :src="u.avatar" :alt="u.name" class="size-9 rounded-full" width="36" height="36" />
+                                <UserAvatar :avatar="u.avatar" :name="u.name" :ring="false" />
                                 <div>
                                     <Link :href="route('admin.users.edit', u.id)" class="font-medium text-mono hover:text-primary">{{ u.name }}</Link>
                                     <p class="text-xs text-muted-foreground" dir="ltr">{{ u.email }}</p>

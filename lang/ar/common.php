@@ -42,4 +42,9 @@ return [
     'skip_to_content' => 'تخطَّ إلى المحتوى',
     'menu' => 'القائمة',
     'whatsapp_us' => 'تواصل عبر واتساب',
+    'register' => 'إنشاء حساب',
+    'register_title' => 'أنشئ حسابك',
+    'register_subtitle' => 'تابع طلباتك واطلب أسرع في المرة القادمة.',
+    'no_account' => 'ليس لديك حساب؟',
+    'have_account' => 'لديك حساب بالفعل؟',
 ];

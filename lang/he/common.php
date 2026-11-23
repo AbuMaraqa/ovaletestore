@@ -42,4 +42,9 @@ return [
     'skip_to_content' => 'דלג לתוכן',
     'menu' => 'תפריט',
     'whatsapp_us' => 'שיחה בוואטסאפ',
+    'register' => 'הרשמה',
+    'register_title' => 'יצירת חשבון',
+    'register_subtitle' => 'עקבו אחרי ההזמנות שלכם ובצעו הזמנה מהר יותר בפעם הבאה.',
+    'no_account' => 'אין לך חשבון?',
+    'have_account' => 'כבר יש לך חשבון?',
 ];

@@ -61,18 +61,6 @@ parameters:
 			path: app/Actions/Orders/ChangeOrderStatus.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Actions/Orders/ChangeOrderStatus.php
-
-		-
-			message: '#^Cannot call method canTransitionTo\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Actions/Orders/ChangeOrderStatus.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -235,6 +223,12 @@ parameters:
 			path: app/Actions/Products/SyncProductVariants.php
 
 		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/CatalogAssignBrands.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$regular_price\.$#'
 			identifier: property.notFound
 			count: 1
@@ -301,14 +295,8 @@ parameters:
 			path: app/Http/Controllers/Admin/CategoryController.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/Admin/DashboardController.php
-
-		-
-			message: '#^Cannot call method diffForHumans\(\) on string\.$#'
-			identifier: method.nonObject
+			message: '#^Call to method diffForHumans\(\) on an unknown class App\\Models\\IlluminateSupportCarbon\.$#'
+			identifier: class.notFound
 			count: 1
 			path: app/Http/Controllers/Admin/DashboardController.php
 
@@ -349,20 +337,8 @@ parameters:
 			path: app/Http/Controllers/Admin/OrderController.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Controllers/Admin/OrderController.php
-
-		-
-			message: '#^Cannot call method allowedTransitions\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Controllers/Admin/OrderController.php
-
-		-
-			message: '#^Cannot call method format\(\) on string\.$#'
-			identifier: method.nonObject
+			message: '#^Call to method format\(\) on an unknown class App\\Models\\IlluminateSupportCarbon\.$#'
+			identifier: class.notFound
 			count: 2
 			path: app/Http/Controllers/Admin/OrderController.php
 
@@ -433,9 +409,15 @@ parameters:
 			path: app/Http/Controllers/Admin/SettingsController.php
 
 		-
+			message: '#^Call to method translatedFormat\(\) on an unknown class App\\Models\\IlluminateSupportCarbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Controllers/Storefront/AccountController.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 3
 			path: app/Http/Controllers/Storefront/CatalogController.php
 
 		-
@@ -461,6 +443,18 @@ parameters:
 			identifier: argument.unresolvableType
 			count: 1
 			path: app/Http/Controllers/Storefront/ProductController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:effectivePrice\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/Storefront/SearchController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: int\<0, max\>, name\: string, url\: string, image\: string\|null, price\: string\}, Closure\(App\\Models\\Product\)\: array\{id\: int\<0, max\>, name\: string, url\: string, image\: string\|null, price\: string\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Storefront/SearchController.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:published\(\)\.$#'
@@ -673,6 +667,12 @@ parameters:
 			path: app/Http/Resources/Storefront/ProductCardResource.php
 
 		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Storefront/ProductCardResource.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$regular_price\.$#'
 			identifier: property.notFound
 			count: 1
@@ -827,6 +827,12 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Models/CategoryTranslation.php
+
+		-
+			message: '#^PHPDoc tag @property for property App\\Models\\Order\:\:\$placed_at contains unknown class App\\Models\\IlluminateSupportCarbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/Order.php
 
 		-
 			message: '#^Call to an undefined method Spatie\\Image\\Drivers\\ImageDriver\:\:performOnCollections\(\)\.$#'

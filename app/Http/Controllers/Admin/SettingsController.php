@@ -21,6 +21,8 @@ class SettingsController extends Controller
 {
     public const GROUPS = ['general', 'contact', 'store', 'seo'];
 
+    public const SOCIAL_NETWORKS = ['facebook', 'instagram', 'snapchat', 'tiktok', 'telegram'];
+
     public function edit(string $group): Response
     {
         $this->authorize('settings.manage');
@@ -110,7 +112,7 @@ class SettingsController extends Controller
         $settings->whatsapp = $data['whatsapp'] ?? null;
         $settings->email = $data['email'] ?? null;
         $settings->address = array_map('strval', array_filter($data['address'] ?? []));
-        $settings->social_links = collect(['facebook', 'instagram', 'tiktok'])
+        $settings->social_links = collect(self::SOCIAL_NETWORKS)
             ->mapWithKeys(fn ($k) => [$k => $data['social_links'][$k] ?? null])->all();
         $settings->save();
     }

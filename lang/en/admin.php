@@ -144,4 +144,9 @@ return [
     'health_on_sale' => 'Variants on sale',
     'top_categories' => 'Largest categories',
     'no_orders_yet' => 'No orders yet. They will appear here as soon as the first one arrives.',
+    'notifications' => 'Notifications',
+    'mark_all_read' => 'Mark all as read',
+    'new_order_from' => 'New order from :name',
+    'new_order' => 'New order',
+    'no_notifications' => 'No notifications.',
 ];

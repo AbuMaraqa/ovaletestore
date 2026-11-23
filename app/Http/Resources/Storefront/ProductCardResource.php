@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Listing card. Requires: translations, activeVariants, media.
+ * Listing card. Requires: translations, activeVariants, media (+ categories.translations for the category label).
  *
  * @mixin Product
  */
@@ -36,6 +36,7 @@ class ProductCardResource extends JsonResource
             'regular_price' => $default && $default->isOnSale() ? Money::format($default->regular_price) : null,
             'on_sale' => $variants->contains(fn (ProductVariant $v) => $v->isOnSale()),
             'in_stock' => $variants->contains(fn (ProductVariant $v) => $v->isPurchasable()),
+            'category' => $this->relationLoaded('categories') ? $this->categories->sortByDesc('pivot.is_primary')->first()?->name : null,
             'default_variant_id' => ! $this->isVariable() ? $default?->id : null,
         ];
     }

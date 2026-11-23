@@ -20,6 +20,9 @@ class ContactSettings extends Settings
     // network => url|null
     public array $social_links;
 
+    // additional phone numbers shown on the contact page
+    public array $extra_phones;
+
     public static function group(): string
     {
         return 'contact';

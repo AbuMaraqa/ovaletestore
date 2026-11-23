@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Storefront;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Storefront\CategoryResource;
 use App\Http\Resources\Storefront\ProductCardResource;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -23,7 +24,7 @@ use Inertia\Response;
  */
 class HomeController extends Controller
 {
-    private const CARD_RELATIONS = ['translations', 'activeVariants', 'media'];
+    private const CARD_RELATIONS = ['translations', 'activeVariants', 'media', 'categories.translations'];
 
     public function __invoke(SeoSettings $seo, HomeSettings $home): Response
     {
@@ -40,7 +41,13 @@ class HomeController extends Controller
                 'subtitle' => $home->hero_subtitle[$locale] ?? $home->hero_subtitle['ar'] ?? '',
                 'image' => $this->responsive($home->hero_image),
             ],
-            'brands' => array_map(fn (string $path) => asset('storage/'.$path), $home->brand_logos),
+            'brands' => Brand::query()->active()->whereHas('media')->with(['translations', 'media'])->orderBy('sort_order')->get()
+                ->map(fn (Brand $b) => [
+                    'id' => $b->id,
+                    'name' => $b->name,
+                    'url' => route('storefront.brand', ['slug' => $b->slug]),
+                    'logo' => CatalogController::logoUrl($b),
+                ]),
             'categories' => CategoryResource::collection(
                 Category::query()->active()->whereNull('parent_id')->ordered()
                     ->with(['translations', 'media'])

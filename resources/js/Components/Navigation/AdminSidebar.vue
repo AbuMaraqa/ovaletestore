@@ -10,7 +10,8 @@ import type { SharedProps } from '@/types';
 defineProps<{ mobileOpen: boolean }>();
 const emit = defineEmits<{ close: []; toggleCollapse: [] }>();
 
-const page = usePage<SharedProps>();
+const page = usePage<SharedProps & { admin_badges: Record<string, number> | null }>();
+const badge = (item: MenuItem) => (item.badge ? (page.props.admin_badges?.[item.badge] ?? 0) : 0);
 const { t } = useTrans();
 
 const isLinkActive = (link: MenuLink) =>
@@ -107,6 +108,7 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
                                 >
                                     <span class="kt-menu-icon w-[20px] items-start text-muted-foreground kt-menu-item-active:text-primary"><KtIcon :name="item.icon" class="text-lg" /></span>
                                     <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-link-hover:!text-primary">{{ t(item.label) }}</span>
+                                    <span v-if="badge(item)" class="kt-menu-badge ms-auto"><span class="kt-badge kt-badge-sm kt-badge-destructive rounded-full tabular-nums">{{ badge(item) }}</span></span>
                                 </Link>
                             </div>
                         </template>

@@ -71,3 +71,13 @@ it('creates a product through the admin endpoint with server-side validation', f
     expect($product->defaultVariant->regular_price)->toBe(1590)
         ->and($product->translate('ar')->description)->toBe('<p>جيدة</p>'); // XSS stripped
 });
+
+it('shares an initials avatar rendered as text (site font) when no photo is uploaded', function () {
+    $user = staffUser('admin');
+    $user->update(['name' => 'مدير النظام']);
+
+    $this->actingAs($user)->get(route('admin.dashboard'))->assertInertia(fn ($page) => $page
+        ->where('auth.user.avatar.url', null)
+        ->where('auth.user.avatar.initials', 'ما')
+        ->has('auth.user.avatar.color'));
+});

@@ -19,11 +19,11 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::query()->with('roles')->latest()->paginate(25)->through(fn (User $u) => [
+            'users' => User::query()->with(['roles', 'media'])->latest()->paginate(25)->through(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
-                'avatar' => $u->avatarUrl(),
+                'avatar' => $u->avatar(),
                 'is_active' => $u->is_active,
                 'roles' => $u->roles->pluck('name'),
                 'two_factor' => $u->two_factor_confirmed_at !== null,

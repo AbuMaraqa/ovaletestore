@@ -2,6 +2,8 @@
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { adminMenu } from '@/Components/Navigation/adminMenu';
+import UserAvatar from '@/Components/Common/UserAvatar.vue';
+import AdminNotifications from '@/Components/Navigation/AdminNotifications.vue';
 import AdminSearch from '@/Components/Navigation/AdminSearch.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
 import { onClickOutside } from '@/Composables/onClickOutside';
@@ -59,15 +61,7 @@ const logout = () => router.post(route('logout'));
                     <KtIcon name="magnifier" class="text-lg group-hover:text-primary" />
                 </button>
 
-                <Link
-                    v-if="page.props.admin_badges"
-                    :href="`${route('admin.orders.index')}?filter[status]=pending`"
-                    class="group kt-btn kt-btn-ghost kt-btn-icon relative size-9 rounded-full hover:bg-primary/10"
-                    :aria-label="`${t('admin.stats_pending')}: ${pending}`"
-                >
-                    <KtIcon name="notification-status" class="text-lg group-hover:text-primary" />
-                    <span v-if="pending" class="kt-badge kt-badge-xs kt-badge-destructive absolute -end-0.5 -top-0.5 min-w-4 justify-center rounded-full px-1 tabular-nums">{{ pending > 99 ? '99+' : pending }}</span>
-                </Link>
+                <AdminNotifications v-if="page.props.admin_badges" />
 
                 <button type="button" class="group kt-btn kt-btn-ghost kt-btn-icon size-9 rounded-full hover:bg-primary/10" :aria-label="t('admin.theme_toggle')" @click="toggle">
                     <KtIcon :name="isDark ? 'sun' : 'moon'" class="text-lg group-hover:text-primary" />
@@ -76,12 +70,12 @@ const logout = () => router.post(route('logout'));
                 <!-- User dropdown (Metronic kt-dropdown-menu markup) -->
                 <div v-if="user" ref="userRoot" class="relative shrink-0">
                     <button type="button" class="shrink-0 cursor-pointer" :aria-expanded="userMenu" aria-haspopup="menu" @click="userMenu = !userMenu">
-                        <img :src="user.avatar" :alt="user.name" class="size-9 shrink-0 rounded-full border-2 border-green-500" width="36" height="36" />
+                        <UserAvatar :avatar="user.avatar" :name="user.name" />
                     </button>
                     <div :class="['kt-dropdown-menu absolute end-0 top-full z-50 mt-2.5 w-[260px]', { open: userMenu }]" role="menu">
                         <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5">
                             <div class="flex items-center gap-2">
-                                <img :src="user.avatar" alt="" class="size-9 shrink-0 rounded-full border-2 border-green-500" />
+                                <UserAvatar :avatar="user.avatar" :name="user.name" />
                                 <span class="text-sm font-semibold leading-none text-foreground">{{ user.name }}</span>
                             </div>
                             <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline">{{ t('admin.panel') }}</span>

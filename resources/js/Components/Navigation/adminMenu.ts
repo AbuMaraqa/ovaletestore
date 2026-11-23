@@ -14,6 +14,8 @@ export interface MenuItem extends Partial<MenuLink> {
     label: string;
     icon: string;
     children?: MenuLink[];
+    /** Key of a count in the `admin_badges` shared prop, shown next to the label. */
+    badge?: 'pending_orders';
 }
 
 export interface MenuSection {
@@ -43,7 +45,7 @@ export const adminMenu: MenuSection[] = [
     },
     {
         heading: 'admin.sales',
-        items: [{ label: 'admin.orders', icon: 'handcart', route: 'admin.orders.index', match: 'admin.orders.*', permission: 'orders.view' }],
+        items: [{ label: 'admin.orders', icon: 'handcart', route: 'admin.orders.index', match: 'admin.orders.*', permission: 'orders.view', badge: 'pending_orders' }],
     },
     {
         heading: 'admin.system',

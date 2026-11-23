@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @property int $id
+ * @property string $number
+ * @property OrderStatus $status
+ * @property int $subtotal
+ * @property int $shipping_total
+ * @property int $total
+ * @property string $currency
+ * @property \Illuminate\Support\Carbon $placed_at
+ */
 class Order extends Model
 {
     use LogsActivity;

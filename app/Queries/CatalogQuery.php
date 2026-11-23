@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Storefront product listing: published products, whitelisted filters/sorts, eager-loaded for cards (no N+1).
  *
- * @phpstan-type CatalogFilters array{q?:string|null, sort?:string|null, in_stock?:bool, on_sale?:bool, category?:Category|null, brand_id?:int|null}
+ * @phpstan-type CatalogFilters array{q?:string|null, sort?:string|null, in_stock?:bool, on_sale?:bool, category?:Category|null, brand_id?:int|null, brand_ids?:list<int>, price_min?:int|null, price_max?:int|null}
  */
 class CatalogQuery
 {
@@ -33,7 +33,7 @@ class CatalogQuery
     {
         $query = Product::query()
             ->published()
-            ->with(['translations', 'activeVariants', 'media'])
+            ->with(['translations', 'activeVariants', 'media', 'categories.translations'])
             ->withMin('activeVariants as min_price', 'regular_price');
 
         if (! $this->settings->show_out_of_stock || ($filters['in_stock'] ?? false)) {
@@ -51,6 +51,21 @@ class CatalogQuery
 
         if ($brandId = $filters['brand_id'] ?? null) {
             $query->where('brand_id', $brandId);
+        }
+
+        if ($brandIds = $filters['brand_ids'] ?? []) {
+            $query->whereIn('brand_id', $brandIds);
+        }
+
+        // Price range in minor units, against the price the customer actually pays.
+        $min = $filters['price_min'] ?? null;
+        $max = $filters['price_max'] ?? null;
+        if ($min !== null || $max !== null) {
+            $query->whereHas('activeVariants', function (Builder $q) use ($min, $max) {
+                $price = 'CASE WHEN sale_price IS NOT NULL AND sale_price < regular_price THEN sale_price ELSE regular_price END';
+                $q->when($min !== null, fn ($q) => $q->whereRaw("{$price} >= ?", [$min]))
+                    ->when($max !== null, fn ($q) => $q->whereRaw("{$price} <= ?", [$max]));
+            });
         }
 
         if ($term = trim((string) ($filters['q'] ?? ''))) {
