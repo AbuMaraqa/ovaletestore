@@ -58,6 +58,11 @@ class ProductDetailResource extends JsonResource
                 'price' => Money::format($v->effectivePrice()),
                 'regular_price' => $v->isOnSale() ? Money::format($v->regular_price) : null,
                 'on_sale' => $v->isOnSale(),
+                'discount_percent' => $v->discountPercent(),
+                'saving' => $v->isOnSale() ? Money::format($v->regular_price - $v->effectivePrice()) : null,
+                // Only short, real deadlines (≤ 14 days) drive the countdown — no fake urgency.
+                'sale_ends_at' => $v->isOnSale() && $v->sale_ends_at && $v->sale_ends_at->lte(now()->addDays(14))
+                    ? $v->sale_ends_at->toIso8601String() : null,
                 'purchasable' => $v->isPurchasable(),
                 'max_quantity' => $v->availableQuantity(),
                 'stock_status' => $v->stock_status->value,

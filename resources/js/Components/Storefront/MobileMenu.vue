@@ -52,7 +52,7 @@ onBeforeUnmount(() => {
                 <nav class="flex-1 overflow-y-auto px-2 py-4" data-lenis-prevent>
                     <Link :href="route('storefront.home')" class="block rounded-xl px-3 py-3 font-medium hover:bg-stone-100">{{ t('common.home') }}</Link>
                     <Link :href="route('storefront.shop')" class="block rounded-xl px-3 py-3 font-medium hover:bg-stone-100">{{ t('storefront.shop') }}</Link>
-                    <p class="mt-4 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-500">{{ t('storefront.categories') }}</p>
+                    <p class="mt-4 px-3 pb-2 text-sm font-bold text-cocoa">{{ t('storefront.categories') }}</p>
                     <Link v-for="category in categories" :key="category.id" :href="category.url" class="block rounded-xl px-3 py-2.5 text-sm text-stone-700 hover:bg-stone-100">
                         {{ category.name }}
                     </Link>

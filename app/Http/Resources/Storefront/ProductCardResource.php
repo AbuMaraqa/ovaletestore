@@ -23,6 +23,8 @@ class ProductCardResource extends JsonResource
         $min = (int) $prices->min();
         $max = (int) $prices->max();
         $default = $variants->firstWhere('is_default', true) ?? $variants->first();
+        // The struck-through price must belong to the variant whose price is shown ("from" = cheapest).
+        $cheapest = $variants->sortBy(fn (ProductVariant $v) => $v->effectivePrice())->first();
         $image = $this->getFirstMedia('gallery');
 
         return [
@@ -33,8 +35,10 @@ class ProductCardResource extends JsonResource
             'is_variable' => $this->isVariable(),
             'price' => Money::format($min),
             'price_max' => $max > $min ? Money::format($max) : null,
-            'regular_price' => $default && $default->isOnSale() ? Money::format($default->regular_price) : null,
+            'regular_price' => $cheapest && $cheapest->isOnSale() ? Money::format($cheapest->regular_price) : null,
             'on_sale' => $variants->contains(fn (ProductVariant $v) => $v->isOnSale()),
+            // Best saving across variants ("up to -X%" for variable products).
+            'discount_percent' => $variants->map(fn (ProductVariant $v) => $v->discountPercent())->filter()->max(),
             'in_stock' => $variants->contains(fn (ProductVariant $v) => $v->isPurchasable()),
             'category' => $this->relationLoaded('categories') ? $this->categories->sortByDesc('pivot.is_primary')->first()?->name : null,
             'default_variant_id' => ! $this->isVariable() ? $default?->id : null,

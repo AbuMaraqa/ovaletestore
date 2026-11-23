@@ -19,6 +19,8 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string|null $sku
  * @property int $regular_price
  * @property int|null $sale_price
+ * @property CarbonInterface|null $sale_starts_at
+ * @property CarbonInterface|null $sale_ends_at
  * @property StockStatus $stock_status
  * @property bool $manage_stock
  * @property int|null $stock_quantity
@@ -73,6 +75,18 @@ class ProductVariant extends Model implements HasMedia
     public function effectivePrice(?CarbonInterface $at = null): int
     {
         return $this->isOnSale($at) ? (int) $this->sale_price : $this->regular_price;
+    }
+
+    /** Whole-percent saving for the "-20%" badge; null when not on sale or the saving rounds to 0. */
+    public function discountPercent(?CarbonInterface $at = null): ?int
+    {
+        if (! $this->isOnSale($at) || $this->regular_price <= 0) {
+            return null;
+        }
+
+        $percent = (int) floor(($this->regular_price - (int) $this->sale_price) * 100 / $this->regular_price);
+
+        return $percent > 0 ? $percent : null;
     }
 
     public function isPurchasable(): bool

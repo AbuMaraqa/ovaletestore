@@ -10,6 +10,7 @@ use App\Models\BrandTranslation;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Support\RichText;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -137,7 +138,10 @@ class CatalogSeeder extends Seeder
         foreach ($translations as $locale => $fields) {
             $translation = $model->translateOrNew($locale);
             foreach ($fields as $field => $value) {
-                $translation->setAttribute($field, $value);
+                // Rendered with v-html on the storefront: sanitize like every other write path.
+                $translation->setAttribute($field, in_array($field, ['description', 'short_description'], true)
+                    ? RichText::clean(is_string($value) ? $value : null)
+                    : $value);
             }
         }
     }

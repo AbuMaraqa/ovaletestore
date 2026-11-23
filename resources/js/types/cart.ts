@@ -20,4 +20,6 @@ export interface CartPayload {
     shipping_total: string | null;
     total: string;
     meets_minimum: boolean;
+    minimum_missing: string | null;
+    free_shipping: { remaining: string | null; progress: number } | null;
 }

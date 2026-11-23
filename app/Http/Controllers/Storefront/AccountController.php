@@ -74,6 +74,12 @@ class AccountController extends Controller
             'name' => ['required', 'string', 'min:2', 'max:120'],
             'email' => ['required', 'email:rfc', 'max:190', Rule::unique('users', 'email')->ignore($user->id)],
             'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-]{7,20}$/'],
+            // Changing the e-mail (= the login and password-reset address) needs the current password,
+            // so a hijacked session cannot take the account over through a password reset.
+            'current_password' => [
+                Rule::requiredIf(fn () => strtolower((string) $request->input('email')) !== strtolower($user->email)),
+                'nullable', 'string', 'current_password',
+            ],
         ]);
 
         $user->update([

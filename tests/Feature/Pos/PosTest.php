@@ -23,7 +23,8 @@ function makeCompany(array $attributes = []): Company
 it('lets only sales reps (and admins) into the POS, and sends reps there after login', function () {
     $this->get(route('pos.index'))->assertRedirect();
     $this->actingAs(User::factory()->create()->assignRole('customer'))->get(route('pos.index'))->assertForbidden();
-    $this->actingAs(User::factory()->create(['is_active' => false])->assignRole('sales-rep'))->get(route('pos.index'))->assertForbidden();
+    $this->actingAs(User::factory()->create(['is_active' => false])->assignRole('sales-rep'))->get(route('pos.index'))->assertRedirect(route('login'));
+    $this->assertGuest();
 
     $rep = salesRep();
     auth()->logout();

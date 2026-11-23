@@ -1,11 +1,12 @@
-# Security Audit — Milestone 1
+# Security Audit
 
-Status as of 2026-11-23. Items marked ✅ are implemented **and** covered by an automated test where noted.
+Status as of 2026-11-24 (full re-audit after the POS, shipping and catalog-seeder work). Items marked ✅ are implemented **and** covered by an automated test where noted.
 
 ## Authentication (Laravel Fortify)
 - ✅ Bcrypt hashing (cost 12), `Password::defaults()` → production: min 10, mixed case, numbers, HIBP `uncompromised()`.
 - ✅ Login throttling: 5/min per email+IP and 20/min per IP (test: *throttles repeated login attempts*).
-- ✅ No public registration; staff accounts created by admins. Deactivated users cannot log in (generic error — no enumeration).
+- ✅ Public customer registration (throttle 5/min + honeypot, `customer` role only); staff and sales reps are created by admins. Deactivated users cannot log in (generic error — no enumeration) **and are signed out of existing sessions on their next request** (`EnsureUserIsActive`).
+- ✅ Changing the account e-mail (login + password-reset address) requires the current password.
 - ✅ Password reset, 2FA (TOTP, confirm + password confirmation) available.
 - ✅ Session cookies encrypted (`SESSION_ENCRYPT=true`); logout invalidates session (Fortify).
 - ✅ Super-admin created by seeder with a random 16-char password printed once — no default credentials in Git.
@@ -30,11 +31,13 @@ Status as of 2026-11-23. Items marked ✅ are implemented **and** covered by an 
 - ✅ Generated file names — user-supplied names/paths never reach the filesystem (test: `../../evil name.png`).
 - ✅ Originals stored by medialibrary; images re-encoded to WebP/AVIF (strips embedded payloads in derivatives).
 - ✅ Migration downloader verifies bytes with `finfo` + `getimagesizefromstring`, 25 MB cap.
+- ✅ SSRF guard: remote images only over HTTPS from the `WOO_BASE_URL` host, redirects not followed (test).
+- ✅ The catalog seeder sanitizes descriptions with the same `RichText` whitelist as every other write path.
 
 ## Headers & transport
 - ✅ CSP (spatie/laravel-csp, nonce-based, self-hosted assets only; Inertia/Ziggy/Vite scripts carry the nonce).
 - ✅ `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `COOP`; HSTS + `upgrade-insecure-requests` + forced https URLs in production.
-- ✅ `Cache-Control: no-store` on admin, cart, checkout, auth pages (test).
+- ✅ `Cache-Control: no-store` on admin, POS, cart, checkout, account and auth pages (tests).
 
 ## Information exposure
 - ✅ Inertia shared props are a whitelist (no config, no other users' data). Admin permission list only sent on admin pages.
@@ -48,3 +51,12 @@ Status as of 2026-11-23. Items marked ✅ are implemented **and** covered by an 
 - ⏳ spatie/laravel-backup schedule + off-site disk (installed, needs credentials).
 - ⏳ Staff 2FA enforcement policy (available, not yet mandatory) and a profile page to enable it.
 - ⏳ Activity log viewer in the admin (logging is active on products, categories, order status).
+
+## Re-audit 2026-11-24
+Checked: every route's middleware, every controller's authorization, IDOR on cart/account/POS/notifications/payments,
+mass assignment, raw SQL (all bound), `v-html` sinks (both sanitized on write), uploads, redirects (no open redirect),
+CSP/headers live on the dev server, shared Inertia props, secrets in Git (none), `composer audit` and `npm audit` (0 advisories).
+
+Fixed in this pass: inactive users kept their sessions; e-mail change without password; POS pages cacheable;
+seeder wrote unsanitized HTML; image downloader accepted any host. Production reminders: `APP_DEBUG=false`,
+`SESSION_SECURE_COOKIE=true` (see deployment-guide.md), make staff 2FA mandatory once the admin profile page exists.

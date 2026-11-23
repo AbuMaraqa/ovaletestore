@@ -35,4 +35,7 @@ return [
     'shipping_unavailable' => 'طريقة التوصيل المختارة غير متاحة لهذا الطلب.',
     'free_over_hint' => 'مجاني للطلبات فوق :amount',
     'pickup_note' => 'ستصلك رسالة عندما يكون طلبك جاهزاً للاستلام.',
+    'free_shipping_remaining' => 'أضف :amount للحصول على توصيل مجاني',
+    'free_shipping_unlocked' => 'رائع! طلبك مؤهل للتوصيل المجاني',
+    'minimum_missing' => 'أضف :amount لتصل إلى الحد الأدنى للطلب',
 ];

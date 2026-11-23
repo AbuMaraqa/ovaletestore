@@ -29,9 +29,12 @@ final class RemoteImageDownloader
             }
         }
 
+        self::assertAllowedSource($url);
+
         $body = null;
         foreach (self::originalCandidates($url) as $candidate) {
-            $response = Http::withUserAgent('OvaleteMigrator/1.0')->timeout(120)->get($candidate);
+            // No redirects: a redirect could point the fetch at an internal host (SSRF).
+            $response = Http::withUserAgent('OvaleteMigrator/1.0')->withoutRedirecting()->timeout(120)->get($candidate);
             if ($response->successful()) {
                 $body = $response->body();
                 break;
@@ -67,6 +70,22 @@ final class RemoteImageDownloader
         $original = preg_replace('/-(scaled|\d+x\d+)(\.[a-z0-9]+)$/i', '$2', $url);
 
         return array_values(array_unique([self::encodeUrl($original), self::encodeUrl($url)]));
+    }
+
+    /**
+     * SSRF guard: images are only fetched over HTTPS from the source store's host (WOO_BASE_URL),
+     * never from arbitrary or internal addresses, even if the seed/migration data is tampered with.
+     */
+    public static function assertAllowedSource(string $url): void
+    {
+        $url = str_starts_with($url, '//') ? 'https:'.$url : $url;
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $allowed = strtolower((string) parse_url((string) config('services.woocommerce.base_url'), PHP_URL_HOST));
+
+        if (parse_url($url, PHP_URL_SCHEME) !== 'https' || $host === '' || $allowed === ''
+            || ($host !== $allowed && $host !== 'www.'.$allowed && 'www.'.$host !== $allowed)) {
+            throw new RuntimeException("Image source not allowed: {$url}");
+        }
     }
 
     /** Source URLs contain raw Arabic file names; percent-encode path segments safely. */

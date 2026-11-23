@@ -29,6 +29,12 @@
     :focus-visible {
         @apply outline-2 outline-offset-2 outline-brand-500;
     }
+    /* Any letter-spacing breaks Arabic letter joining (browsers drop ligatures), and Hebrew reads worse
+       with it: neutralise every tracking-* utility for these scripts. */
+    :lang(ar) *,
+    :lang(he) * {
+        letter-spacing: 0 !important;
+    }
 }
 
 /* Design-system primitives as Tailwind 4 utilities (composable, variant-aware: e.g. `lg:btn-primary`). */
@@ -48,7 +54,7 @@
     @apply btn bg-white text-cocoa ring-1 ring-stone-200 hover:ring-stone-300;
 }
 @utility field {
-    @apply block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-cocoa ring-1 ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-brand-500 focus:outline-none;
+    @apply block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-cocoa ring-1 ring-stone-200 placeholder:text-stone-500 focus:ring-2 focus:ring-brand-500 focus:outline-none;
 }
 @utility chip {
     @apply inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-medium ring-1 ring-stone-200 transition hover:ring-stone-300;
@@ -57,16 +63,19 @@
 @layer components {
     /* Sanitized rich text (product/category descriptions). */
     .rich-text {
-        @apply space-y-3 leading-loose text-stone-700;
-        & h2, & h3, & h4 { @apply mt-6 font-semibold text-cocoa; }
-        & h2 { @apply text-xl; }
-        & h3 { @apply text-lg; }
-        & ul { @apply list-disc space-y-1 ps-6; }
-        & ol { @apply list-decimal space-y-1 ps-6; }
+        @apply max-w-[68ch] space-y-3 leading-loose text-stone-700;
+        & h2, & h3, & h4 { @apply mt-6 font-bold text-cocoa; }
+        & h2 { @apply text-2xl; }
+        & h3 { @apply text-xl; }
+        & ul { @apply list-disc space-y-1.5 ps-6; }
+        & ol { @apply list-decimal space-y-1.5 ps-6; }
+        & li::marker { @apply text-brand-500; }
         & a { @apply text-brand-700 underline underline-offset-2; }
         & strong { @apply font-semibold text-cocoa; }
+        & img { @apply rounded-2xl; }
         & table { @apply w-full text-sm; }
-        & td, & th { @apply border-b border-stone-200 py-2 pe-4 text-start; }
+        & td, & th { @apply border-b border-stone-200 py-3 pe-4 text-start; }
+        & th { @apply bg-stone-50 font-semibold; }
     }
 }
 

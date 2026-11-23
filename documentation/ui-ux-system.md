@@ -36,5 +36,14 @@ Skip link, visible focus rings, 44 px touch targets, labelled icon buttons, `ari
 ## Images
 `<ResponsiveImage>` → `<picture>` AVIF + WebP srcsets (400/800/1600 w) with original fallback while conversions are pending; lazy by default, `priority` for above-the-fold.
 
+## Marketing & readability pass (2026-11-24)
+Applied from the design review (contrast computed from the OKLCH tokens, WCAG AA):
+- **Arabic/Hebrew letter-spacing is always 0** (`storefront.css` base layer) — any tracking breaks Arabic joining. `uppercase`/`tracking-*` removed from Arabic labels.
+- **Product card**: name 15–16px / line-height 1.55, price 18–20px extra-bold (brand colour when on sale), struck price 13px stone-500 (was 2.6:1), 44px buttons, `-X%` badge (`discount_percent`), visible focus on the title link. The struck price now belongs to the variant whose price is shown.
+- **Product page**: `ProductPriceBlock` (price, `-X%`, "you save", stock pill, real countdown only when a sale ends within 14 days — no fake urgency), `ProductTrust` (cash on delivery, delivery areas, "ask on WhatsApp" with product name + link prefilled), `StickyBuyBar` (mobile, appears after the buy button scrolls away; WhatsApp float moves up), loading spinner on add-to-cart.
+- **Cart**: free-delivery progress bar (`free_over` of the default delivery method), "add X to reach the minimum order", a real disabled button instead of a focusable link, larger names/totals, COD reassurance.
+- **Contrast fixes**: hero CTA brand-600, offers banner darker gradient + white/90 text, header search/login, footer copyright, placeholders and filter counts → stone-500/600. Hero scrim now darkens the text side in both directions; hero line-height 1.4 so hamza/ascenders are not clipped.
+- Filters: 44px inputs, 20px checkboxes. `.rich-text`: 68ch measure, bolder/larger headings, brand list markers, roomier tables.
+
 ## Next design steps
 Real logo upload (Settings → General), hero photography/banners, brand strip once brands are curated, a WYSIWYG for descriptions, browser-based visual QA on mobile/tablet/desktop in all three languages.

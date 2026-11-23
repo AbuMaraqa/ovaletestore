@@ -81,6 +81,7 @@ export interface ProductCard {
     price_max: string | null;
     regular_price: string | null;
     on_sale: boolean;
+    discount_percent: number | null;
     in_stock: boolean;
     default_variant_id: number | null;
     category: string | null;

@@ -35,4 +35,7 @@ return [
     'shipping_unavailable' => 'The selected shipping method is not available for this order.',
     'free_over_hint' => 'Free on orders over :amount',
     'pickup_note' => 'We will message you when your order is ready for pickup.',
+    'free_shipping_remaining' => 'Add :amount more for free delivery',
+    'free_shipping_unlocked' => 'Great! Your order qualifies for free delivery',
+    'minimum_missing' => 'Add :amount more to reach the minimum order',
 ];

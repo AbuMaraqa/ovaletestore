@@ -9,17 +9,6 @@ use App\Models\ShippingMethod;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-function checkoutPayload(): array
-{
-    return [
-        'customer_name' => 'محمد أحمد',
-        'customer_phone' => '0599 123 456',
-        'shipping_method_id' => ShippingMethod::query()->where('code', 'west_bank')->value('id'),
-        'shipping_city' => 'رام الله',
-        'shipping_address' => 'شارع الإرسال 12',
-    ];
-}
-
 it('adds a product to a guest cart and calculates totals from current prices', function () {
     $product = makeSimpleProduct(price: '10.00');
     $variant = $product->defaultVariant;
@@ -81,7 +70,7 @@ it('validates checkout input', function () {
     $product = makeSimpleProduct();
     $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
 
-    $this->post(route('storefront.checkout.store'), ['customer_name' => '', 'customer_phone' => 'abc'])
+    $this->post(route('storefront.checkout.store'), ['customer_name' => '', 'customer_phone' => 'abc', ...honeypotFields()])
         ->assertSessionHasErrors(['customer_name', 'customer_phone', 'shipping_method_id', 'shipping_city', 'shipping_address']);
 
     expect(Order::query()->count())->toBe(0);
@@ -130,7 +119,7 @@ it('allows store pickup without an address', function () {
     $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
 
     $this->post(route('storefront.checkout.store'), [
-        'customer_name' => 'سارة', 'customer_phone' => '0599123456', 'shipping_method_id' => $pickup->id,
+        'customer_name' => 'سارة', 'customer_phone' => '0599123456', 'shipping_method_id' => $pickup->id, ...honeypotFields(),
     ])->assertSessionHasNoErrors();
 
     $order = Order::query()->sole();

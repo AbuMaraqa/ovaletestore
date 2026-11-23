@@ -11,11 +11,15 @@ it('forbids authenticated users without a staff role', function () {
     $this->actingAs(User::factory()->create())->get(route('admin.dashboard'))->assertForbidden();
 });
 
-it('forbids deactivated staff', function () {
+it('signs deactivated staff out instead of letting them into the admin', function () {
     $user = staffUser('admin');
     $user->update(['is_active' => false]);
 
-    $this->actingAs($user)->get(route('admin.dashboard'))->assertForbidden();
+    $this->actingAs($user)->get(route('admin.dashboard'))->assertRedirect(route('login'));
+    $this->assertGuest();
+
+    // The gate itself also refuses an inactive account (defence in depth).
+    expect($user->fresh()->can('access-admin'))->toBeFalse();
 });
 
 it('lets a product manager manage products but not users, settings or orders', function () {

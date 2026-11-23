@@ -6,17 +6,6 @@ use App\Models\User;
 use App\Notifications\NewOrderPlaced;
 use Illuminate\Support\Facades\Notification;
 
-function registrationPayload(array $overrides = []): array
-{
-    return array_merge([
-        'name' => 'سارة',
-        'email' => 'sara@example.com',
-        'phone' => '0599 111 222',
-        'password' => 'Secret-Pass-123',
-        'password_confirmation' => 'Secret-Pass-123',
-    ], $overrides);
-}
-
 it('lets anyone register as a customer without admin access', function () {
     $this->post(route('register.store'), registrationPayload())->assertRedirect(route('account.dashboard'));
 

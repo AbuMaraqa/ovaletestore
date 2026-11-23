@@ -2,8 +2,12 @@
 import { Deferred, Link, router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import ProductGallery from '@/Components/Storefront/ProductGallery.vue';
+import Icon from '@/Components/Storefront/Icon.vue';
 import ProductGrid from '@/Components/Storefront/ProductGrid.vue';
+import ProductPriceBlock from '@/Components/Storefront/ProductPriceBlock.vue';
+import ProductTrust from '@/Components/Storefront/ProductTrust.vue';
 import QuantityInput from '@/Components/Storefront/QuantityInput.vue';
+import StickyBuyBar from '@/Components/Storefront/StickyBuyBar.vue';
 import VariantPicker from '@/Components/Storefront/VariantPicker.vue';
 import { useTrans } from '@/Composables/useTrans';
 import { useVariantSelection } from '@/Composables/useVariantSelection';
@@ -16,6 +20,9 @@ interface Variant {
     price: string;
     regular_price: string | null;
     on_sale: boolean;
+    discount_percent: number | null;
+    saving: string | null;
+    sale_ends_at: string | null;
     purchasable: boolean;
     max_quantity: number | null;
     stock_status: 'in_stock' | 'out_of_stock' | 'on_backorder';
@@ -67,10 +74,8 @@ function addToCart(): void {
     );
 }
 
-const stockLabel = computed(() => {
-    if (!variant.value) return null;
-    return { in_stock: t('storefront.in_stock'), out_of_stock: t('storefront.out_of_stock'), on_backorder: t('storefront.on_backorder') }[variant.value.stock_status];
-});
+const buyRow = ref<HTMLElement | null>(null);
+const buyLabel = computed(() => (variant.value && !variant.value.purchasable ? t('storefront.out_of_stock') : t('storefront.add_to_cart')));
 </script>
 
 <template>
@@ -92,18 +97,11 @@ const stockLabel = computed(() => {
                         <Link v-if="product.category" :href="product.category.url" class="hover:underline">{{ product.category.name }}</Link>
                         <span v-if="product.brand"> · {{ product.brand.name }}</span>
                     </p>
-                    <h1 class="mt-2 text-2xl font-bold leading-snug tracking-tight text-cocoa sm:text-3xl">{{ product.name }}</h1>
+                    <h1 class="mt-2 text-2xl leading-[1.45] font-bold text-cocoa sm:text-3xl">{{ product.name }}</h1>
 
-                    <div class="mt-5 flex items-baseline gap-3" aria-live="polite">
-                        <template v-if="variant">
-                            <span class="text-3xl font-bold text-cocoa" dir="ltr">{{ variant.price }}</span>
-                            <span v-if="variant.regular_price" class="text-lg text-stone-400 line-through" dir="ltr">{{ variant.regular_price }}</span>
-                            <span v-if="variant.on_sale" class="rounded-full bg-brand-600 px-2.5 py-1 text-xs font-bold text-white">{{ t('storefront.sale') }}</span>
-                        </template>
-                        <span v-else class="text-sm text-stone-500">{{ t('storefront.unavailable_combination') }}</span>
-                    </div>
+                    <ProductPriceBlock :variant="variant ?? null" />
 
-                    <div v-if="product.short_description" class="rich-text mt-5 text-sm" v-html="product.short_description" />
+                    <div v-if="product.short_description" class="rich-text mt-5 text-base" v-html="product.short_description" />
 
                     <VariantPicker
                         v-if="variationAttributes.length"
@@ -114,24 +112,24 @@ const stockLabel = computed(() => {
                         @select="select"
                     />
 
-                    <div class="mt-8 flex flex-wrap items-center gap-3">
+                    <div ref="buyRow" class="mt-8 flex flex-wrap items-center gap-3">
                         <QuantityInput v-model="quantity" :max="variant?.max_quantity ?? 999" :disabled="!variant?.purchasable" />
-                        <button type="button" class="btn-accent h-12 flex-1 text-base" :disabled="!variant?.purchasable || adding" @click="addToCart">
-                            {{ variant && !variant.purchasable ? t('storefront.out_of_stock') : t('storefront.add_to_cart') }}
+                        <button type="button" class="btn-accent h-13 flex-1 text-base" :disabled="!variant?.purchasable || adding" @click="addToCart">
+                            <span v-if="adding" class="size-4 animate-spin rounded-full border-2 border-white border-e-transparent" aria-hidden="true" />
+                            <Icon v-else name="cart" class="size-5" />
+                            {{ buyLabel }}
                         </button>
                     </div>
 
-                    <dl class="mt-8 divide-y divide-stone-200 rounded-2xl bg-white px-5 text-sm ring-1 ring-stone-100">
-                        <div v-if="stockLabel" class="flex justify-between gap-4 py-3">
-                            <dt class="text-stone-500">{{ t('common.status') }}</dt>
-                            <dd :class="variant?.purchasable ? 'font-medium text-emerald-700' : 'font-medium text-stone-500'">{{ stockLabel }}</dd>
-                        </div>
+                    <ProductTrust :product-name="product.name" />
+
+                    <dl v-if="variant?.sku || infoAttributes.length" class="mt-6 divide-y divide-stone-200 rounded-2xl bg-white px-5 text-sm ring-1 ring-stone-100">
                         <div v-if="variant?.sku" class="flex justify-between gap-4 py-3">
-                            <dt class="text-stone-500">{{ t('storefront.sku') }}</dt>
+                            <dt class="text-stone-600">{{ t('storefront.sku') }}</dt>
                             <dd class="font-mono text-xs" dir="ltr">{{ variant.sku }}</dd>
                         </div>
                         <div v-for="attribute in infoAttributes" :key="attribute.id" class="flex justify-between gap-4 py-3">
-                            <dt class="text-stone-500">{{ attribute.name }}</dt>
+                            <dt class="text-stone-600">{{ attribute.name }}</dt>
                             <dd class="text-end">{{ attribute.terms.map((term) => term.name).join('، ') }}</dd>
                         </div>
                     </dl>
@@ -146,7 +144,7 @@ const stockLabel = computed(() => {
         </section>
 
         <section class="mt-20">
-            <h2 class="text-2xl font-bold tracking-tight text-cocoa">{{ t('storefront.related_products') }}</h2>
+            <h2 class="text-2xl font-bold text-cocoa">{{ t('storefront.related_products') }}</h2>
             <Deferred data="related">
                 <template #fallback>
                     <div class="mt-8 grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
@@ -156,5 +154,7 @@ const stockLabel = computed(() => {
                 <ProductGrid :products="related ?? []" class="mt-8" />
             </Deferred>
         </section>
+
+        <StickyBuyBar :target="buyRow" :price="variant?.price ?? null" :disabled="!variant?.purchasable" :adding="adding" :label="buyLabel" @add="addToCart" />
     </div>
 </template>

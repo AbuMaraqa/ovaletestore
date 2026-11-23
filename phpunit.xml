@@ -29,6 +29,7 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="CSP_ENABLED" value="false"/>
+        <env name="HONEYPOT_SECONDS" value="0"/>
         <env name="QUEUE_CONVERSIONS_BY_DEFAULT" value="false"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

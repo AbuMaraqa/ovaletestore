@@ -7,7 +7,7 @@ import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 const props = defineProps<{
-    user: { id: number; name: string; email: string; phone: string | null; is_active: boolean; roles: string[] } | null;
+    user: { id: number; name: string; email: string; phone: string | null; is_active: boolean; roles: string[]; is_self?: boolean } | null;
     roles: string[];
 }>();
 
@@ -53,10 +53,12 @@ function submit(): void {
         </KtCard>
         <KtCard :title="t('admin.roles_assigned')" class="xl:col-span-4">
             <div class="space-y-3">
-                <label class="flex items-center justify-between text-sm">{{ t('admin.active') }} <input v-model="form.is_active" type="checkbox" class="kt-switch" /></label>
+                <label class="flex items-center justify-between text-sm">{{ t('admin.active') }} <input v-model="form.is_active" type="checkbox" class="kt-switch" :disabled="user?.is_self" /></label>
+                <p v-if="form.errors.is_active" class="text-sm text-destructive">{{ form.errors.is_active }}</p>
                 <label v-for="role in roles" :key="role" class="flex items-center gap-2.5 text-sm">
-                    <input v-model="form.roles" type="checkbox" :value="role" class="kt-checkbox" /> {{ role }}
+                    <input v-model="form.roles" type="checkbox" :value="role" class="kt-checkbox" :disabled="user?.is_self" /> {{ role }}
                 </label>
+                <p v-if="user?.is_self" class="text-sm text-muted-foreground">{{ t('admin.own_account_locked') }}</p>
                 <p v-if="form.errors.roles" class="text-sm text-destructive">{{ form.errors.roles }}</p>
             </div>
         </KtCard>

@@ -17,7 +17,7 @@ function submit(): void {
 <template>
     <form role="search" class="relative w-full max-w-xl" @submit.prevent="submit">
         <label for="site-search" class="sr-only">{{ t('common.search') }}</label>
-        <Icon name="search" class="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-stone-400" />
+        <Icon name="search" class="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-stone-500" />
         <input
             id="site-search"
             v-model="q"
@@ -25,7 +25,7 @@ function submit(): void {
             maxlength="100"
             enterkeyhint="search"
             :placeholder="t('common.search_placeholder')"
-            class="h-11 w-full rounded-full border-0 bg-white ps-11 pe-4 text-sm ring-1 ring-stone-200 placeholder:text-stone-400 focus:ring-2 focus:ring-brand-500 focus:outline-none"
+            class="h-11 w-full rounded-full border-0 bg-white ps-11 pe-4 text-sm ring-1 ring-stone-200 placeholder:text-stone-500 focus:ring-2 focus:ring-brand-500 focus:outline-none"
         />
     </form>
 </template>

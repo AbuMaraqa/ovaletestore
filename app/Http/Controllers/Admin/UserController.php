@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -55,7 +56,7 @@ class UserController extends Controller
         return to_route('admin.users.index')->with('success', __('admin.created'));
     }
 
-    public function edit(User $user): Response
+    public function edit(Request $request, User $user): Response
     {
         $this->authorize('update', $user);
 
@@ -67,6 +68,7 @@ class UserController extends Controller
                 'phone' => $user->phone,
                 'is_active' => $user->is_active,
                 'roles' => $user->roles()->pluck('name'),
+                'is_self' => $request->user()->is($user),
             ],
             'roles' => $this->assignableRoles(),
         ]);
@@ -76,13 +78,28 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
         $data = $this->validated($request, $user);
+        $self = $request->user()->is($user);
+
+        // Lock-out guard: nobody can deactivate their own account (they would be signed out at once).
+        if ($self && ! (bool) ($data['is_active'] ?? true)) {
+            throw ValidationException::withMessages(['is_active' => __('admin.cannot_deactivate_self')]);
+        }
 
         $user->fill(collect($data)->only(['name', 'email', 'phone', 'is_active'])->all());
         if (! empty($data['password'])) {
             $user->password = $data['password'];
         }
         $user->save();
-        $user->syncRoles($data['roles'] ?? []);
+
+        // Own roles are never changed from this form (no self-demotion), and super-admin — which the
+        // form cannot offer — is always preserved instead of being silently stripped.
+        if (! $self) {
+            $roles = $data['roles'] ?? [];
+            if ($user->hasRole('super-admin')) {
+                $roles[] = 'super-admin';
+            }
+            $user->syncRoles($roles);
+        }
 
         return back()->with('success', __('admin.updated'));
     }

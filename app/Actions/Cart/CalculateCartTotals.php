@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
  * Shipping uses the chosen method (or the first one available for this subtotal).
  *
  * @phpstan-type CartTotals array{subtotal:int, discount_total:int, shipping_total:int, total:int, item_count:int,
- *   meets_minimum:bool, shipping_method:?ShippingMethod}
+ *   meets_minimum:bool, minimum_missing:int, shipping_method:?ShippingMethod}
  */
 class CalculateCartTotals
 {
@@ -37,6 +37,7 @@ class CalculateCartTotals
             'total' => $subtotal + $shipping,
             'item_count' => $itemCount,
             'meets_minimum' => $subtotal >= $this->settings->min_order_total,
+            'minimum_missing' => max(0, $this->settings->min_order_total - $subtotal),
             'shipping_method' => $method,
         ];
     }

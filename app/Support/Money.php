@@ -2,18 +2,29 @@
 
 namespace App\Support;
 
+use App\Settings\StoreSettings;
 use NumberFormatter;
 
 final class Money
 {
     public static function format(int $minor, ?string $currency = null, ?string $locale = null): string
     {
-        $currency ??= config('store.currency', 'ILS');
+        $currency ??= self::storeCurrency();
         $locale ??= app()->getLocale();
 
         $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
 
         return (string) $formatter->formatCurrency($minor / 100, $currency);
+    }
+
+    /** The currency chosen in Admin → Settings → Store (orders snapshot the same value); ILS before settings exist. */
+    public static function storeCurrency(): string
+    {
+        try {
+            return app(StoreSettings::class)->currency ?: 'ILS';
+        } catch (\Throwable) {
+            return 'ILS'; // settings table not migrated yet (installs, early console commands)
+        }
     }
 
     /** Converts user input like "12.5" to minor units (1250) without float drift. */

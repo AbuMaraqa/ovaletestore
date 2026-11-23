@@ -35,4 +35,7 @@ return [
     'shipping_unavailable' => 'שיטת המשלוח שנבחרה אינה זמינה להזמנה זו.',
     'free_over_hint' => 'חינם בהזמנה מעל :amount',
     'pickup_note' => 'נשלח לך הודעה כשההזמנה תהיה מוכנה לאיסוף.',
+    'free_shipping_remaining' => 'הוסיפו עוד :amount למשלוח חינם',
+    'free_shipping_unlocked' => 'מעולה! ההזמנה שלכם זכאית למשלוח חינם',
+    'minimum_missing' => 'הוסיפו עוד :amount כדי להגיע למינימום ההזמנה',
 ];

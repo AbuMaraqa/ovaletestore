@@ -24,13 +24,13 @@ useGsap(root, ({ gsap }) => {
 
 <template>
     <section v-if="products.length" ref="root" class="container-store mt-28">
-        <div data-offer-banner class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-6 py-12 text-white sm:px-12 lg:py-16">
+        <div data-offer-banner class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900 px-6 py-12 text-white sm:px-12 lg:py-16">
             <div class="absolute -end-24 -top-24 size-96 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
             <div class="relative flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <p class="text-sm font-bold uppercase tracking-wide text-brand-200">{{ t('storefront.offers_eyebrow') }}</p>
-                    <h2 class="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">{{ t('storefront.offers_title') }}</h2>
-                    <p class="mt-3 max-w-md text-white/75">{{ t('storefront.offers_text') }}</p>
+                    <p class="text-sm font-bold text-brand-100">{{ t('storefront.offers_eyebrow') }}</p>
+                    <h2 class="mt-3 text-4xl font-extrabold sm:text-5xl">{{ t('storefront.offers_title') }}</h2>
+                    <p class="mt-3 max-w-md text-white/90">{{ t('storefront.offers_text') }}</p>
                 </div>
                 <Link :href="`${route('storefront.shop')}?sale=1`" class="btn h-12 bg-white px-7 text-cocoa hover:bg-brand-50">
                     {{ t('storefront.view_offers') }}

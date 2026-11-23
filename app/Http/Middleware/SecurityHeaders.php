@@ -25,7 +25,7 @@ class SecurityHeaders
         }
 
         // Admin pages and personalised pages must never be stored by shared caches.
-        if ($request->routeIs('admin.*', 'storefront.cart', 'storefront.checkout', 'storefront.order.thanks', 'account.*', 'login', 'register', 'password.*')) {
+        if ($request->routeIs('admin.*', 'pos.*', 'storefront.cart', 'storefront.checkout', 'storefront.order.thanks', 'account.*', 'login', 'register', 'password.*')) {
             $response->headers->set('Cache-Control', 'no-store, private');
         }
 

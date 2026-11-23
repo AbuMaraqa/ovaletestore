@@ -3,11 +3,13 @@
 use App\Actions\Products\SaveProduct;
 use App\Models\Attribute;
 use App\Models\Product;
+use App\Models\ShippingMethod;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\ShippingMethodSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Honeypot\Honeypot;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)
@@ -49,4 +51,43 @@ function makeAttribute(string $code, array $termNames): Attribute
 function staffUser(string $role): User
 {
     return User::factory()->create(['is_active' => true])->assignRole($role);
+}
+
+/**
+ * Honeypot fields exactly as the real forms send them (empty trap field + encrypted timestamp).
+ * The honeypot is required on checkout and registration, so a POST without them is treated as spam.
+ *
+ * @return array<string, string>
+ */
+function honeypotFields(): array
+{
+    $honeypot = app(Honeypot::class)->toArray();
+
+    return [$honeypot['nameFieldName'] => '', $honeypot['validFromFieldName'] => $honeypot['encryptedValidFrom']];
+}
+
+/** A valid checkout form (west-bank delivery) including the honeypot fields. */
+function checkoutPayload(): array
+{
+    return [
+        'customer_name' => 'محمد أحمد',
+        'customer_phone' => '0599 123 456',
+        'shipping_method_id' => ShippingMethod::query()->where('code', 'west_bank')->value('id'),
+        'shipping_city' => 'رام الله',
+        'shipping_address' => 'شارع الإرسال 12',
+        ...honeypotFields(),
+    ];
+}
+
+/** A valid registration form including the honeypot fields. */
+function registrationPayload(array $overrides = []): array
+{
+    return array_merge([
+        'name' => 'سارة',
+        'email' => 'sara@example.com',
+        'phone' => '0599 111 222',
+        'password' => 'Secret-Pass-123',
+        'password_confirmation' => 'Secret-Pass-123',
+        ...honeypotFields(),
+    ], $overrides);
 }

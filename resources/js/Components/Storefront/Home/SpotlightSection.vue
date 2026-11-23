@@ -21,7 +21,7 @@ useGsap(root, ({ gsap }) => {
         });
     });
     gsap.from('[data-spot-text] > *', {
-        autoAlpha: 0, x: 40, duration: 0.8, stagger: 0.1, ease: 'power3.out',
+        autoAlpha: 0, x: document.documentElement.dir === 'rtl' ? -40 : 40, duration: 0.8, stagger: 0.1, ease: 'power3.out',
         scrollTrigger: { trigger: '[data-spot-text]', start: 'top 80%', once: true },
     });
 });
@@ -44,8 +44,8 @@ useGsap(root, ({ gsap }) => {
                 />
             </div>
             <div data-spot-text>
-                <span class="inline-flex items-center gap-2 text-sm font-semibold text-brand-300"><span class="h-px w-8 bg-brand-300" />Espresso</span>
-                <h2 class="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">{{ spotlight.title }}</h2>
+                <span class="inline-flex items-center gap-2 text-sm font-semibold text-brand-300"><span class="h-px w-8 bg-brand-300" />{{ t('storefront.spotlight_eyebrow') }}</span>
+                <h2 class="mt-4 text-4xl font-extrabold leading-snug sm:text-5xl">{{ spotlight.title }}</h2>
                 <p v-if="spotlight.text" class="mt-5 max-w-lg text-lg leading-relaxed text-white/70">{{ spotlight.text }}</p>
                 <Link :href="spotlight.url" class="btn mt-8 h-13 bg-white px-8 text-base text-cocoa hover:bg-brand-100">
                     {{ t('storefront.shop_now') }}

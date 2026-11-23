@@ -28,7 +28,7 @@ useGsap(root, ({ gsap }) => {
 </script>
 
 <template>
-    <section ref="root" class="relative isolate flex min-h-[78svh] items-end overflow-hidden bg-cocoa lg:min-h-[86svh]">
+    <section ref="root" class="relative isolate flex min-h-[64svh] items-end overflow-hidden bg-cocoa lg:min-h-[86svh]">
         <img
             v-if="image"
             data-hero-bg
@@ -41,7 +41,7 @@ useGsap(root, ({ gsap }) => {
             class="absolute inset-0 -z-10 size-full object-cover will-change-transform"
         />
         <div class="absolute inset-0 -z-10 bg-gradient-to-t from-cocoa via-cocoa/60 to-cocoa/10" aria-hidden="true" />
-        <div class="absolute inset-0 -z-10 bg-gradient-to-l from-cocoa/70 via-transparent to-transparent rtl:bg-gradient-to-r" aria-hidden="true" />
+        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-cocoa/70 via-transparent to-transparent rtl:bg-gradient-to-l" aria-hidden="true" />
 
         <div data-hero-content class="container-store pb-14 pt-32 lg:pb-24">
             <div class="max-w-3xl text-white">
@@ -49,15 +49,15 @@ useGsap(root, ({ gsap }) => {
                     <span class="size-2 rounded-full bg-brand-400" />
                     {{ t('storefront.hero_eyebrow') }}
                 </p>
-                <h1 class="mt-6 text-4xl font-extrabold leading-[1.2] tracking-tight text-balance sm:text-5xl lg:text-7xl">
-                    <span v-for="(word, i) in words" :key="i" class="inline-block overflow-hidden pb-2 align-bottom">
+                <h1 class="mt-6 text-4xl font-extrabold leading-[1.4] text-balance sm:text-5xl lg:text-7xl">
+                    <span v-for="(word, i) in words" :key="i" class="inline-block overflow-hidden pt-1 pb-2 align-bottom">
                         <span data-hero-word class="inline-block">{{ word }}</span>&nbsp;
                     </span>
                 </h1>
                 <p data-hero-sub class="mt-5 max-w-2xl text-lg leading-relaxed text-white/80 lg:text-xl">{{ subtitle }}</p>
 
                 <div data-hero-cta class="mt-9 flex flex-wrap items-center gap-3">
-                    <Link :href="route('storefront.shop')" class="btn h-13 bg-brand-500 px-8 text-base text-white hover:bg-brand-600">
+                    <Link :href="route('storefront.shop')" class="btn h-13 bg-brand-600 px-8 text-base text-white hover:bg-brand-700">
                         {{ t('storefront.hero_cta') }}
                         <Icon name="arrow" class="size-5 rtl:-scale-x-100" />
                     </Link>

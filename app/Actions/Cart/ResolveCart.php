@@ -19,6 +19,19 @@ class ResolveCart
 
     public function handle(Request $request, bool $create = true): ?Cart
     {
+        $cart = $this->resolve($request, $create);
+
+        if ($cart) {
+            // Lines whose product was deleted (soft) or whose variant is gone can never be bought and would
+            // break the cart page: drop them so the visitor is never stuck with an item they cannot remove.
+            $cart->items()->whereDoesntHave('variant.product')->delete();
+        }
+
+        return $cart;
+    }
+
+    private function resolve(Request $request, bool $create): ?Cart
+    {
         $user = $request->user();
         $guestCart = $this->guestCart($request);
 

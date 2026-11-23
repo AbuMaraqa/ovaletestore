@@ -198,4 +198,6 @@ return [
     'search_companies' => 'Search by name, phone or city…',
     'view_orders' => 'View orders',
     'pos' => 'Point of sale (POS)',
+    'cannot_deactivate_self' => 'You cannot deactivate your own account.',
+    'own_account_locked' => 'You cannot change your own roles or deactivate yourself — ask another admin.',
 ];

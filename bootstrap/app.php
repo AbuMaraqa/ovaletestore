@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLegacyRedirects;
 use App\Http\Middleware\RedirectToLocalePrefix;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(
             prepend: [HandleLegacyRedirects::class],
             append: [
+                EnsureUserIsActive::class,
                 HandleInertiaRequests::class,
                 AddCspHeaders::class,
                 SecurityHeaders::class,

@@ -367,12 +367,6 @@ parameters:
 			path: app/Http/Resources/Admin/ProductFormResource.php
 
 		-
-			message: '#^Cannot call method toDateTimeLocalString\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Resources/Admin/ProductFormResource.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>description" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -580,18 +574,6 @@ parameters:
 			message: '#^Call to an undefined method Spatie\\Image\\Drivers\\ImageDriver\:\:performOnCollections\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Models/ProductVariant.php
-
-		-
-			message: '#^Cannot call method gt\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/ProductVariant.php
-
-		-
-			message: '#^Cannot call method lte\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: app/Models/ProductVariant.php
 
 		-

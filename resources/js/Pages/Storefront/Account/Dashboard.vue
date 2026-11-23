@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AccountShell from '@/Components/Storefront/AccountShell.vue';
 import OrderStatusPill from '@/Components/Storefront/OrderStatusPill.vue';
 import StoreField from '@/Components/Storefront/StoreField.vue';
@@ -13,7 +14,10 @@ const props = defineProps<{
 }>();
 
 const { t } = useTrans();
-const form = useForm({ name: props.profile.name, email: props.profile.email, phone: props.profile.phone ?? '' });
+const form = useForm({ name: props.profile.name, email: props.profile.email, phone: props.profile.phone ?? '', current_password: '' });
+// The server asks for the current password only when the e-mail changes.
+const emailChanged = computed(() => form.email.trim().toLowerCase() !== props.profile.email.toLowerCase());
+const saveProfile = () => form.put(route('account.profile.update'), { preserveScroll: true, onSuccess: () => form.reset('current_password') });
 const password = useForm({ current_password: '', password: '', password_confirmation: '' });
 const savePassword = () => password.put(route('user-password.update'), { errorBag: 'updatePassword', preserveScroll: true, onSuccess: () => password.reset() });
 </script>
@@ -46,12 +50,13 @@ const savePassword = () => password.put(route('user-password.update'), { errorBa
         </section>
 
         <div class="mt-8 grid gap-6 xl:grid-cols-2">
-            <form class="rounded-3xl bg-white p-5 ring-1 ring-stone-200/70 sm:p-6" @submit.prevent="form.put(route('account.profile.update'), { preserveScroll: true })">
+            <form class="rounded-3xl bg-white p-5 ring-1 ring-stone-200/70 sm:p-6" @submit.prevent="saveProfile">
                 <h2 class="text-lg font-bold text-cocoa">{{ t('account.profile') }}</h2>
                 <div class="mt-5 space-y-4">
                     <StoreField id="name" v-model="form.name" :label="t('cart.name')" :error="form.errors.name" required />
                     <StoreField id="email" v-model="form.email" type="email" :label="t('common.email')" :error="form.errors.email" dir="ltr" required />
                     <StoreField id="phone" v-model="form.phone" type="tel" :label="t('cart.phone')" :error="form.errors.phone" dir="ltr" required />
+                    <StoreField v-if="emailChanged" id="profile_current_password" v-model="form.current_password" type="password" :label="t('account.current_password')" :error="form.errors.current_password" autocomplete="current-password" required />
                 </div>
                 <button type="submit" class="btn-primary mt-5" :disabled="form.processing">{{ t('common.save') }}</button>
             </form>

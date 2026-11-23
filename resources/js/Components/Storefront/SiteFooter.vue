@@ -38,7 +38,7 @@ const year = new Date().getFullYear();
             </div>
         </div>
         <div class="border-t border-white/10">
-            <p class="container-store py-5 text-xs text-stone-500">© {{ year }} {{ site.name }}. {{ t('storefront.rights') }}</p>
+            <p class="container-store py-5 text-xs text-stone-400">© {{ year }} {{ site.name }}. {{ t('storefront.rights') }}</p>
         </div>
     </footer>
 </template>

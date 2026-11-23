@@ -86,7 +86,7 @@ const logout = () => router.post(route('logout'));
                     <span v-else class="text-xl font-extrabold">{{ site.name }}</span>
                 </Link>
 
-                <nav class="hidden items-center gap-8 text-[15px] font-semibold text-cocoa lg:flex" aria-label="Main">
+                <nav class="hidden items-center gap-8 text-[15px] font-semibold text-cocoa lg:flex" :aria-label="t('storefront.main_navigation')">
                     <Link
                         v-for="item in nav"
                         :key="item.href"
@@ -136,7 +136,7 @@ const logout = () => router.post(route('logout'));
                     <!-- Search pill (opens the full-screen search) -->
                     <button
                         type="button"
-                        class="hidden h-11 w-56 items-center gap-2.5 rounded-full bg-[#f7efe2] px-4 text-sm text-stone-500 ring-1 ring-[#eadfcb] transition hover:ring-[#c9a24d] md:inline-flex xl:w-64"
+                        class="hidden h-11 w-56 items-center gap-2.5 rounded-full bg-[#f7efe2] px-4 text-sm text-stone-600 ring-1 ring-[#eadfcb] transition hover:ring-[#c9a24d] md:inline-flex xl:w-64"
                         @click="searchOpen = true"
                     >
                         <Icon name="search" class="size-5 text-cocoa" />
@@ -148,7 +148,7 @@ const logout = () => router.post(route('logout'));
 
                     <!-- Account -->
                     <div class="relative">
-                        <Link v-if="!user" :href="route('login')" class="inline-flex size-11 items-center justify-center rounded-full bg-[#f7efe2] text-stone-400 ring-1 ring-[#eadfcb] hover:text-cocoa" :aria-label="t('common.login')">
+                        <Link v-if="!user" :href="route('login')" class="inline-flex size-11 items-center justify-center rounded-full bg-[#f7efe2] text-cocoa ring-1 ring-[#eadfcb] hover:text-brand-700" :aria-label="t('common.login')">
                             <svg viewBox="0 0 24 24" class="size-6" fill="currentColor" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z" /></svg>
                         </Link>
                         <template v-else>
