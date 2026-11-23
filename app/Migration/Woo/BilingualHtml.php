@@ -16,6 +16,11 @@ final class BilingualHtml
     /** Minimum share of letters of the minority script for a block to count as mixed. */
     private const MIXED_RATIO = 0.2;
 
+    private const LABEL = '/^(english|arabic|en|ar|بالإنجليزي|بالانجليزي|بالإنجليزية|بالعربي|بالعربية|عربي|انجليزي|إنجليزي)\s*[:：]?$/iu';
+
+    /** A bold label followed by a line break, inside an otherwise single-language block. */
+    private const INLINE_LABEL = '#<(strong|b)>\s*(english|arabic|بالإنجليزي|بالانجليزي|بالإنجليزية|بالعربي|بالعربية)\s*[:：]?\s*</\1>\s*(<br\s*/?>)?#iu';
+
     private const SPLITTABLE = ['p', 'div', 'ul', 'ol', 'h2', 'h3', 'h4', 'blockquote', 'span', 'strong', 'b', 'em', 'i', 'u', 'td'];
 
     /** @return array{ar: ?string, en: ?string} en is null when the source has no English part */
@@ -45,6 +50,7 @@ final class BilingualHtml
 
         $render = function (array $nodes) use ($doc): ?string {
             $out = trim(implode('', array_map(fn (DOMNode $n) => $doc->saveHTML($n), $nodes)));
+            $out = (string) preg_replace(self::INLINE_LABEL, '', $out);
             $out = (string) preg_replace('#(<br\s*/?>\s*)+(</(p|h[2-4]|div|li|strong|b|em|span)>)#u', '$2', $out);
             $out = (string) preg_replace('#(</(p|h[2-4]|div|ul|ol|table)>)\s*(<br\s*/?>\s*)+#u', "$1\n", $out);
             $out = (string) preg_replace('#<(p|h[2-4]|div|strong)>(\s|&nbsp;|<br\s*/?>)*</\1>#u', '', $out);
@@ -73,6 +79,12 @@ final class BilingualHtml
 
         foreach (self::segments($parent) as $segment) {
             $text = implode('', array_map(fn (DOMNode $n) => $n->textContent, $segment));
+
+            // Language labels the source used as separators ("English:", "بالإنجليزي:") belong to neither side.
+            if (preg_match(self::LABEL, trim($text))) {
+                continue;
+            }
+
             $script = self::script($text);
 
             // A single mixed element (e.g. <p>عربي<br>English</p>): split inside it, keep the wrapper.

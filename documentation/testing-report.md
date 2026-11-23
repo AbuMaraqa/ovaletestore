@@ -1,6 +1,6 @@
 # Testing Report
 
-Last run: 2026-11-23 â€” `php artisan test` â†’ **56 passed, 264 assertions, ~5 s** (Pest 5, SQLite in-memory).
+Last run: 2026-11-23 — `php artisan test` → **66 passed, 336 assertions** (Pest 5, SQLite in-memory). `vendor/bin/pint` → clean. `vendor/bin/phpstan analyse` (Larastan, level 5) → **no errors** (159 baseline entries, down from 165). `npx vue-tsc --noEmit` → clean. `npm run build` → OK.
 `vendor/bin/pint` â†’ clean. `vendor/bin/phpstan analyse` (Larastan, level 5) â†’ **no new errors**; 164 pre-existing findings (down from 255 after annotating translated attributes) recorded in `phpstan-baseline.neon` (mostly Astrotomic magic attributes and untyped Eloquent generics â€” to be reduced by adding `@property` annotations). `npx vue-tsc --noEmit` â†’ clean. `npm run build` â†’ OK.
 
 | Suite | Covers |
@@ -12,6 +12,8 @@ Last run: 2026-11-23 â€” `php artisan test` â†’ **56 passed, 264 asser
 | Security/SecurityTest | security headers; no-store on admin; disguised PHP upload rejected; safe generated filenames; login throttling (429); admin routes not leaked to storefront |
 | Migration/WooImporterTest | idempotent import (re-run updates, no duplicates); bilingual name split; Arabic slug preserved; HTML sanitized; duplicate SKU handling; TranslatePress 301; dry-run writes nothing; `-scaled` original preference |
 | Storefront/HomePageTest | all homepage sections present; best-sellers label only when backed by real orders (ranked by quantity); on-sale catalog filter |
+| Storefront/CartAndCheckoutTest (shipping) | chosen method charged and snapshotted; free-over threshold; pickup without address; inactive / below-minimum methods rejected; admin CRUD + permission; checkout and admin pages render |
+| Unit/BilingualHtmlTest | bilingual description split (block and line level), single-language passthrough, label removal, trailing-English product names |
 | Unit/BilingualNameTest | name-splitting edge cases (`Mr. Chef`, missing English, HTML entities, trailing Latin category names) |
 
 ## Manual / HTTP verification (local `php artisan serve`)

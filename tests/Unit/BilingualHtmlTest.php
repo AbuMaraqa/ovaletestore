@@ -35,3 +35,10 @@ it('splits product names with a trailing English name but keeps a lone Latin bra
         ->toBe(['ar' => 'كاسات كوكتيل ربطة 50 كاسة', 'en' => '10oz cocktail cups'])
         ->and(BilingualName::split('شوكولاتة كاليبوت Callebaut', allowTrailingLatin: true, minTrailingWords: 2)['en'])->toBeNull();
 });
+
+it('drops language labels used as separators in the source', function () {
+    $split = BilingualHtml::split('<p>حليب مكثف لذيذ وكريمي.</p><p><strong>English:</strong><br />Rich and creamy condensed milk.</p>');
+
+    expect($split['en'])->toContain('Rich and creamy')->not->toContain('English:')
+        ->and($split['ar'])->not->toContain('English');
+});
