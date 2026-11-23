@@ -14,18 +14,17 @@ class DatabaseSeeder extends Seeder
 
         $email = (string) env('ADMIN_EMAIL', 'admin@ovalete.test');
 
-        if (! User::query()->where('email', $email)->exists()) {
-            // A random password is generated and printed once — no default credentials in source control.
-            $password = Str::password(16);
+        // Local/dev: fixed easy password (ADMIN_PASSWORD or 123456789).
+        // Production: ADMIN_PASSWORD must be set, otherwise a random one is generated — never a weak default.
+        $password = (string) (env('ADMIN_PASSWORD') ?: (app()->isProduction() ? Str::password(16) : '123456789'));
 
-            User::query()->create([
-                'name' => 'مدير النظام',
-                'email' => $email,
-                'password' => $password,
-                'email_verified_at' => now(),
-            ])->assignRole('super-admin');
+        // updateOrCreate: re-running the seeder also resets the existing admin's password.
+        // The model's `hashed` cast hashes the plain password.
+        User::query()->updateOrCreate(
+            ['email' => $email],
+            ['name' => 'مدير النظام', 'password' => $password, 'is_active' => true, 'email_verified_at' => now()],
+        )->assignRole('super-admin');
 
-            $this->command?->warn("Super admin created: {$email} / {$password}  (change it after first login)");
-        }
+        $this->command?->warn("Super admin: {$email} / {$password}");
     }
 }
