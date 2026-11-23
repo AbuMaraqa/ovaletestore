@@ -86,7 +86,9 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                         </FormField>
                         <FormField id="ppp" :label="t('admin.products_per_page')" :error="errors.products_per_page"><input id="ppp" v-model.number="form.products_per_page" type="number" min="8" max="96" class="kt-input" /></FormField>
                         <FormField id="min" :label="t('admin.min_order_total')" :error="errors.min_order_total"><input id="min" v-model="form.min_order_total" type="number" step="0.01" min="0" class="kt-input" dir="ltr" /></FormField>
-                        <FormField id="ship" :label="t('admin.shipping_fee')" :error="errors.shipping_fee"><input id="ship" v-model="form.shipping_fee" type="number" step="0.01" min="0" class="kt-input" dir="ltr" /></FormField>
+                        <div class="flex items-end">
+                            <KtButton :href="route('admin.shipping-methods.index')" variant="ghost" icon="delivery">{{ t('admin.shipping_methods') }}</KtButton>
+                        </div>
                     </div>
                     <label class="flex items-center gap-3 text-sm"><input v-model="form.show_out_of_stock" type="checkbox" class="kt-switch" /> {{ t('admin.show_out_of_stock') }}</label>
                     <label class="flex items-center gap-3 text-sm"><input v-model="form.guest_checkout" type="checkbox" class="kt-switch" /> {{ t('admin.guest_checkout') }}</label>

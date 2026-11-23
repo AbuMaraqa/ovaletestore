@@ -159,7 +159,7 @@ const logout = () => router.post(route('logout'));
                                 <p class="truncate px-3 pb-2 pt-1 font-bold text-cocoa">{{ user.name }}</p>
                                 <Link :href="route('account.dashboard')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_account') }}</Link>
                                 <Link :href="route('account.orders')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_orders') }}</Link>
-                                <a v-if="user.is_staff" :href="route('admin.dashboard')" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
+                                <a v-if="user.admin_url" :href="user.admin_url" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
                                 <button type="button" class="mt-1 block w-full rounded-xl px-3 py-2.5 text-start text-red-600 hover:bg-red-50" @click="logout">{{ t('common.logout') }}</button>
                             </div>
                         </template>

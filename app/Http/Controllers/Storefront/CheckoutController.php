@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Storefront\CheckoutRequest;
 use App\Http\Resources\Storefront\CartResource;
 use App\Models\Order;
+use App\Models\ShippingMethod;
 use App\Settings\StoreSettings;
 use App\Support\Money;
 use App\Support\Seo\SeoData;
@@ -35,8 +36,21 @@ class CheckoutController extends Controller
             return redirect()->route('storefront.cart');
         }
 
+        $cartTotals = $totals->handle($cart);
+        $subtotal = $cartTotals['subtotal'];
+
         return Inertia::render('Storefront/Checkout/Index', [
-            'cart' => new CartResource($cart->load(CartResource::RELATIONS), $totals->handle($cart)),
+            'cart' => new CartResource($cart->load(CartResource::RELATIONS), $cartTotals),
+            // Each option carries its own cost and resulting total so the summary updates without a round-trip.
+            'shipping_options' => $totals->availableMethods($subtotal)->map(fn (ShippingMethod $m) => [
+                'id' => $m->id,
+                'name' => $m->name,
+                'description' => $m->description,
+                'requires_address' => $m->type->requiresAddress(),
+                'cost' => $m->costFor($subtotal) > 0 ? Money::format($m->costFor($subtotal)) : null,
+                'total' => Money::format($subtotal + $m->costFor($subtotal)),
+                'free_over' => $m->free_over && $m->costFor($subtotal) > 0 ? Money::format($m->free_over) : null,
+            ])->all(),
             'honeypot' => app(Honeypot::class)->toArray(),
             'prefill' => $request->user() ? ['customer_name' => $request->user()->name, 'customer_email' => $request->user()->email, 'customer_phone' => $request->user()->phone] : null,
             'seo' => SeoData::make(__('cart.checkout_title'))->noindex(),
@@ -50,7 +64,7 @@ class CheckoutController extends Controller
         $cart = $this->resolveCart->handle($request, create: false);
         abort_unless($cart, 404);
 
-        $order = $placeOrder->handle($cart, $request->customer(), $request->user()?->id);
+        $order = $placeOrder->handle($cart, $request->customer(), $request->user()?->id, (int) $request->validated('shipping_method_id'));
 
         // Signed, expiring URL: guests can see their confirmation without exposing sequential order data.
         return redirect()->to(URL::temporarySignedRoute('storefront.order.thanks', now()->addHours(2), ['order' => $order->number]));

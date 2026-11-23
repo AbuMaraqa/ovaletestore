@@ -73,6 +73,7 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::resource('categories', Admin\CategoryController::class)->except('show');
             Route::resource('attributes', Admin\AttributeController::class)->except('show');
             Route::resource('brands', Admin\BrandController::class)->except('show');
+            Route::resource('shipping-methods', Admin\ShippingMethodController::class)->except('show');
 
             Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');

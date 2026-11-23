@@ -7,7 +7,7 @@ import { useTrans } from '@/Composables/useTrans';
 defineProps<{
     order: {
         number: string; status: string; total: string; date: string; subtotal: string; shipping_total: string;
-        shipping_city: string; shipping_address: string; customer_note: string | null;
+        shipping_city: string | null; shipping_address: string | null; shipping_method: string | null; customer_note: string | null;
         items: { id: number; name: string; variant_label: string | null; quantity: number; unit_price: string; line_total: string }[];
     };
 }>();
@@ -38,7 +38,8 @@ const { t } = useTrans();
                 </dl>
                 <div class="rounded-3xl bg-white p-5 text-sm ring-1 ring-stone-200/70">
                     <p class="font-bold text-cocoa">{{ t('cart.delivery_details') }}</p>
-                    <p class="mt-2 text-stone-600">{{ order.shipping_city }} — {{ order.shipping_address }}</p>
+                    <p v-if="order.shipping_method" class="mt-2 font-semibold text-cocoa">{{ order.shipping_method }}</p>
+                    <p v-if="order.shipping_city || order.shipping_address" class="mt-1 text-stone-600">{{ [order.shipping_city, order.shipping_address].filter(Boolean).join(' — ') }}</p>
                     <p v-if="order.customer_note" class="mt-2 whitespace-pre-line text-stone-500">{{ order.customer_note }}</p>
                 </div>
             </aside>

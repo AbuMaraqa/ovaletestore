@@ -1,1 +1,0 @@
-O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:74:"v2-854d94f87a2c5fd62843c83caffc979eeb3bf5b18eb16bf9229ab6a920d8ef79-8.4.23";s:4:"data";a:3:{s:7:"classes";a:1:{s:58:"laravel\fortify\actions\redirectiftwofactorauthenticatable";b:1;}s:9:"functions";a:0:{}s:9:"constants";a:0:{}}}

@@ -15,8 +15,7 @@ class StoreSettings extends Settings
     /** Minimum order subtotal in minor units (0 = none). */
     public int $min_order_total;
 
-    /** Flat shipping fee in minor units. */
-    public int $shipping_fee;
+    // Shipping costs live in App\Models\ShippingMethod (admin → Shipping methods).
 
     public bool $guest_checkout;
 

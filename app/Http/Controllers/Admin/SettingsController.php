@@ -65,7 +65,7 @@ class SettingsController extends Controller
             'store' => ($s = app(StoreSettings::class)) ? [
                 'currency' => $s->currency, 'products_per_page' => $s->products_per_page,
                 'show_out_of_stock' => $s->show_out_of_stock, 'guest_checkout' => $s->guest_checkout,
-                'min_order_total' => Money::toMajor($s->min_order_total), 'shipping_fee' => Money::toMajor($s->shipping_fee),
+                'min_order_total' => Money::toMajor($s->min_order_total),
             ] : [],
             'seo' => ($s = app(SeoSettings::class)) ? [
                 'home_title' => $s->home_title, 'home_description' => $s->home_description,
@@ -125,7 +125,6 @@ class SettingsController extends Controller
             'show_out_of_stock' => ['boolean'],
             'guest_checkout' => ['boolean'],
             'min_order_total' => ['nullable', 'numeric', 'min:0'],
-            'shipping_fee' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $settings->currency = $data['currency'];
@@ -133,7 +132,6 @@ class SettingsController extends Controller
         $settings->show_out_of_stock = (bool) ($data['show_out_of_stock'] ?? false);
         $settings->guest_checkout = (bool) ($data['guest_checkout'] ?? true);
         $settings->min_order_total = (int) Money::toMinor($data['min_order_total'] ?? 0);
-        $settings->shipping_fee = (int) Money::toMinor($data['shipping_fee'] ?? 0);
         $settings->save();
     }
 

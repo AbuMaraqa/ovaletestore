@@ -5,6 +5,7 @@ namespace App\Http\Resources\Storefront;
 use App\Http\Resources\ImageResource;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\ShippingMethod;
 use App\Support\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,7 +20,7 @@ class CartResource extends JsonResource
         'items.variant.media',
     ];
 
-    /** @param array{subtotal:int, discount_total:int, shipping_total:int, total:int, item_count:int, meets_minimum:bool} $totals */
+    /** @param array{subtotal:int, discount_total:int, shipping_total:int, total:int, item_count:int, meets_minimum:bool, shipping_method:?ShippingMethod} $totals */
     public function __construct(Cart $cart, private readonly array $totals)
     {
         parent::__construct($cart);

@@ -31,4 +31,8 @@ return [
     'thank_you' => 'Thank you! Your order has been placed.',
     'order_number' => 'Order number',
     'we_will_contact' => 'Our team will contact you shortly on :phone to confirm delivery.',
+    'shipping_method' => 'Shipping method',
+    'shipping_unavailable' => 'The selected shipping method is not available for this order.',
+    'free_over_hint' => 'Free on orders over :amount',
+    'pickup_note' => 'We will message you when your order is ready for pickup.',
 ];

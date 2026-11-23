@@ -2,6 +2,7 @@
 
 namespace App\Actions\Orders;
 
+use App\Actions\Cart\CalculateCartTotals;
 use App\Enums\OrderStatus;
 use App\Enums\StockStatus;
 use App\Events\OrderPlaced;
@@ -19,16 +20,19 @@ use Illuminate\Validation\ValidationException;
  * snapshots names/prices, decrements managed stock, and empties the cart.
  *
  * @phpstan-type CustomerInput array{customer_name:string, customer_email?:string|null, customer_phone:string,
- *   shipping_city:string, shipping_address:string, customer_note?:string|null}
+ *   shipping_city?:string|null, shipping_address?:string|null, customer_note?:string|null}
  */
 class PlaceOrder
 {
-    public function __construct(private readonly StoreSettings $settings) {}
+    public function __construct(
+        private readonly StoreSettings $settings,
+        private readonly CalculateCartTotals $totals,
+    ) {}
 
     /** @param CustomerInput $customer */
-    public function handle(Cart $cart, array $customer, ?int $userId = null): Order
+    public function handle(Cart $cart, array $customer, ?int $userId = null, ?int $shippingMethodId = null): Order
     {
-        return DB::transaction(function () use ($cart, $customer, $userId): Order {
+        return DB::transaction(function () use ($cart, $customer, $userId, $shippingMethodId): Order {
             $cart->load('items');
 
             if ($cart->items->isEmpty()) {
@@ -63,20 +67,32 @@ class PlaceOrder
                 $this->decrementStock($variant, $item->quantity);
             }
 
-            $totals = [
-                'subtotal' => $subtotal = array_sum(array_column($lines, 'line_total')),
-                'discount_total' => 0,
-                'shipping_total' => $this->settings->shipping_fee,
-                'total' => $subtotal + $this->settings->shipping_fee,
-                'meets_minimum' => $subtotal >= $this->settings->min_order_total,
-            ];
-
-            if (! $totals['meets_minimum']) {
+            $subtotal = array_sum(array_column($lines, 'line_total'));
+            if ($subtotal < $this->settings->min_order_total) {
                 throw ValidationException::withMessages(['cart' => __('cart.below_minimum')]);
             }
 
+            // Re-checked here (not only in the request): availability depends on the locked subtotal.
+            $method = $this->totals->availableMethods($subtotal)->firstWhere('id', $shippingMethodId);
+            if ($method === null) {
+                throw ValidationException::withMessages(['shipping_method_id' => __('cart.shipping_unavailable')]);
+            }
+            $shipping = $method->costFor($subtotal);
+            $needsAddress = $method->type->requiresAddress();
+
+            $totals = [
+                'subtotal' => $subtotal,
+                'discount_total' => 0,
+                'shipping_total' => $shipping,
+                'total' => $subtotal + $shipping,
+            ];
+
             $order = Order::create([
                 ...$customer,
+                'shipping_city' => $needsAddress ? ($customer['shipping_city'] ?? null) : null,
+                'shipping_address' => $needsAddress ? ($customer['shipping_address'] ?? null) : null,
+                'shipping_method_id' => $method->id,
+                'shipping_method_name' => $method->name,
                 'number' => $this->generateNumber(),
                 'user_id' => $userId,
                 'status' => OrderStatus::Pending,

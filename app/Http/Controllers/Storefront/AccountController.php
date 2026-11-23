@@ -50,6 +50,7 @@ class AccountController extends Controller
                 ...$this->summary($order),
                 'shipping_city' => $order->shipping_city,
                 'shipping_address' => $order->shipping_address,
+                'shipping_method' => $order->shipping_method_name,
                 'customer_note' => $order->customer_note,
                 'subtotal' => Money::format($order->subtotal, $order->currency),
                 'shipping_total' => Money::format($order->shipping_total, $order->currency),

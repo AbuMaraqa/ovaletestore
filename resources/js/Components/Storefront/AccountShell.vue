@@ -35,7 +35,7 @@ const links = [
                     >
                         {{ t(link.label) }}
                     </Link>
-                    <a v-if="page.props.auth.user?.is_staff" :href="route('admin.dashboard')" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
+                    <a v-if="page.props.auth.user?.admin_url" :href="page.props.auth.user.admin_url" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
                     <button type="button" class="block w-full rounded-2xl px-4 py-3 text-start text-sm font-semibold text-red-600 hover:bg-red-50" @click="router.post(route('logout'))">{{ t('common.logout') }}</button>
                 </nav>
             </aside>

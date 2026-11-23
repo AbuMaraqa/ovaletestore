@@ -45,7 +45,10 @@ export const adminMenu: MenuSection[] = [
     },
     {
         heading: 'admin.sales',
-        items: [{ label: 'admin.orders', icon: 'handcart', route: 'admin.orders.index', match: 'admin.orders.*', permission: 'orders.view', badge: 'pending_orders' }],
+        items: [
+            { label: 'admin.orders', icon: 'handcart', route: 'admin.orders.index', match: 'admin.orders.*', permission: 'orders.view', badge: 'pending_orders' },
+            { label: 'admin.shipping_methods', icon: 'delivery', route: 'admin.shipping-methods.index', match: 'admin.shipping-methods.*', permission: 'settings.manage' },
+        ],
     },
     {
         heading: 'admin.system',

@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -17,7 +18,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $shipping_total
  * @property int $total
  * @property string $currency
- * @property \Illuminate\Support\Carbon $placed_at
+ * @property Carbon $placed_at
  */
 class Order extends Model
 {
@@ -25,7 +26,7 @@ class Order extends Model
 
     protected $fillable = [
         'number', 'user_id', 'status', 'customer_name', 'customer_email', 'customer_phone',
-        'shipping_city', 'shipping_address', 'customer_note', 'currency',
+        'shipping_city', 'shipping_address', 'shipping_method_id', 'shipping_method_name', 'customer_note', 'currency',
         'subtotal', 'discount_total', 'shipping_total', 'total', 'locale', 'placed_at',
     ];
 

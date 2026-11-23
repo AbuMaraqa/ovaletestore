@@ -80,7 +80,7 @@ class WooImporter
     public function importProduct(array $row): array
     {
         $warnings = [];
-        $names = BilingualName::split((string) $row['name']);
+        $names = BilingualName::split((string) $row['name'], allowTrailingLatin: true, minTrailingWords: 2);
         $sku = $this->resolveSku($row, $warnings);
         $prices = $this->prices($row);
 
@@ -100,16 +100,24 @@ class WooImporter
                 'published_at' => $product->published_at ?? now(),
             ]);
 
+            // The source keeps Arabic + English in one field; give each locale its own text.
+            $description = BilingualHtml::split(RichText::clean($row['description'] ?? null));
+            $short = BilingualHtml::split(RichText::clean($row['short_description'] ?? null));
+
             $ar = $product->translateOrNew('ar');
             $ar->name = $names['ar'];
             $ar->slug = rawurldecode((string) $row['slug']);
-            $ar->short_description = RichText::clean($row['short_description'] ?? null);
-            $ar->description = RichText::clean($row['description'] ?? null);
+            $ar->setAttribute('short_description', RichText::clean($short['ar']));
+            $ar->setAttribute('description', RichText::clean($description['ar']));
 
-            if ($names['en']) {
+            // English name: from the source, otherwise an existing (manually/AI translated) one is kept.
+            $enName = $names['en'] ?? ($product->hasTranslation('en') ? $product->translate('en')->getAttribute('name') : null);
+            if ($enName) {
                 $en = $product->translateOrNew('en');
-                $en->name = $names['en'];
-                $en->slug ??= $names['en'];
+                $en->setAttribute('name', $enName);
+                $en->setAttribute('slug', $en->getAttribute('slug') ?? $enName);
+                $en->setAttribute('description', RichText::clean($description['en']) ?? $en->getAttribute('description'));
+                $en->setAttribute('short_description', RichText::clean($short['en']) ?? $en->getAttribute('short_description'));
             }
 
             $product->save();

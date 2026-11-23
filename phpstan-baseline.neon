@@ -295,18 +295,6 @@ parameters:
 			path: app/Http/Controllers/Admin/CategoryController.php
 
 		-
-			message: '#^Call to method diffForHumans\(\) on an unknown class App\\Models\\IlluminateSupportCarbon\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/DashboardController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Order\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/Admin/DashboardController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$author\.$#'
 			identifier: property.notFound
 			count: 1
@@ -334,12 +322,6 @@ parameters:
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Order\>\:\:allowedFilters\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/Http/Controllers/Admin/OrderController.php
-
-		-
-			message: '#^Call to method format\(\) on an unknown class App\\Models\\IlluminateSupportCarbon\.$#'
-			identifier: class.notFound
-			count: 2
 			path: app/Http/Controllers/Admin/OrderController.php
 
 		-
@@ -407,12 +389,6 @@ parameters:
 			identifier: ternary.alwaysTrue
 			count: 4
 			path: app/Http/Controllers/Admin/SettingsController.php
-
-		-
-			message: '#^Call to method translatedFormat\(\) on an unknown class App\\Models\\IlluminateSupportCarbon\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Http/Controllers/Storefront/AccountController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
@@ -753,25 +729,19 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Migration/Woo/WooImporter.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
-			count: 4
-			path: app/Migration/Woo/WooImporter.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$short_description\.$#'
-			identifier: property.notFound
-			count: 1
+			count: 3
 			path: app/Migration/Woo/WooImporter.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
 			identifier: property.notFound
-			count: 6
+			count: 5
 			path: app/Migration/Woo/WooImporter.php
 
 		-
@@ -827,12 +797,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Models/CategoryTranslation.php
-
-		-
-			message: '#^PHPDoc tag @property for property App\\Models\\Order\:\:\$placed_at contains unknown class App\\Models\\IlluminateSupportCarbon\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Models/Order.php
 
 		-
 			message: '#^Call to an undefined method Spatie\\Image\\Drivers\\ImageDriver\:\:performOnCollections\(\)\.$#'

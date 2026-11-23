@@ -11,7 +11,7 @@ const props = defineProps<{
     order: {
         id: number; number: string; status: string; allowed_statuses: string[];
         customer_name: string; customer_phone: string; customer_email: string | null;
-        shipping_city: string; shipping_address: string; customer_note: string | null;
+        shipping_city: string | null; shipping_address: string | null; shipping_method: string | null; customer_note: string | null;
         subtotal: string; shipping_total: string; total: string; placed_at: string;
         items: { id: number; name: string; variant_label: string | null; sku: string | null; quantity: number; unit_price: string; line_total: string }[];
         notes: { id: number; body: string; author: string | null; date: string }[];
@@ -76,7 +76,8 @@ const submit = () => form.patch(route('admin.orders.status', props.order.id), { 
                     <div><dt class="text-muted-foreground">{{ t('admin.name') }}</dt><dd class="font-medium">{{ order.customer_name }}</dd></div>
                     <div><dt class="text-muted-foreground">{{ t('admin.phone') }}</dt><dd><a :href="`tel:${order.customer_phone}`" class="text-primary" dir="ltr">{{ order.customer_phone }}</a></dd></div>
                     <div v-if="order.customer_email"><dt class="text-muted-foreground">Email</dt><dd dir="ltr">{{ order.customer_email }}</dd></div>
-                    <div><dt class="text-muted-foreground">{{ t('orders.delivery') }}</dt><dd>{{ order.shipping_city }} — {{ order.shipping_address }}</dd></div>
+                    <div><dt class="text-muted-foreground">{{ t('admin.shipping_method') }}</dt><dd class="font-medium">{{ order.shipping_method ?? '—' }}</dd></div>
+                    <div v-if="order.shipping_city || order.shipping_address"><dt class="text-muted-foreground">{{ t('orders.delivery') }}</dt><dd>{{ [order.shipping_city, order.shipping_address].filter(Boolean).join(' — ') }}</dd></div>
                     <div v-if="order.customer_note"><dt class="text-muted-foreground">{{ t('orders.customer_note') }}</dt><dd class="whitespace-pre-line">{{ order.customer_note }}</dd></div>
                 </dl>
             </KtCard>

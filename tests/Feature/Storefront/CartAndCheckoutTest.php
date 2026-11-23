@@ -5,6 +5,7 @@ use App\Enums\OrderStatus;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
+use App\Models\ShippingMethod;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -13,6 +14,7 @@ function checkoutPayload(): array
     return [
         'customer_name' => 'محمد أحمد',
         'customer_phone' => '0599 123 456',
+        'shipping_method_id' => ShippingMethod::query()->where('type', 'delivery')->value('id'),
         'shipping_city' => 'رام الله',
         'shipping_address' => 'شارع الإرسال 12',
     ];
@@ -80,7 +82,7 @@ it('validates checkout input', function () {
     $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
 
     $this->post(route('storefront.checkout.store'), ['customer_name' => '', 'customer_phone' => 'abc'])
-        ->assertSessionHasErrors(['customer_name', 'customer_phone', 'shipping_city', 'shipping_address']);
+        ->assertSessionHasErrors(['customer_name', 'customer_phone', 'shipping_method_id', 'shipping_city', 'shipping_address']);
 
     expect(Order::query()->count())->toBe(0);
 });
@@ -99,4 +101,81 @@ it('enforces order status transitions and restocks on cancellation', function ()
     expect($order->fresh()->status)->toBe(OrderStatus::Cancelled)
         ->and($product->defaultVariant->fresh()->stock_quantity)->toBe(4)
         ->and($order->notes()->count())->toBe(1);
+});
+
+it('charges the chosen shipping method, free above the threshold, and snapshots its name', function () {
+    $delivery = ShippingMethod::query()->where('type', 'delivery')->sole();
+    $delivery->update(['cost' => 2500, 'free_over' => 10000]);
+    $product = makeSimpleProduct(price: '40.00');
+
+    $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 2]);
+    $this->post(route('storefront.checkout.store'), checkoutPayload());
+    $order = Order::query()->sole();
+
+    expect($order->shipping_total)->toBe(2500)
+        ->and($order->total)->toBe(8000 + 2500)
+        ->and($order->shipping_method_id)->toBe($delivery->id)
+        ->and($order->shipping_method_name)->toBe('توصيل للمنزل');
+
+    // 3 × 40 = 120 ≥ 100 → free.
+    $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 3]);
+    $this->post(route('storefront.checkout.store'), checkoutPayload());
+
+    expect(Order::query()->latest('id')->first()->shipping_total)->toBe(0);
+});
+
+it('allows store pickup without an address', function () {
+    $pickup = ShippingMethod::query()->where('type', 'pickup')->sole();
+    $product = makeSimpleProduct(price: '10.00');
+    $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
+
+    $this->post(route('storefront.checkout.store'), [
+        'customer_name' => 'سارة', 'customer_phone' => '0599123456', 'shipping_method_id' => $pickup->id,
+    ])->assertSessionHasNoErrors();
+
+    $order = Order::query()->sole();
+    expect($order->shipping_method_name)->toBe('استلام من المحل')
+        ->and($order->shipping_city)->toBeNull()
+        ->and($order->shipping_total)->toBe(0);
+});
+
+it('rejects inactive methods and methods below their minimum order', function () {
+    $delivery = ShippingMethod::query()->where('type', 'delivery')->sole();
+    $product = makeSimpleProduct(price: '10.00');
+    $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
+
+    $delivery->update(['min_order' => 5000]);
+    $this->post(route('storefront.checkout.store'), checkoutPayload())->assertSessionHasErrors('shipping_method_id');
+
+    $delivery->update(['min_order' => null, 'is_active' => false]);
+    $this->post(route('storefront.checkout.store'), checkoutPayload())->assertSessionHasErrors('shipping_method_id');
+
+    expect(Order::query()->count())->toBe(0);
+});
+
+it('lets settings managers manage shipping methods and blocks others', function () {
+    $this->actingAs(staffUser('order-manager'))->get(route('admin.shipping-methods.index'))->assertForbidden();
+
+    $this->actingAs(staffUser('admin'))->post(route('admin.shipping-methods.store'), [
+        'type' => 'delivery', 'cost' => '35', 'free_over' => '300', 'is_active' => true,
+        'translations' => ['ar' => ['name' => 'توصيل سريع', 'description' => ''], 'en' => ['name' => 'Express', 'description' => ''], 'he' => ['name' => '', 'description' => '']],
+    ])->assertRedirect(route('admin.shipping-methods.index'));
+
+    $method = ShippingMethod::query()->latest('id')->first();
+    expect($method->cost)->toBe(3500)->and($method->free_over)->toBe(30000)->and($method->translate('en')->name)->toBe('Express');
+});
+
+it('renders the shipping options at checkout and the admin shipping pages', function () {
+    $product = makeSimpleProduct(price: '10.00');
+    $this->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
+
+    $this->get(route('storefront.checkout'))->assertOk()->assertInertia(fn ($page) => $page
+        ->component('Storefront/Checkout/Index')
+        ->has('shipping_options', 2)
+        ->where('shipping_options.1.requires_address', false));
+
+    $method = ShippingMethod::query()->first();
+    $this->actingAs(staffUser('admin'));
+    $this->get(route('admin.shipping-methods.index'))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Index')->has('methods', 2));
+    $this->get(route('admin.shipping-methods.edit', $method))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Form')->where('method.translations.ar.name', 'توصيل للمنزل'));
 });

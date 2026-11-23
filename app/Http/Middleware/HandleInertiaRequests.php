@@ -41,7 +41,9 @@ class HandleInertiaRequests extends Middleware
                     'id' => $user->id,
                     'name' => $user->name,
                     'avatar' => $user->avatar(),
-                    'is_staff' => $user->can('access-admin'),
+                    'is_staff' => $isStaff = $user->can('access-admin'),
+                    // Admin routes are excluded from the storefront Ziggy list, so the URL is sent to staff only.
+                    'admin_url' => $isStaff ? route('admin.dashboard') : null,
                 ] : null,
                 // Permission names drive menu visibility only — every action is re-authorized server-side.
                 'permissions' => fn () => $user && $request->routeIs('admin.*') ? $user->getAllPermissions()->pluck('name') : [],
