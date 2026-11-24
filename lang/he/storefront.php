@@ -105,4 +105,8 @@ return [
     'whatsapp_product_message' => "שלום, אשמח לשאול על: :product\n:url",
     'spotlight_eyebrow' => 'הבחירה של אובלטה',
     'main_navigation' => 'ניווט ראשי',
+    'our_branches' => 'הסניפים שלנו',
+    'directions' => 'הוראות הגעה',
+    'show_on_map' => 'הצג במפה',
+    'map_of' => 'מפה של :name',
 ];

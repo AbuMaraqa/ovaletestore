@@ -45,10 +45,22 @@ export interface Seo {
     json_ld: Record<string, unknown>[];
 }
 
+export interface PhoneLine {
+    number: string;
+    label: string | null;
+}
+
+export interface StoreLocation {
+    name: string | null;
+    address: string | null;
+    map_embed: string;
+    directions: string;
+}
+
 export interface SharedProps {
     auth: { user: AuthUser | null; permissions: string[] };
     locale: { current: 'ar' | 'en' | 'he'; dir: 'rtl' | 'ltr'; available: LocaleOption[] };
-    site: { name: string; tagline: string | null; logo: string | null; whatsapp: string | null; phone: string | null; social: Record<string, string>; currency: string };
+    site: { name: string; tagline: string | null; logo: string | null; whatsapp: string | null; phone: string | null; social: Record<string, string>; phone_lines: PhoneLine[]; locations: StoreLocation[]; currency: string };
     cart_count: number;
     flash: { success: string | null; error: string | null };
     translations: Record<string, Record<string, unknown>>;

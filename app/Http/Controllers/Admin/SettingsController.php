@@ -60,7 +60,11 @@ class SettingsController extends Controller
             ] : [],
             'contact' => ($s = app(ContactSettings::class)) ? [
                 'phone' => $s->phone, 'whatsapp' => $s->whatsapp, 'email' => $s->email,
-                'address' => $s->address, 'social_links' => $s->social_links,
+                'social_links' => $s->social_links, 'phone_lines' => $s->phone_lines,
+                'locations' => array_map(fn (array $l) => [
+                    'name' => $l['name'] ?? [], 'address' => $l['address'] ?? [],
+                    'coordinates' => is_numeric($l['lat'] ?? null) ? $l['lat'].', '.$l['lng'] : '',
+                ], $s->locations),
             ] : [],
             'store' => ($s = app(StoreSettings::class)) ? [
                 'currency' => $s->currency, 'products_per_page' => $s->products_per_page,
@@ -74,10 +78,10 @@ class SettingsController extends Controller
         };
     }
 
-    private function localeRules(string $field, string $rule): array
+    private function localeRules(string $field, string $rule, bool $requireArabic = true): array
     {
         return collect(config('translatable.locales'))
-            ->mapWithKeys(fn ($l) => ["{$field}.{$l}" => ($l === 'ar' ? 'required|' : 'nullable|').$rule])
+            ->mapWithKeys(fn ($l) => ["{$field}.{$l}" => ($l === 'ar' && $requireArabic ? 'required|' : 'nullable|').$rule])
             ->all();
     }
 
@@ -103,18 +107,57 @@ class SettingsController extends Controller
             'phone' => ['nullable', 'string', 'max:32'],
             'whatsapp' => ['nullable', 'regex:/^[0-9]{8,15}$/'],
             'email' => ['nullable', 'email:rfc', 'max:190'],
-            ...$this->localeRules('address', 'string|max:300'),
             'social_links' => ['array'],
             'social_links.*' => ['nullable', 'url:https', 'max:300'],
+            'phone_lines' => ['array', 'max:12'],
+            'phone_lines.*.number' => ['required', 'string', 'regex:/^\+?[0-9][0-9 \-]{5,19}$/'],
+            ...$this->localeRules('phone_lines.*.label', 'string|max:120', requireArabic: false),
+            'locations' => ['array', 'max:12'],
+            ...$this->localeRules('locations.*.name', 'string|max:120'),
+            ...$this->localeRules('locations.*.address', 'string|max:300'),
+            // "31.507, 35.0374" — what Google Maps copies when you click a point.
+            'locations.*.coordinates' => ['nullable', 'string', 'regex:/^\s*-?\d{1,2}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/'],
         ]);
 
         $settings->phone = $data['phone'] ?? null;
         $settings->whatsapp = $data['whatsapp'] ?? null;
         $settings->email = $data['email'] ?? null;
-        $settings->address = array_map('strval', array_filter($data['address'] ?? []));
         $settings->social_links = collect(self::SOCIAL_NETWORKS)
             ->mapWithKeys(fn ($k) => [$k => $data['social_links'][$k] ?? null])->all();
+        $settings->phone_lines = array_values(array_map(fn (array $line) => [
+            'number' => preg_replace('/[\s\-]/', '', $line['number']),
+            'label' => $this->cleanLocalized($line['label'] ?? []),
+        ], $data['phone_lines'] ?? []));
+        $settings->locations = array_values(array_map(fn (array $location) => [
+            'name' => $this->cleanLocalized($location['name'] ?? []),
+            'address' => $this->cleanLocalized($location['address'] ?? []),
+            ...$this->coordinates($location['coordinates'] ?? null),
+        ], $data['locations'] ?? []));
         $settings->save();
+    }
+
+    /**
+     * "31.507, 35.0374" → lat/lng; empty or out of range → no pin (the map then searches the address).
+     *
+     * @return array{lat: float|null, lng: float|null}
+     */
+    private function coordinates(?string $value): array
+    {
+        $parts = filled($value) ? explode(',', (string) $value, 2) : [];
+        if (count($parts) !== 2) {
+            return ['lat' => null, 'lng' => null];
+        }
+
+        $lat = round((float) trim($parts[0]), 7);
+        $lng = round((float) trim($parts[1]), 7);
+
+        return abs($lat) <= 90 && abs($lng) <= 180 ? ['lat' => $lat, 'lng' => $lng] : ['lat' => null, 'lng' => null];
+    }
+
+    /** @return array<string, string> */
+    private function cleanLocalized(array $values): array
+    {
+        return array_map('strval', array_filter(array_intersect_key($values, array_flip(config('translatable.locales')))));
     }
 
     private function updateStore(Request $request, StoreSettings $settings): void

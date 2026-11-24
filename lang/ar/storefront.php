@@ -105,4 +105,8 @@ return [
     'whatsapp_product_message' => "مرحباً، أريد الاستفسار عن: :product\n:url",
     'spotlight_eyebrow' => 'مختارات أوفاليتي',
     'main_navigation' => 'القائمة الرئيسية',
+    'our_branches' => 'فروعنا',
+    'directions' => 'الاتجاهات',
+    'show_on_map' => 'عرض على الخريطة',
+    'map_of' => 'خريطة :name',
 ];

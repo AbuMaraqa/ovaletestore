@@ -47,3 +47,8 @@ Applied from the design review (contrast computed from the OKLCH tokens, WCAG AA
 
 ## Next design steps
 Real logo upload (Settings → General), hero photography/banners, brand strip once brands are curated, a WYSIWYG for descriptions, browser-based visual QA on mobile/tablet/desktop in all three languages.
+
+## Store locations & contact numbers (2026-11-24)
+- Taken from the original ovaletestore.com footer: 2 branches (Dura — pin of the original map; Bethlehem — no pin yet, the map searches its address) and 4 labelled numbers.
+- Editable in **Admin → Settings → Contact**: labelled phone numbers (number + label per locale) and branches (name, address per locale, coordinates pasted from Google Maps as `lat, lng`), add / reorder / delete. `ContactSettings::phoneLinesFor()` / `locationsFor()` localize them (he→en→ar) and build the Google Maps embed + directions URLs.
+- Shown in the footer (labelled number cards, WhatsApp, branches + one map that follows the selected branch — `StoreLocations.vue`) and on the contact page (the footer skips its map there). The map is a lazy `<iframe>`; CSP allows `frame-src https://www.google.com` only.

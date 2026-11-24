@@ -18,10 +18,10 @@ class PageController extends Controller
 
         return Inertia::render('Storefront/Pages/Contact', [
             'contact' => [
-                'phones' => array_values(array_filter([$contact->phone, ...$contact->extra_phones])),
+                'phone_lines' => $contact->phoneLinesFor($locale) ?: ($contact->phone ? [['number' => $contact->phone, 'label' => null]] : []),
                 'whatsapp' => $contact->whatsapp,
                 'email' => $contact->email,
-                'address' => $contact->address[$locale] ?? $contact->address['ar'] ?? null,
+                'locations' => $contact->locationsFor($locale),
                 'social' => array_filter($contact->social_links),
             ],
             'seo' => SeoData::make(__('storefront.contact_us'), __('storefront.contact_intro'))

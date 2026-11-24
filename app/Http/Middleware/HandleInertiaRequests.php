@@ -71,6 +71,8 @@ class HandleInertiaRequests extends Middleware
                 'whatsapp' => app(ContactSettings::class)->whatsapp,
                 'phone' => app(ContactSettings::class)->phone,
                 'social' => array_filter(app(ContactSettings::class)->social_links),
+                'phone_lines' => app(ContactSettings::class)->phoneLinesFor($locale),
+                'locations' => app(ContactSettings::class)->locationsFor($locale),
                 'currency' => app(StoreSettings::class)->currency,
             ],
 

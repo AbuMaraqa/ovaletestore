@@ -105,4 +105,8 @@ return [
     'whatsapp_product_message' => "Hi, I'd like to ask about: :product\n:url",
     'spotlight_eyebrow' => 'Ovalete\'s pick',
     'main_navigation' => 'Main navigation',
+    'our_branches' => 'Our branches',
+    'directions' => 'Directions',
+    'show_on_map' => 'Show on map',
+    'map_of' => 'Map of :name',
 ];
