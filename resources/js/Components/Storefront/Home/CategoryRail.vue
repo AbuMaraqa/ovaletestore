@@ -13,7 +13,7 @@ const { t } = useTrans();
 
 <template>
     <section id="categories" class="container-store mt-20 scroll-mt-32">
-        <SectionHeading data-reveal :title="t('storefront.shop_by_category')" :link="route('storefront.shop')" :link-label="t('storefront.view_all')" />
+        <SectionHeading data-reveal :title="t('storefront.shop_by_category')" :link="route('storefront.categories')" :link-label="t('storefront.all_categories')" />
         <ScrollRail :label="t('storefront.categories')" class="mt-6">
             <Link
                 v-for="category in categories"

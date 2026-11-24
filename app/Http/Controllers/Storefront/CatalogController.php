@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Storefront\CategoryResource;
 use App\Http\Resources\Storefront\ProductCardResource;
 use App\Models\Brand;
 use App\Models\BrandTranslation;
@@ -103,6 +104,38 @@ class CatalogController extends Controller
             'description' => $brand->description,
             'url' => $url,
             'logo' => self::logoUrl($brand),
+        ]);
+    }
+
+    /** All categories as large image cards, with product and live-offer counts (marketing entry page). */
+    public function categories(): Response
+    {
+        $onSale = fn ($variants) => $variants->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'regular_price')
+            ->where(fn ($q) => $q->whereNull('sale_starts_at')->orWhere('sale_starts_at', '<=', now()))
+            ->where(fn ($q) => $q->whereNull('sale_ends_at')->orWhere('sale_ends_at', '>', now()));
+
+        $categories = Category::query()->active()->whereNull('parent_id')->ordered()
+            ->with(['translations', 'media'])
+            ->withCount([
+                'products' => fn ($q) => $q->published(),
+                'products as on_sale_count' => fn ($q) => $q->published()->whereHas('activeVariants', $onSale),
+            ])
+            ->get()
+            ->filter(fn (Category $c) => $c->products_count > 0)
+            ->values();
+
+        return Inertia::render('Storefront/Categories/Index', [
+            'categories' => $categories->map(fn (Category $c) => [
+                ...(new CategoryResource($c))->resolve(),
+                'on_sale_count' => (int) $c->getAttribute('on_sale_count'),
+                'sale_url' => route('storefront.category', ['slug' => $c->slug, 'sale' => 1]),
+            ]),
+            'seo' => SeoData::make(__('storefront.categories_title'), __('storefront.categories_subtitle'))
+                ->forCurrentRoute()
+                ->withJsonLd(JsonLd::breadcrumbs([
+                    ['name' => __('common.home'), 'url' => route('storefront.home')],
+                    ['name' => __('storefront.categories'), 'url' => route('storefront.categories')],
+                ])),
         ]);
     }
 

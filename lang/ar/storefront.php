@@ -109,4 +109,11 @@ return [
     'directions' => 'الاتجاهات',
     'show_on_map' => 'عرض على الخريطة',
     'map_of' => 'خريطة :name',
+    'categories_title' => 'تسوّق حسب القسم',
+    'categories_subtitle' => 'كل ما تحتاجه لمحلك ومطبخك في مكان واحد — اختر القسم وابدأ التسوّق.',
+    'categories_stats' => ':categories قسم · :products منتج',
+    'categories_search' => 'ابحث عن قسم…',
+    'category_offers' => ':count عرض',
+    'categories_no_match' => 'لا يوجد قسم باسم «:q»',
+    'search_products_for' => 'ابحث عن «:q» في المنتجات',
 ];

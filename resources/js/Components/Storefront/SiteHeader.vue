@@ -99,7 +99,7 @@ const logout = () => router.post(route('logout'));
                     <div class="relative">
                         <button
                             type="button"
-                            :class="['relative inline-flex items-center gap-1 py-2 transition hover:text-brand-700', isActive('storefront.category') && 'after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#c9a24d]']"
+                            :class="['relative inline-flex items-center gap-1 py-2 transition hover:text-brand-700', (isActive('storefront.category') || isActive('storefront.categories')) && 'after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#c9a24d]']"
                             :aria-expanded="openMenu === 'categories'"
                             @click="toggle('categories')"
                         >
@@ -110,6 +110,10 @@ const logout = () => router.post(route('logout'));
                                 <div class="grid grid-cols-3 gap-1 rounded-3xl bg-white p-4 shadow-lift ring-1 ring-stone-100" data-lenis-prevent>
                                     <Link v-for="c in categories" :key="c.id" :href="c.url" class="rounded-xl px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-800" @click="openMenu = null">
                                         {{ c.name }}
+                                    </Link>
+                                    <Link :href="route('storefront.categories')" class="col-span-3 mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-50 px-3 py-3 text-sm font-bold text-brand-800 hover:bg-brand-100" @click="openMenu = null">
+                                        {{ t('storefront.all_categories') }}
+                                        <Icon name="arrow" class="size-4 rtl:-scale-x-100" />
                                     </Link>
                                 </div>
                             </div>

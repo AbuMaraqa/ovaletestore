@@ -109,4 +109,11 @@ return [
     'directions' => 'הוראות הגעה',
     'show_on_map' => 'הצג במפה',
     'map_of' => 'מפה של :name',
+    'categories_title' => 'קנייה לפי קטגוריה',
+    'categories_subtitle' => 'כל מה שהעסק והמטבח שלכם צריכים במקום אחד — בחרו קטגוריה והתחילו לקנות.',
+    'categories_stats' => ':categories קטגוריות · :products מוצרים',
+    'categories_search' => 'חיפוש קטגוריה…',
+    'category_offers' => ':count מבצעים',
+    'categories_no_match' => 'אין קטגוריה בשם „:q”',
+    'search_products_for' => 'חיפוש „:q” במוצרים',
 ];

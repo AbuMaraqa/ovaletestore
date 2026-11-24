@@ -45,6 +45,7 @@ const year = new Date().getFullYear();
                     <li v-for="category in categories" :key="category.id">
                         <Link :href="category.url" class="transition hover:text-white">{{ category.name }}</Link>
                     </li>
+                    <li><Link :href="route('storefront.categories')" class="font-semibold text-[#e4cfa3] hover:text-white">{{ t('storefront.all_categories') }}</Link></li>
                     <li><Link :href="route('storefront.shop')" class="font-semibold text-[#e4cfa3] hover:text-white">{{ t('storefront.shop') }}</Link></li>
                 </ul>
             </nav>

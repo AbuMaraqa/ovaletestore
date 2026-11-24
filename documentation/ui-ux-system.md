@@ -52,3 +52,8 @@ Real logo upload (Settings → General), hero photography/banners, brand strip o
 - Taken from the original ovaletestore.com footer: 2 branches (Dura — pin of the original map; Bethlehem — no pin yet, the map searches its address) and 4 labelled numbers.
 - Editable in **Admin → Settings → Contact**: labelled phone numbers (number + label per locale) and branches (name, address per locale, coordinates pasted from Google Maps as `lat, lng`), add / reorder / delete. `ContactSettings::phoneLinesFor()` / `locationsFor()` localize them (he→en→ar) and build the Google Maps embed + directions URLs.
 - Shown in the footer (labelled number cards, WhatsApp, branches + one map that follows the selected branch — `StoreLocations.vue`) and on the contact page (the footer skips its map there). The map is a lazy `<iframe>`; CSP allows `frame-src https://www.google.com` only.
+
+## Categories page & card heights (2026-11-24)
+- `/{locale}/categories` (`storefront.categories`): every active category with published products as a 4:3 image tile, product count, and a "N offers" badge linking to `?sale=1` (live sales only: dates respected). Arabic-aware quick filter (ignores diacritics, unifies ا/أ/إ/آ, ة/ه, ى/ي) with an empty state that offers a product search. Linked from the header mega-menu, mobile menu, home category rail and footer; in the pages sitemap (with brands).
+- Product cards are identical in height everywhere: fixed rows (category 1 line — always reserved, name 2 lines, price 1 line), `h-full` in grids and rails, image 6:5 and 40px button → shorter card.
+- `useTrans` replaces placeholders in one pass, longest name first (`:to` no longer breaks `:total` — "40tal" bug on the shop count).

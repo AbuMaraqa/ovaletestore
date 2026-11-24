@@ -7,8 +7,9 @@ import { useTrans } from '@/Composables/useTrans';
 import type { ProductCard } from '@/types';
 
 /**
- * Product card: image → name → price (with "-X%" saving) → category → full-width "Add to cart".
- * Sized for Arabic readability (Tajawal has a small x-height) and 44px touch targets.
+ * Product card: image → category → name → price (with "-X%" saving) → full-width "Add to cart".
+ * Every row has a fixed height (category 1 line, name 2 lines, price 1 line) so all cards in a row are
+ * identical whatever the data, and the card fills its grid/rail cell (h-full).
  */
 const props = withDefaults(defineProps<{ product: ProductCard; priority?: boolean }>(), { priority: false });
 const { t } = useTrans();
@@ -25,8 +26,8 @@ function quickAdd(): void {
 </script>
 
 <template>
-    <article class="group relative flex flex-col rounded-2xl border border-stone-200/80 bg-white p-2.5 transition duration-300 hover:-translate-y-1 hover:border-stone-200 hover:shadow-lift">
-        <Link :href="product.url" class="relative block aspect-square overflow-hidden rounded-xl bg-white" :aria-label="product.name" tabindex="-1">
+    <article class="group relative flex h-full w-full flex-col rounded-2xl border border-stone-200/80 bg-white p-2.5 transition duration-300 hover:-translate-y-1 hover:border-stone-200 hover:shadow-lift">
+        <Link :href="product.url" class="relative block aspect-[6/5] overflow-hidden rounded-xl bg-white" :aria-label="product.name" tabindex="-1">
             <ResponsiveImage
                 :image="product.image"
                 :priority="priority"
@@ -42,25 +43,25 @@ function quickAdd(): void {
             </span>
         </Link>
 
-        <div class="mt-3 flex flex-1 flex-col px-1">
-            <h3 class="line-clamp-2 min-h-[3.1em] text-[15px] leading-[1.55] font-semibold text-stone-800 sm:text-base">
+        <div class="mt-2 flex flex-1 flex-col px-1">
+            <p class="h-[1.125rem] truncate text-xs leading-[1.125rem] text-stone-500">{{ product.category }}</p>
+            <h3 class="mt-0.5 line-clamp-2 h-[3.1em] text-[15px] leading-[1.55] font-semibold text-stone-800 sm:text-base">
                 <Link :href="product.url" class="hover:text-brand-700">{{ product.name }}</Link>
             </h3>
 
-            <p class="mt-2 flex flex-wrap items-baseline gap-x-2 leading-tight">
+            <p class="mt-1.5 flex h-7 items-baseline gap-x-2 overflow-hidden leading-7 whitespace-nowrap">
                 <span class="text-lg font-extrabold sm:text-xl" :class="product.on_sale ? 'text-brand-700' : 'text-cocoa'" dir="ltr">
                     <template v-if="product.price_max">{{ t('storefront.from_price', { price: product.price }) }}</template>
                     <template v-else>{{ product.price }}</template>
                 </span>
                 <span v-if="product.regular_price" class="text-[13px] text-stone-500 line-through" dir="ltr">{{ product.regular_price }}</span>
             </p>
-            <p v-if="product.category" class="mt-1 truncate text-xs text-stone-500">{{ product.category }}</p>
 
-            <div class="mt-auto pt-3">
+            <div class="mt-auto pt-2.5">
                 <button
                     v-if="product.default_variant_id && product.in_stock"
                     type="button"
-                    class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-cocoa text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60"
+                    class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-cocoa text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60"
                     :disabled="adding"
                     @click="quickAdd"
                 >
@@ -71,11 +72,11 @@ function quickAdd(): void {
                 <Link
                     v-else-if="product.is_variable && product.in_stock"
                     :href="product.url"
-                    class="inline-flex h-11 w-full items-center justify-center rounded-full text-sm font-bold text-cocoa ring-1 ring-cocoa transition hover:bg-cocoa hover:text-white"
+                    class="inline-flex h-10 w-full items-center justify-center rounded-full text-sm font-bold text-cocoa ring-1 ring-cocoa transition hover:bg-cocoa hover:text-white"
                 >
                     {{ t('storefront.select_options') }}
                 </Link>
-                <span v-else class="inline-flex h-11 w-full items-center justify-center rounded-full bg-stone-100 text-sm font-semibold text-stone-500">{{ t('storefront.out_of_stock') }}</span>
+                <span v-else class="inline-flex h-10 w-full items-center justify-center rounded-full bg-stone-100 text-sm font-semibold text-stone-500">{{ t('storefront.out_of_stock') }}</span>
             </div>
         </div>
     </article>

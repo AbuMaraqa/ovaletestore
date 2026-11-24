@@ -38,7 +38,7 @@ useGsap(root, ({ gsap }) => {
                 </Link>
             </div>
             <ScrollRail :label="t('storefront.offers_title')" tone="dark" class="relative mt-10">
-                <div v-for="product in products" :key="product.id" class="w-[46%] shrink-0 snap-start text-cocoa sm:w-[31%] md:w-[23.5%] lg:w-[18.9%]">
+                <div v-for="product in products" :key="product.id" class="flex w-[46%] shrink-0 snap-start text-cocoa sm:w-[31%] md:w-[23.5%] lg:w-[18.9%]">
                     <ProductCard :product="product" />
                 </div>
             </ScrollRail>

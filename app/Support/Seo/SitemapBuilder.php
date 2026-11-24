@@ -56,7 +56,7 @@ class SitemapBuilder
 
     private function pages(Sitemap $sitemap, string $locale): void
     {
-        foreach (['storefront.home' => 1.0, 'storefront.shop' => 0.8] as $route => $priority) {
+        foreach (['storefront.home' => 1.0, 'storefront.shop' => 0.8, 'storefront.categories' => 0.8, 'storefront.brands' => 0.6] as $route => $priority) {
             $sitemap->add($this->url(fn (string $l) => $this->localized($l, route($route)), $locale)->setPriority($priority));
         }
     }

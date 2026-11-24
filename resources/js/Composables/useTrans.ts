@@ -14,11 +14,12 @@ export function useTrans() {
             .split('.')
             .reduce<unknown>((node, part) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[part] : undefined), page.props.translations);
 
-        let text = typeof value === 'string' ? value : key;
-        for (const [name, replacement] of Object.entries(replacements)) {
-            text = text.replaceAll(`:${name}`, String(replacement));
-        }
-        return text;
+        const text = typeof value === 'string' ? value : key;
+        const names = Object.keys(replacements);
+        if (!names.length) return text;
+        // One pass, longest name first, like Laravel: ":to" must never eat the start of ":total".
+        const pattern = new RegExp(`:(${names.sort((a, b) => b.length - a.length).join('|')})`, 'g');
+        return text.replace(pattern, (_, name: string) => String(replacements[name]));
     }
 
     return { t };

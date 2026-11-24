@@ -109,4 +109,11 @@ return [
     'directions' => 'Directions',
     'show_on_map' => 'Show on map',
     'map_of' => 'Map of :name',
+    'categories_title' => 'Shop by category',
+    'categories_subtitle' => 'Everything your shop and kitchen need in one place — pick a category and start shopping.',
+    'categories_stats' => ':categories categories · :products products',
+    'categories_search' => 'Search categories…',
+    'category_offers' => ':count offers',
+    'categories_no_match' => 'No category named “:q”',
+    'search_products_for' => 'Search products for “:q”',
 ];

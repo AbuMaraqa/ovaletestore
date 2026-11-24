@@ -301,7 +301,7 @@ it('hides inactive companies from the POS order screen', function () {
 
 it('serves every public page', function () {
     $category = Category::query()->create(['is_active' => true, 'ar' => ['name' => 'شوكولاتة']]);
-    $product = makeSimpleProduct(overrides: ['categories' => [$category->id]]);
+    $product = makeSimpleProduct(overrides: ['category_ids' => [$category->id]]);
 
     foreach ([
         route('storefront.home'), route('storefront.shop'), route('storefront.shop', ['q' => 'منتج', 'sort' => 'price_asc', 'sale' => 1]),

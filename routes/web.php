@@ -30,6 +30,7 @@ Route::prefix(LaravelLocalization::setLocale())
         Route::name('storefront.')->group(function () {
             Route::get('/', Storefront\HomeController::class)->name('home');
             Route::get('/shop', [Storefront\CatalogController::class, 'index'])->name('shop');
+            Route::get('/categories', [Storefront\CatalogController::class, 'categories'])->name('categories');
             Route::get('/product-category/{slug}', [Storefront\CatalogController::class, 'category'])->name('category');
             Route::get('/product/{slug}', [Storefront\ProductController::class, 'show'])->name('product');
             Route::get('/brands', [Storefront\CatalogController::class, 'brands'])->name('brands');
