@@ -112,7 +112,7 @@ it('exports orders read-only through a wp-admin login', function () {
     ]);
     $path = storage_path('framework/testing/export-'.uniqid().'.json');
 
-    $this->artisan('woo:export-orders', ['--path' => $path])->assertSuccessful();
+    $this->artisan('woo:export-orders', ['--path' => $path, '--delay' => 0])->assertSuccessful();
 
     expect(json_decode(File::get($path), true)['orders'][0]['number'])->toBe('WC-7001');
     Http::assertSent(fn ($request) => $request->hasHeader('X-WP-Nonce', 'abcdef1234') || ! str_contains($request->url(), 'wp-json'));

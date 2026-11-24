@@ -7,6 +7,7 @@ use App\Migration\Woo\WooOrderMapper;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\File;
 use Throwable;
 
@@ -15,7 +16,7 @@ use Throwable;
  * for Database\Seeders\OrderSeeder. The file holds customer personal data: it is git-ignored and must
  * never be committed or shared.
  */
-#[Signature('woo:export-orders {--path= : Output file (default: database/data/orders/orders.json)} {--no-notes : Skip the order notes (one request per order)}')]
+#[Signature('woo:export-orders {--path= : Output file (default: database/data/orders/orders.json)} {--no-notes : Skip the order notes (one request per order)} {--delay=2000 : Pause between notes requests in ms (the source firewall blocks bursts)}')]
 #[Description('Export all WooCommerce orders (read-only) as seed data for OrderSeeder')]
 class WooExportOrders extends Command
 {
@@ -38,7 +39,7 @@ class WooExportOrders extends Command
 
         foreach ($client->orderPages() as $page) {
             foreach ($page as $row) {
-                $notes = $this->option('no-notes') ? [] : $client->orderNotes((int) $row['id']);
+                $notes = $this->option('no-notes') ? [] : $this->notes($client, (int) $row['id']);
                 $orders[] = WooOrderMapper::map($row, $notes);
                 $bar->advance();
             }
@@ -60,5 +61,26 @@ class WooExportOrders extends Command
         $this->components->info("Wrote {$path} — contains customer data, do not commit. Next: php artisan db:seed --class=OrderSeeder");
 
         return count($orders) === $totals['total'] ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * Notes are one request per order: paced, and after a dropped connection (firewall rate limit)
+     * wait and try once more. A second failure aborts the run before anything is written.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function notes(AdminApiClient $client, int $orderId): array
+    {
+        usleep(max(0, (int) $this->option('delay')) * 1000);
+
+        try {
+            return $client->orderNotes($orderId);
+        } catch (ConnectionException) {
+            $this->newLine();
+            $this->components->warn("Connection dropped at order {$orderId}; waiting 90s before retrying…");
+            sleep(90);
+
+            return $client->orderNotes($orderId);
+        }
     }
 }
