@@ -56,5 +56,5 @@ php artisan woo:verify-orders            # export vs DB: count, totals, items, p
 - History only: the seeder never changes stock and fires no events (no notifications, no activity log).
 
 ### Result (2026-11-24, `woo:verify-orders`)
-101 / 101 orders imported (73 completed, 27 cancelled incl. 1 refunded, 1 open POS order), ₪43,850.75 total, ₪4,270.00 delivery, 886 line items (795 linked to a current product, 91 to products no longer published). No missing orders, no total/status/item mismatches.
-Order notes are not in this first import: the source host's firewall started refusing this machine's connections after the sign-ins, so the export was built from the order pages already downloaded. Re-run `woo:export-orders` + `OrderSeeder` once access returns to add the notes (updates in place).
+101 / 101 orders imported (73 completed, 27 cancelled incl. 1 refunded, 1 open POS order), ₪43,850.75 total, ₪4,270.00 delivery, 886 line items, 383 notes (795 items linked to a current product, 91 to products no longer published). No missing orders, no total/status/item mismatches.
+383 order notes imported (status history + one internal "WooCommerce #id (status)" note per order). The source firewall blocks bursts of requests, so the export pauses 2 s between notes requests (`--delay`) and retries once after a dropped connection.
