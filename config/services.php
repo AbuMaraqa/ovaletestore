@@ -39,6 +39,9 @@ return [
         'base_url' => env('WOO_BASE_URL', 'https://ovaletestore.com'),
         'consumer_key' => env('WOO_CONSUMER_KEY'),
         'consumer_secret' => env('WOO_CONSUMER_SECRET'),
+        // wp-admin login, used only by `woo:export-orders` to read orders (never stored in code).
+        'admin_user' => env('WOO_ADMIN_USER'),
+        'admin_password' => env('WOO_ADMIN_PASSWORD'),
         'timeout' => 60,
         'per_page' => 100,
     ],

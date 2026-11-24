@@ -42,3 +42,19 @@ php artisan woo:verify                  # compare source vs DB, write documentat
 
 ## Image quality policy
 Original file kept untouched (media library original). Conversions (queued): `thumb` 400w, `card` 800w, `large` 1600w, each WebP q=82 plus AVIF q=60 for `card/large`, never upscaled; responsive srcset for `large`.
+
+## Orders (historical)
+Source: `wc/v3` through a normal wp-admin login (`WOO_ADMIN_USER` / `WOO_ADMIN_PASSWORD` in `.env` only — cookie auth + REST nonce, GET requests only).
+```
+php artisan woo:export-orders            # all orders (any status) + notes → database/data/orders/orders.json
+php artisan db:seed --class=OrderSeeder  # idempotent import (also run by DatabaseSeeder when the file exists)
+php artisan woo:verify-orders            # export vs DB: count, totals, items, per-status, per-order mismatches
+```
+- `database/data/orders/` is **git-ignored**: it contains customer names, phones and addresses. Copy it to a server by hand (or run the export there); never commit or share it.
+- Mapping (`App\Migration\Woo\WooOrderMapper`): order `id` → `orders.source_id`, number `WC-{id}`; money → agorot; statuses completed→completed, processing→processing, pending/on-hold/pos-*→pending, cancelled/refunded/failed→cancelled (original status + refund amount/reason kept as an internal note); billing city → `shipping_city`, area + address lines → `shipping_address`; delivery line title → our region (`inside` / `west_bank` / `jerusalem`); `trp_language` → order locale; `woocommerce-pos` orders → channel `pos`.
+- Items link to the migrated product by WooCommerce product id; products no longer on the store keep the name/SKU/price snapshot (the bilingual name is split to the order's language). Customers are linked by e-mail when an account with that e-mail exists here.
+- History only: the seeder never changes stock and fires no events (no notifications, no activity log).
+
+### Result (2026-11-24, `woo:verify-orders`)
+101 / 101 orders imported (73 completed, 27 cancelled incl. 1 refunded, 1 open POS order), ₪43,850.75 total, ₪4,270.00 delivery, 886 line items (795 linked to a current product, 91 to products no longer published). No missing orders, no total/status/item mismatches.
+Order notes are not in this first import: the source host's firewall started refusing this machine's connections after the sign-ins, so the export was built from the order pages already downloaded. Re-run `woo:export-orders` + `OrderSeeder` once access returns to add the notes (updates in place).

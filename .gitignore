@@ -23,3 +23,5 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /storage/framework/phpstan/
+# Exported WooCommerce orders contain customer personal data: never commit
+/database/data/orders/

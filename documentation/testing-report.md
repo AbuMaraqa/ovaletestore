@@ -1,6 +1,6 @@
 # Testing Report
 
-Last run: 2026-11-24 — `php artisan test` → **110 passed, 604 assertions** (Pest, SQLite in-memory). `vendor/bin/pint` → clean. `vendor/bin/phpstan analyse` (Larastan) → **no errors** (107 baseline entries, down from 110). `npx vue-tsc --noEmit` → clean. `npm run build` → OK. `composer audit` / `npm audit` → 0 advisories.
+Last run: 2026-11-24 — `php artisan test` → **115 passed, 662 assertions** (Pest, SQLite in-memory). `vendor/bin/pint` → clean. `vendor/bin/phpstan analyse` (Larastan) → **no errors** (107 baseline entries, down from 110). `npx vue-tsc --noEmit` → clean. `npm run build` → OK. `composer audit` / `npm audit` → 0 advisories.
 
 | Suite | Covers |
 |---|---|
@@ -9,6 +9,7 @@ Last run: 2026-11-24 — `php artisan test` → **110 passed, 604 assertions** (
 | Admin/AuthorizationTest | guest redirect; non-staff 403; deactivated staff signed out; role matrix (product vs order manager); super-admin cannot be granted; admin cannot edit super-admin; admin product create with validation + XSS sanitizing + price conversion |
 | Localization/LocalizedRoutesTest | ar/en/he pages with correct `lang`/`dir`; legacy Arabic URL with diacritics; heâ†’enâ†’ar fallback; cross-locale slug 301; server-rendered canonical/hreflang/JSON-LD; sitemap content excludes private pages |
 | Security/SecurityTest | security headers; no-store on admin and POS; deactivated users signed out; e-mail change needs current password; image downloader host allow-list (SSRF); disguised PHP upload rejected; safe generated filenames; login throttling (429); admin routes not leaked to storefront |
+| Migration/OrderImportTest | Woo order → agorot/status/address/region/locale/notes mapping (refund note, POS channel); seeder idempotent, links products + customers + delivery region, keeps stock untouched; `woo:verify-orders` passes/fails; export uses wp-admin cookie login + nonce and GET only; failed login exports nothing |
 | Migration/WooImporterTest | idempotent import (re-run updates, no duplicates); bilingual name split; Arabic slug preserved; HTML sanitized; duplicate SKU handling; TranslatePress 301; dry-run writes nothing; `-scaled` original preference |
 | Storefront/HomePageTest | all homepage sections present; best-sellers label only when backed by real orders (ranked by quantity); on-sale catalog filter |
 | Storefront/CartAndCheckoutTest (shipping) | chosen method charged and snapshotted; free-over threshold; pickup without address; inactive / below-minimum methods rejected; admin CRUD + permission; checkout and admin pages render |

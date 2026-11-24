@@ -8,6 +8,7 @@ Multilingual: **ar (default, RTL)**, en (LTR), he (RTL). Currency: ILS (stored i
 - `php artisan test` (Pest) · `vendor/bin/pint` · `vendor/bin/phpstan analyse`
 - `npm run build` · `npm run types` (vue-tsc)
 - `php artisan woo:inspect | woo:migrate [--images] [--dry-run] | woo:verify`
+- `php artisan woo:export-orders` → `db:seed --class=OrderSeeder` → `woo:verify-orders` (orders file holds customer data: git-ignored)
 - `php artisan sitemap:generate`
 
 ## Architecture (see documentation/architecture.md)

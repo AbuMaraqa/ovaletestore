@@ -15,6 +15,7 @@ use Spatie\Activitylog\Support\LogOptions;
 /**
  * @property int $id
  * @property string $number
+ * @property int|null $source_id WooCommerce order id for imported history
  * @property OrderStatus $status
  * @property OrderChannel $channel
  * @property PaymentMethod $payment_method
