@@ -28,7 +28,7 @@ trait HasOptimizedImages
                 ->quality($width <= 400 ? 80 : 82)
                 ->performOnCollections(...$collections);
 
-            if ($width >= 800) {
+            if ($width >= 800 && self::canEncodeAvif()) {
                 $this->addMediaConversion("{$name}_avif")
                     ->fit(Fit::Max, $width, $width)
                     ->format('avif')
@@ -40,6 +40,20 @@ trait HasOptimizedImages
 
     /** @return list<string> */
     abstract protected function optimizedImageCollections(): array;
+
+    /**
+     * AVIF derivatives are optional: a server whose GD/Imagick cannot encode AVIF would
+     * otherwise fail the whole conversion job (and skip the later webp sizes).
+     * ImageResource only emits an AVIF srcset for conversions that were generated.
+     */
+    public static function canEncodeAvif(): bool
+    {
+        static $supported = null;
+
+        return $supported ??= config('media-library.image_driver') === 'imagick'
+            ? class_exists(\Imagick::class) && \Imagick::queryFormats('AVIF') !== []
+            : function_exists('imageavif') && (bool) (gd_info()['AVIF Support'] ?? false);
+    }
 
     /** @return list<string> */
     public static function acceptedImageMimes(): array
