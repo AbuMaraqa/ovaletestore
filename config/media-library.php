@@ -245,6 +245,12 @@ return [
     'image_driver' => env('IMAGE_DRIVER', 'gd'),
 
     /*
+     * Ovalete: force AVIF derivatives on/off (null = auto-detect from the image driver).
+     * See App\Support\ImageSizes::avifEnabled().
+     */
+    'avif' => env('MEDIA_AVIF'),
+
+    /*
      * FFMPEG & FFProbe binaries paths, only used if you try to generate video
      * thumbnails and have installed the php-ffmpeg/php-ffmpeg composer
      * dependency.

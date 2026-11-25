@@ -19,12 +19,14 @@ class ImageResource extends JsonResource
     {
         $webp = [];
         $avif = [];
+        $avifEnabled = ImageSizes::avifEnabled();
 
         foreach (ImageSizes::WIDTHS as $name => $width) {
             if ($this->hasGeneratedConversion($name)) {
                 $webp[] = $this->getUrl($name).' '.$width.'w';
             }
-            if ($this->hasGeneratedConversion("{$name}_avif")) {
+            // The conversion must also be registered here: getUrl() throws for unregistered ones.
+            if ($avifEnabled && $this->hasGeneratedConversion("{$name}_avif")) {
                 $avif[] = $this->getUrl("{$name}_avif").' '.$width.'w';
             }
         }
