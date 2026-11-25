@@ -13,6 +13,7 @@ use App\Support\CurrencyContext;
 use App\Support\PriceContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
@@ -21,11 +22,14 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Mcamara\LaravelLocalization\Traits\LoadsTranslatedCachedRoutes;
 use Spatie\Activitylog\Actions\LogActivityAction;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 
 class AppServiceProvider extends ServiceProvider
 {
+    use LoadsTranslatedCachedRoutes;
+
     public function register(): void
     {
         // One pricing context per request / queue job (trader tier of the signed-in user).
@@ -35,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // `route:trans:cache` writes one route file per locale; without this the framework loads the
+        // locale-less default file and every /ar, /en, /he URL 404s once routes are cached.
+        RouteServiceProvider::loadCachedRoutesUsing(fn () => $this->loadCachedRoutes());
+
         // Fail loudly outside production on silently discarded / missing attributes,
         // and on lazy loading (N+1) during local HTTP requests.
         $strict = ! $this->app->isProduction();
