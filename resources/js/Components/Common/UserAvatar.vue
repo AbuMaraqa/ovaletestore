@@ -10,13 +10,13 @@ withDefaults(defineProps<{ avatar: Avatar; name: string; size?: string; ring?: b
         v-if="avatar.url"
         :src="avatar.url"
         :alt="name"
-        :class="[size, 'shrink-0 rounded-full object-cover', ring && 'border-2 border-green-500']"
+        :class="[size, 'shrink-0 rounded-full object-cover', ring && 'ring-2 ring-primary/40 ring-offset-1 ring-offset-background']"
     />
     <span
         v-else
         role="img"
         :aria-label="name"
-        :class="[size, 'inline-flex shrink-0 select-none items-center justify-center rounded-full font-sans text-sm font-bold leading-none text-white', ring && 'border-2 border-green-500']"
+        :class="[size, 'inline-flex shrink-0 select-none items-center justify-center rounded-full font-sans text-sm font-bold leading-none text-white', ring && 'ring-2 ring-primary/40 ring-offset-1 ring-offset-background']"
         :style="{ backgroundColor: avatar.color }"
     >
         <span aria-hidden="true" class="translate-y-px">{{ avatar.initials }}</span>

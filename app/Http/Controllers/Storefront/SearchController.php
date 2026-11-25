@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Queries\CatalogQuery;
-use App\Support\Money;
+use App\Support\CurrencyContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,7 +28,7 @@ class SearchController extends Controller
                 'name' => $p->name,
                 'url' => route('storefront.product', ['slug' => $p->slug]),
                 'image' => $image ? ($image->hasGeneratedConversion('thumb') ? $image->getUrl('thumb') : $image->getUrl()) : null,
-                'price' => Money::format($price),
+                'price' => app(CurrencyContext::class)->format($price),
             ];
         });
 

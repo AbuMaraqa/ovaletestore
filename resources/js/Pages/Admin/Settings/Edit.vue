@@ -1,23 +1,39 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import FontSettingsFields from '@/Components/Admin/Settings/FontSettingsFields.vue';
 import LocationsEditor from '@/Components/Admin/Settings/LocationsEditor.vue';
+import MailSettingsFields from '@/Components/Admin/Settings/MailSettingsFields.vue';
+import MailTestCard from '@/Components/Admin/Settings/MailTestCard.vue';
 import PhoneLinesEditor from '@/Components/Admin/Settings/PhoneLinesEditor.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useTrans } from '@/Composables/useTrans';
+import type { SharedProps } from '@/types';
 
 type Localized = Record<string, string>;
-const props = defineProps<{ group: 'general' | 'contact' | 'store' | 'seo'; groups: string[]; values: Record<string, any>; locales: string[] }>();
+const props = defineProps<{ group: 'general' | 'contact' | 'store' | 'seo' | 'mail'; groups: string[]; values: Record<string, any>; locales: string[] }>();
 const { t } = useTrans();
 
 /** File inputs are separate keys (logo/favicon/og_image); existing URLs are display-only. */
 const fill = (values?: Localized): Localized => Object.fromEntries(props.locales.map((l) => [l, values?.[l] ?? '']));
 const localized = (key: string): Localized => Object.fromEntries(props.locales.map((l) => [l, (props.values[key] as Localized | undefined)?.[l] ?? '']));
 const initial: Record<string, any> = {
-    general: { site_name: localized('site_name'), tagline: localized('tagline'), logo: null, favicon: null },
+    general: {
+        site_name: localized('site_name'),
+        tagline: localized('tagline'),
+        logo: null,
+        favicon: null,
+        font_family: props.values.font_family ?? 'tajawal',
+        font_name: props.values.font_name ?? 'OT Magnit Arabic',
+        font_scope: props.values.font_scope ?? 'all',
+        font_locales: props.values.font_locales ?? ['ar'],
+        font_regular: null,
+        font_medium: null,
+        font_bold: null,
+    },
     contact: {
         phone: props.values.phone ?? '',
         whatsapp: props.values.whatsapp ?? '',
@@ -28,7 +44,16 @@ const initial: Record<string, any> = {
     },
     store: { ...props.values },
     seo: { home_title: localized('home_title'), home_description: localized('home_description'), og_image: null, allow_indexing: props.values.allow_indexing },
+    mail: {
+        from_name: props.values.from_name ?? '',
+        from_address: props.values.from_address ?? '',
+        order_recipients: props.values.order_recipients ?? '',
+        notify_new_order: props.values.notify_new_order,
+        customer_confirmation: props.values.customer_confirmation,
+        customer_status_updates: props.values.customer_status_updates,
+    },
 }[props.group];
+const siteName = usePage<SharedProps>().props.site.name;
 
 const form = useForm<Record<string, any>>({ ...initial, _method: 'put' });
 const errors = computed(() => form.errors as Record<string, string>);
@@ -73,6 +98,8 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                             <input id="favicon" type="file" accept="image/png,image/x-icon" class="kt-input" @change="setFile('favicon', $event)" />
                         </FormField>
                     </div>
+                    <!-- Edits the fields of this same form object in place. -->
+                    <FontSettingsFields :model-value="form as any" :uploaded="values.font_files ?? {}" :locales="locales" :errors="errors" />
                 </template>
 
                 <template v-else-if="group === 'contact'">
@@ -90,9 +117,9 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
 
                 <template v-else-if="group === 'store'">
                     <div class="grid gap-5 md:grid-cols-3">
-                        <FormField id="currency" :label="t('admin.currency')" :error="errors.currency">
-                            <select id="currency" v-model="form.currency" class="kt-select"><option v-for="c in ['ILS', 'USD', 'JOD']" :key="c" :value="c">{{ c }}</option></select>
-                        </FormField>
+                        <div class="flex items-end">
+                            <KtButton :href="route('admin.currencies.index')" variant="ghost" icon="dollar">{{ t('currencies.title') }}</KtButton>
+                        </div>
                         <FormField id="ppp" :label="t('admin.products_per_page')" :error="errors.products_per_page"><input id="ppp" v-model.number="form.products_per_page" type="number" min="8" max="96" class="kt-input" /></FormField>
                         <FormField id="min" :label="t('admin.min_order_total')" :error="errors.min_order_total"><input id="min" v-model="form.min_order_total" type="number" step="0.01" min="0" class="kt-input" dir="ltr" /></FormField>
                         <div class="flex items-end">
@@ -102,6 +129,8 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                     <label class="flex items-center gap-3 text-sm"><input v-model="form.show_out_of_stock" type="checkbox" class="kt-switch" /> {{ t('admin.show_out_of_stock') }}</label>
                     <label class="flex items-center gap-3 text-sm"><input v-model="form.guest_checkout" type="checkbox" class="kt-switch" /> {{ t('admin.guest_checkout') }}</label>
                 </template>
+
+                <MailSettingsFields v-else-if="group === 'mail'" v-model="form" :errors="errors" :site-name="siteName" :default-from="values.transport.default_from" />
 
                 <template v-else>
                     <FormField v-for="l in locales" :id="`ht-${l}`" :key="l" :label="`${t('admin.home_title')} (${l})`" :error="errors[`home_title.${l}`]" :required="l === 'ar'">
@@ -120,4 +149,6 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
             <template #footer><KtButton type="submit" :loading="form.processing" icon="check" class="ms-auto">{{ t('common.save') }}</KtButton></template>
         </KtCard>
     </form>
+
+    <MailTestCard v-if="group === 'mail'" :transport="values.transport" />
 </template>

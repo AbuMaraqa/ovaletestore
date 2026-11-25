@@ -6,7 +6,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
-use App\Settings\StoreSettings;
+use App\Support\Money;
 use Spatie\SchemaOrg\Schema;
 
 /** Typed schema.org builders (spatie/schema-org). */
@@ -56,7 +56,7 @@ final class JsonLd
 
     public static function product(Product $product, string $url, ?string $image): array
     {
-        $currency = app(StoreSettings::class)->currency;
+        $currency = Money::storeCurrency(); // structured data: base-currency prices
 
         $offers = $product->activeVariants->map(function (ProductVariant $variant) use ($currency, $url) {
             return Schema::offer()

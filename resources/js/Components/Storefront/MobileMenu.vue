@@ -2,6 +2,7 @@
 import { Link, router } from '@inertiajs/vue3';
 import { onBeforeUnmount, watch } from 'vue';
 import Icon from '@/Components/Storefront/Icon.vue';
+import { useCurrency } from '@/Composables/useCurrency';
 import { useLocale } from '@/Composables/useLocale';
 import { lockScroll } from '@/Composables/useMotion';
 import { useTrans } from '@/Composables/useTrans';
@@ -11,6 +12,7 @@ defineProps<{ categories: { id: number; name: string; url: string }[] }>();
 
 const { t } = useTrans();
 const { current, available } = useLocale();
+const currency = useCurrency();
 
 watch(open, (value) => {
     document.documentElement.classList.toggle('overflow-hidden', value);
@@ -71,6 +73,21 @@ onBeforeUnmount(() => {
                     >
                         {{ locale.native }}
                     </a>
+                </div>
+                <p v-if="currency.options.value.length" class="px-4 pb-2 text-xs font-bold text-stone-500">{{ t('storefront.currency') }}</p>
+                <div v-if="currency.options.value.length" class="flex gap-2 px-4 pb-4" role="group" :aria-label="t('storefront.currency')">
+                    <button
+                        v-for="c in currency.options.value"
+                        :key="c.code"
+                        type="button"
+                        class="chip flex-1 justify-center"
+                        :class="{ 'bg-cocoa text-white ring-cocoa': c.code === currency.current.value }"
+                        :aria-pressed="c.code === currency.current.value"
+                        dir="ltr"
+                        @click="currency.choose(c.code)"
+                    >
+                        {{ c.symbol }} {{ c.code }}
+                    </button>
                 </div>
             </aside>
         </Transition>

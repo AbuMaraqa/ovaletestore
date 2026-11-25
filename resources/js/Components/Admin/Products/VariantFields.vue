@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TierPriceFields from '@/Components/Admin/Products/TierPriceFields.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import { useTrans } from '@/Composables/useTrans';
 import type { VariantForm } from '@/types/admin';
@@ -49,4 +50,5 @@ const id = (field: string) => `${props.prefix.replace('.', '-')}-${field}`;
             </div>
         </template>
     </div>
+    <TierPriceFields v-model="model" :errors="errors" :prefix="prefix" />
 </template>

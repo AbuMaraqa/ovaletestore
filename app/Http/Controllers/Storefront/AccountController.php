@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Storefront;
 
+use App\Actions\Traders\RequestTraderAccount;
+use App\Enums\TraderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Support\CurrencyContext;
 use App\Support\Money;
 use App\Support\Seo\SeoData;
 use Illuminate\Http\RedirectResponse;
@@ -22,14 +25,30 @@ class AccountController extends Controller
 
         return Inertia::render('Storefront/Account/Dashboard', [
             'profile' => ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone],
+            'trader' => [
+                'status' => $user->trader_status?->value,
+                'business_name' => $user->business_name,
+                'tier' => $user->activePriceTier()?->label(),
+            ],
             'stats' => [
                 'orders' => $user->orders()->count(),
                 'open' => $user->orders()->whereIn('status', ['pending', 'confirmed', 'processing', 'shipped'])->count(),
-                'spent' => Money::format((int) $user->orders()->where('status', '!=', 'cancelled')->sum('total')),
+                'spent' => app(CurrencyContext::class)->format((int) $user->orders()->where('status', '!=', 'cancelled')->sum('base_total')),
             ],
             'recentOrders' => $user->orders()->withCount('items')->latest('placed_at')->limit(5)->get()->map($this->summary(...)),
             'seo' => SeoData::make(__('account.my_account'))->noindex(),
         ]);
+    }
+
+    /** "I am a trader": asks staff for trader prices (once approved, the whole store shows them). */
+    public function requestTrader(Request $request, RequestTraderAccount $requestTrader): RedirectResponse
+    {
+        $data = $request->validate(['business_name' => ['required', 'string', 'min:2', 'max:150']], attributes: ['business_name' => __('traders.business_name')]);
+        abort_if($request->user()->trader_status === TraderStatus::Approved, 409);
+
+        $requestTrader->handle($request->user(), trim($data['business_name']));
+
+        return back()->with('success', __('traders.request_sent'));
     }
 
     public function orders(Request $request): Response

@@ -11,6 +11,7 @@ const props = defineProps<{
     profile: { name: string; email: string; phone: string | null };
     stats: { orders: number; open: number; spent: string };
     recentOrders: OrderSummary[];
+    trader: { status: 'pending' | 'approved' | 'rejected' | null; business_name: string | null; tier: string | null };
 }>();
 
 const { t } = useTrans();
@@ -18,6 +19,8 @@ const form = useForm({ name: props.profile.name, email: props.profile.email, pho
 // The server asks for the current password only when the e-mail changes.
 const emailChanged = computed(() => form.email.trim().toLowerCase() !== props.profile.email.toLowerCase());
 const saveProfile = () => form.put(route('account.profile.update'), { preserveScroll: true, onSuccess: () => form.reset('current_password') });
+const traderForm = useForm({ business_name: props.trader.business_name ?? '' });
+const requestTrader = () => traderForm.post(route('account.trader.request'), { preserveScroll: true });
 const password = useForm({ current_password: '', password: '', password_confirmation: '' });
 const savePassword = () => password.put(route('user-password.update'), { errorBag: 'updatePassword', preserveScroll: true, onSuccess: () => password.reset() });
 </script>
@@ -29,6 +32,27 @@ const savePassword = () => password.put(route('user-password.update'), { errorBa
             <div class="rounded-3xl bg-white p-5 ring-1 ring-stone-200/70"><p class="text-sm text-stone-500">{{ t('account.orders_open') }}</p><p class="mt-1 text-2xl font-extrabold text-cocoa tabular-nums">{{ stats.open }}</p></div>
             <div class="rounded-3xl bg-cocoa p-5 text-white"><p class="text-sm text-white/70">{{ t('account.total_spent') }}</p><p class="mt-1 text-2xl font-extrabold tabular-nums" dir="ltr">{{ stats.spent }}</p></div>
         </div>
+
+        <!-- Trader account: status, or a short request form -->
+        <section class="mt-8 rounded-3xl p-5 ring-1 sm:p-6" :class="trader.status === 'approved' ? 'bg-cocoa text-white ring-cocoa' : 'bg-white ring-stone-200/70'">
+            <template v-if="trader.status === 'approved'">
+                <p class="text-sm text-white/70">{{ t('storefront.trader_account') }}</p>
+                <p class="mt-1 text-lg font-bold">{{ t('storefront.trader_active', { tier: trader.tier ?? '' }) }}</p>
+                <p class="mt-1 text-sm text-white/80">{{ t('storefront.trader_active_help') }}</p>
+            </template>
+            <template v-else-if="trader.status === 'pending'">
+                <h2 class="text-lg font-bold text-cocoa">{{ t('storefront.trader_account') }}</h2>
+                <p class="mt-1 text-sm text-stone-600">{{ t('storefront.trader_pending', { business: trader.business_name ?? '' }) }}</p>
+            </template>
+            <form v-else class="flex flex-col gap-3" @submit.prevent="requestTrader">
+                <h2 class="text-lg font-bold text-cocoa">{{ t('storefront.trader_signup') }}</h2>
+                <p class="text-sm text-stone-600">{{ trader.status === 'rejected' ? t('storefront.trader_rejected') : t('storefront.trader_signup_help') }}</p>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <StoreField id="business_name" v-model="traderForm.business_name" class="grow" :label="t('storefront.business_name')" :error="traderForm.errors.business_name" autocomplete="organization" required />
+                    <button type="submit" class="btn-primary h-12 px-6" :disabled="traderForm.processing">{{ t('storefront.trader_request_send') }}</button>
+                </div>
+            </form>
+        </section>
 
         <section class="mt-8 rounded-3xl bg-white p-5 ring-1 ring-stone-200/70 sm:p-6">
             <div class="flex items-center justify-between">

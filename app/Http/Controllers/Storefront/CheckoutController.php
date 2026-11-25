@@ -11,6 +11,7 @@ use App\Http\Resources\Storefront\CartResource;
 use App\Models\Order;
 use App\Models\ShippingMethod;
 use App\Settings\StoreSettings;
+use App\Support\CurrencyContext;
 use App\Support\Money;
 use App\Support\Seo\SeoData;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,8 @@ class CheckoutController extends Controller
 
         $cartTotals = $totals->handle($cart);
         $subtotal = $cartTotals['subtotal'];
+        $currency = app(CurrencyContext::class);
+        $displaySubtotal = $cartTotals['display']['subtotal'];
 
         return Inertia::render('Storefront/Checkout/Index', [
             'cart' => new CartResource($cart->load(CartResource::RELATIONS), $cartTotals),
@@ -47,11 +50,13 @@ class CheckoutController extends Controller
                 'name' => $m->name,
                 'description' => $m->description,
                 'requires_address' => $m->type->requiresAddress(),
-                'cost' => $m->costFor($subtotal) > 0 ? Money::format($m->costFor($subtotal)) : null,
-                'total' => Money::format($subtotal + $m->costFor($subtotal)),
-                'free_over' => $m->free_over && $m->costFor($subtotal) > 0 ? Money::format($m->free_over) : null,
+                'cost' => $m->costFor($subtotal) > 0 ? $currency->format($m->costFor($subtotal)) : null,
+                'total' => $currency->formatConverted($displaySubtotal + $currency->convert($m->costFor($subtotal))),
+                'free_over' => $m->free_over && $m->costFor($subtotal) > 0 ? $currency->format($m->free_over) : null,
             ])->all(),
             'honeypot' => app(Honeypot::class)->toArray(),
+            // Cash on delivery in a foreign currency: say plainly what will be collected.
+            'currency_note' => $currency->isBase() ? null : __('currencies.pay_in', ['currency' => $currency->current()->label(), 'code' => $currency->current()->code]),
             'prefill' => $request->user() ? ['customer_name' => $request->user()->name, 'customer_email' => $request->user()->email, 'customer_phone' => $request->user()->phone] : null,
             'seo' => SeoData::make(__('cart.checkout_title'))->noindex(),
         ]);
@@ -64,7 +69,9 @@ class CheckoutController extends Controller
         $cart = $this->resolveCart->handle($request, create: false);
         abort_unless($cart, 404);
 
-        $order = $placeOrder->handle($cart, $request->customer(), $request->user()?->id, (int) $request->validated('shipping_method_id'));
+        $order = $placeOrder->handle(
+            $cart, $request->customer(), $request->user()?->id, (int) $request->validated('shipping_method_id'), $request->validated('currency'),
+        );
 
         // Signed, expiring URL: guests can see their confirmation without exposing sequential order data.
         return redirect()->to(URL::temporarySignedRoute('storefront.order.thanks', now()->addHours(2), ['order' => $order->number]));

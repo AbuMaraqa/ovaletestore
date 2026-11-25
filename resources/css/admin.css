@@ -6,6 +6,7 @@
 @source '../js/Pages/Admin/**/*.vue';
 @source '../js/Pages/Auth/**/*.vue';
 @source '../js/Components/**/*.vue';
+@source '../js/Composables/**/*.ts';
 @source '../views/**/*.blade.php';
 
 /* Metronic theme tokens (light/dark) */
@@ -27,7 +28,9 @@
     --primary-foreground: var(--color-white);
 }
 .dark {
-    --primary: var(--color-brand-500);
+    /* brand-600 keeps white button text at AA contrast (brand-500 was ~3.6:1). */
+    --primary: var(--color-brand-600);
+    color-scheme: dark; /* native date/time pickers and scrollbars follow the theme */
 }
 
 [v-cloak] {
@@ -38,4 +41,91 @@
     0%, 100% { transform: rotate(0); }
     20%, 60% { transform: rotate(-14deg); }
     40%, 80% { transform: rotate(14deg); }
+}
+
+/* ── Interaction feedback (buttons, menus, popovers) ─────────────────────────────
+   Press "squash" + ripple (usePressFeedback.ts), smooth colour changes, popovers that
+   ease in. Everything motion-related is skipped for reduced-motion users. */
+/* In the components layer so utilities like `absolute` still win. No overflow clipping on the
+   button itself (corner badges stay visible): the ripple lives in its own clipped host. */
+@layer components {
+    .kt-btn,
+    .kt-menu-link,
+    .kt-dropdown-menu-link,
+    [data-ripple] {
+        position: relative;
+        isolation: isolate;
+    }
+}
+
+.press-ripple-host {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.press-ripple {
+    position: absolute;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.22;
+    pointer-events: none;
+    transform: scale(0);
+    animation: press-ripple 550ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes press-ripple {
+    to {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.97);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .kt-btn,
+    .kt-menu-link,
+    .kt-dropdown-menu-link,
+    .kt-badge,
+    .kt-table tbody tr,
+    [data-ripple] {
+        transition:
+            transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 200ms ease,
+            color 200ms ease,
+            border-color 200ms ease,
+            box-shadow 200ms ease,
+            opacity 200ms ease;
+    }
+
+    /* Buttons only: full-width menu rows would visibly jitter. */
+    .kt-btn:active:not(:disabled),
+    [data-ripple]:active {
+        transform: scale(0.97);
+    }
+
+    .kt-dropdown-menu.open,
+    .animate-pop-in {
+        animation: pop-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+        transform-origin: top;
+    }
+}
+
+/* Thin indeterminate bar on top of a table while it reloads (DataTable.vue). */
+@keyframes dt-progress {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(300%);
+    }
 }

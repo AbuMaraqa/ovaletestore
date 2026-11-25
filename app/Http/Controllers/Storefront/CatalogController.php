@@ -10,6 +10,7 @@ use App\Models\BrandTranslation;
 use App\Models\Category;
 use App\Models\CategoryTranslation;
 use App\Queries\CatalogQuery;
+use App\Support\CurrencyContext;
 use App\Support\Money;
 use App\Support\Seo\JsonLd;
 use App\Support\Seo\SeoData;
@@ -180,8 +181,9 @@ class CatalogController extends Controller
                 'in_stock' => $filters['in_stock'],
                 'sale' => $filters['on_sale'],
                 'brands' => $filters['brand_ids'],
-                'price_min' => Money::toMajor($filters['price_min']),
-                'price_max' => Money::toMajor($filters['price_max']),
+                // Echo what the visitor typed (their currency), not the converted base amount.
+                'price_min' => $filters['price_min'] !== null ? Money::toMajor(Money::toMinor((string) $request->query('price_min'))) : null,
+                'price_max' => $filters['price_max'] !== null ? Money::toMajor(Money::toMinor((string) $request->query('price_max'))) : null,
             ],
             'sorts' => CatalogQuery::SORTS,
             'seo' => $seo,
@@ -208,9 +210,17 @@ class CatalogController extends Controller
             'in_stock' => (bool) ($validated['in_stock'] ?? false),
             'on_sale' => (bool) ($validated['sale'] ?? false),
             'brand_ids' => array_values(array_unique(array_map('intval', $validated['brands'] ?? []))),
-            'price_min' => Money::toMinor($validated['price_min'] ?? null),
-            'price_max' => Money::toMinor($validated['price_max'] ?? null),
+            'price_min' => $this->priceToBase($validated['price_min'] ?? null),
+            'price_max' => $this->priceToBase($validated['price_max'] ?? null),
         ];
+    }
+
+    /** A price typed in the visitor's currency → base minor units (prices are stored in the base currency). */
+    private function priceToBase(string|int|float|null $amount): ?int
+    {
+        $minor = Money::toMinor($amount);
+
+        return $minor === null ? null : app(CurrencyContext::class)->toBase($minor);
     }
 
     /** Sidebar facets: categories and brands with published-product counts. */

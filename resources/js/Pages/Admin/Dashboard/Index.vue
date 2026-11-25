@@ -14,6 +14,7 @@ type Kpi = { value: string | number; change: number | null };
 const props = defineProps<{
     kpis: { revenue: Kpi; orders: Kpi; average: Kpi; pending: Kpi } | null;
     chart?: { date: string; label: string; revenue: number; orders: number }[] | null;
+    currencySymbol: string;
     catalog: Record<'published' | 'drafts' | 'without_image' | 'without_english' | 'without_hebrew' | 'without_sku' | 'out_of_stock' | 'on_sale' | 'english_ratio', number>;
     topCategories: { id: number; name: string; count: number }[];
     recentOrders: { id: number; number: string; customer: string; status: string; total: string; date: string }[];
@@ -77,13 +78,15 @@ useGsap(root, ({ gsap }) => {
                             dir="ltr"
                             :title="t('admin.vs_last_month')"
                         >
-                            {{ card.change >= 0 ? '▲' : '▼' }} {{ Math.abs(card.change) }}%
+                            <template v-if="card.change > 999">{{ t('admin.kpi_new') }}</template>
+                            <template v-else>{{ card.change >= 0 ? '▲' : '▼' }} {{ Math.abs(card.change) }}%</template>
                         </span>
                     </div>
                     <div>
-                        <p class="text-2xl font-semibold leading-none text-mono tabular-nums" dir="ltr">
-                            <span v-if="typeof card.value === 'number'" :data-count="card.value">{{ card.value }}</span>
-                            <template v-else>{{ card.value }}</template>
+                        <!-- Block keeps the page direction (aligned with its label); only the number is LTR. -->
+                        <p class="text-2xl font-semibold leading-none text-mono tabular-nums">
+                            <bdi v-if="typeof card.value === 'number'" dir="ltr" :data-count="card.value">{{ card.value }}</bdi>
+                            <bdi v-else dir="ltr">{{ card.value }}</bdi>
                         </p>
                         <p class="mt-2 text-sm text-secondary-foreground">{{ t(card.label) }}</p>
                     </div>
@@ -96,7 +99,7 @@ useGsap(root, ({ gsap }) => {
             <KtCard v-if="kpis" :title="t('admin.revenue_30d')" class="lg:col-span-2">
                 <Deferred data="chart">
                     <template #fallback><div class="h-72 animate-pulse rounded-lg bg-accent" /></template>
-                    <RevenueChart v-if="chart" :points="chart" currency="₪" />
+                    <RevenueChart v-if="chart" :points="chart" :currency="currencySymbol" />
                 </Deferred>
             </KtCard>
 
@@ -149,7 +152,7 @@ useGsap(root, ({ gsap }) => {
                                 </td>
                                 <td>{{ order.customer }}</td>
                                 <td><OrderStatusBadge :status="order.status" /></td>
-                                <td class="text-end font-medium" dir="ltr">{{ order.total }}</td>
+                                <td class="text-end font-medium"><bdi dir="ltr">{{ order.total }}</bdi></td>
                             </tr>
                         </tbody>
                     </table>

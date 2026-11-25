@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\DataTable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,15 +14,38 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends Controller
 {
-    public function index(): Response
+    /** Staff accounts (anyone with a role other than "customer"); customers have their own screen. */
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', User::class);
 
+        $staff = User::query()->with(['roles', 'media'])
+            ->where(fn (Builder $q) => $q->whereHas('roles', fn (Builder $r) => $r->where('name', '!=', 'customer'))->orWhereDoesntHave('roles'));
+
+        $users = QueryBuilder::for($staff)
+            ->allowedFilters(...[
+                AllowedFilter::callback('search', function (Builder $q, $term) {
+                    $like = DataTable::like($term);
+                    $q->where(fn (Builder $w) => $w->where('name', 'like', $like)->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like));
+                }),
+                AllowedFilter::callback('role', fn (Builder $q, $role) => $q->whereHas('roles', fn (Builder $r) => $r->where('name', (string) $role))),
+                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
+                AllowedFilter::callback('two_factor', fn (Builder $q, $v) => $v === 'on' ? $q->whereNotNull('two_factor_confirmed_at') : $q->whereNull('two_factor_confirmed_at')),
+            ])
+            ->allowedSorts(...['name', 'email', 'created_at'])
+            ->defaultSort('-created_at')
+            ->paginate(DataTable::perPage($request))
+            ->withQueryString();
+
+        $actor = $request->user();
+
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::query()->with(['roles', 'media'])->latest()->paginate(25)->through(fn (User $u) => [
+            'users' => $users->through(fn (User $u) => [
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
@@ -28,7 +53,13 @@ class UserController extends Controller
                 'is_active' => $u->is_active,
                 'roles' => $u->roles->pluck('name'),
                 'two_factor' => $u->two_factor_confirmed_at !== null,
+                'created_at' => $u->created_at?->format('Y-m-d'),
+                'edit_url' => $actor->can('update', $u) ? route('admin.users.edit', $u) : null,
+                'delete_url' => $actor->can('delete', $u) ? route('admin.users.destroy', $u) : null,
             ]),
+            'state' => DataTable::state($request),
+            'roles' => Role::query()->where('name', '!=', 'customer')->orderBy('name')->pluck('name')
+                ->map(fn (string $name) => ['value' => $name, 'label' => __("permissions.roles.{$name}") === "permissions.roles.{$name}" ? $name : __("permissions.roles.{$name}")]),
         ]);
     }
 
@@ -51,7 +82,7 @@ class UserController extends Controller
             'password' => $data['password'],
             'is_active' => $data['is_active'] ?? true,
         ]);
-        $user->syncRoles($data['roles'] ?? []);
+        $this->syncRolesLogged($user, $data['roles'] ?? []);
 
         return to_route('admin.users.index')->with('success', __('admin.created'));
     }
@@ -98,7 +129,7 @@ class UserController extends Controller
             if ($user->hasRole('super-admin')) {
                 $roles[] = 'super-admin';
             }
-            $user->syncRoles($roles);
+            $this->syncRolesLogged($user, $roles);
         }
 
         return back()->with('success', __('admin.updated'));
@@ -110,6 +141,21 @@ class UserController extends Controller
         $user->delete();
 
         return to_route('admin.users.index')->with('success', __('admin.deleted'));
+    }
+
+    /** Role changes are pivot rows (no model event): record them in the audit trail by hand. */
+    private function syncRolesLogged(User $user, array $roles): void
+    {
+        $before = $user->roles()->pluck('name')->sort()->values()->all();
+        $user->syncRoles($roles);
+        $after = $user->roles()->pluck('name')->sort()->values()->all();
+
+        if ($before !== $after) {
+            activity('users')->event('roles_changed')->performedOn($user)
+                ->withChanges(['attributes' => ['roles' => $after], 'old' => ['roles' => $before]])
+                ->withProperties(['label' => $user->name])
+                ->log('roles_changed');
+        }
     }
 
     private function validated(Request $request, ?User $user = null): array
@@ -126,8 +172,16 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Roles the current user may hand out: never super-admin, and only roles whose every permission
+     * the actor holds themselves (someone with users.create cannot mint an admin).
+     */
     private function assignableRoles()
     {
-        return Role::query()->where('name', '!=', 'super-admin')->orderBy('name')->pluck('name');
+        $actor = request()->user();
+
+        return Role::query()->where('name', '!=', 'super-admin')->with('permissions')->orderBy('name')->get()
+            ->filter(fn (Role $role) => $role->permissions->every(fn ($p) => $actor->can($p->name)))
+            ->pluck('name')->values();
     }
 }

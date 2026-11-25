@@ -2,44 +2,42 @@
 
 namespace Database\Seeders;
 
+use App\Support\Permissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
+/**
+ * Idempotent: creates missing permissions/roles and removes permissions no longer in the registry.
+ * Roles edited from the admin panel keep their edits — an existing built-in role only receives the
+ * permissions that are new in this run (so a deploy that adds a button grants it to the right roles).
+ */
 class RolesAndPermissionsSeeder extends Seeder
 {
-    public const PERMISSIONS = [
-        'admin.access',
-        'products.view', 'products.create', 'products.update', 'products.delete',
-        'categories.manage', 'attributes.manage', 'brands.manage',
-        'orders.view', 'orders.update',
-        'companies.manage', 'pos.access',
-        'users.manage',
-        'settings.manage',
-    ];
-
-    public const ROLES = [
-        'super-admin' => [], // bypasses all checks via Gate::before
-        'admin' => self::PERMISSIONS,
-        'product-manager' => ['admin.access', 'products.view', 'products.create', 'products.update', 'products.delete', 'categories.manage', 'attributes.manage', 'brands.manage'],
-        'content-manager' => ['admin.access', 'products.view', 'products.update', 'categories.manage', 'brands.manage', 'settings.manage'],
-        'customer' => [], // storefront account only — no admin access
-        'order-manager' => ['admin.access', 'orders.view', 'orders.update', 'products.view', 'companies.manage'],
-        // iPad POS only: places on-account orders for companies; no admin panel.
-        'sales-rep' => ['pos.access'],
-    ];
-
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        foreach (self::PERMISSIONS as $name) {
-            Permission::findOrCreate($name, 'web');
+        $wanted = Permissions::all();
+        $existing = Permission::query()->where('guard_name', 'web')->pluck('name')->all();
+        $new = array_values(array_diff($wanted, $existing));
+
+        foreach ($new as $name) {
+            Permission::query()->create(['name' => $name, 'guard_name' => 'web']);
+        }
+        Permission::query()->where('guard_name', 'web')->whereNotIn('name', $wanted)->delete();
+
+        foreach (Permissions::defaultRoles() as $name => $permissions) {
+            $role = Role::query()->where(['name' => $name, 'guard_name' => 'web'])->first();
+
+            if (! $role) {
+                Role::query()->create(['name' => $name, 'guard_name' => 'web'])->syncPermissions($permissions);
+            } elseif ($added = array_intersect($permissions, $new)) {
+                $role->givePermissionTo($added);
+            }
         }
 
-        foreach (self::ROLES as $role => $permissions) {
-            Role::findOrCreate($role, 'web')->syncPermissions($role === 'super-admin' ? self::PERMISSIONS : $permissions);
-        }
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

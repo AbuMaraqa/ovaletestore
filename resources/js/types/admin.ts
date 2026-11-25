@@ -17,6 +17,15 @@ export interface VariantForm {
     height_mm: number | null;
     is_active: boolean;
     is_default: boolean;
+    /** price_tier_id => trader price (major units); missing/empty = the tier's automatic % */
+    tier_prices?: Record<string, string | number | null>;
+}
+
+export interface PriceTierOption {
+    id: number;
+    name: string;
+    discount_percent: number;
+    is_active: boolean;
 }
 
 export interface ProductAttributeForm {

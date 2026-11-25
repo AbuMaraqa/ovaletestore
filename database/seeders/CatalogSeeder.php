@@ -26,6 +26,12 @@ class CatalogSeeder extends Seeder
 {
     public function run(): void
     {
+        // Bulk import: thousands of rows would bury the human audit trail.
+        activity()->withoutLogging(fn () => $this->seed());
+    }
+
+    private function seed(): void
+    {
         $dir = database_path('data/catalog');
         if (! File::exists("{$dir}/products.json")) {
             $this->command?->warn('No catalog snapshot found — run `php artisan catalog:export-seed` first.');

@@ -83,7 +83,7 @@ it('enforces order status transitions and restocks on cancellation', function ()
     $order = Order::query()->sole();
     $admin = staffUser('order-manager');
 
-    expect(fn () => app(ChangeOrderStatus::class)->handle($order, OrderStatus::Completed, $admin))->toThrow(ValidationException::class);
+    expect(fn () => app(ChangeOrderStatus::class)->handle($order, OrderStatus::Pending, $admin))->toThrow(ValidationException::class);
 
     app(ChangeOrderStatus::class)->handle($order, OrderStatus::Cancelled, $admin, 'customer asked');
 
@@ -166,6 +166,6 @@ it('renders the shipping options at checkout and the admin shipping pages', func
 
     $method = ShippingMethod::query()->where('code', 'jerusalem')->sole();
     $this->actingAs(staffUser('admin'));
-    $this->get(route('admin.shipping-methods.index'))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Index')->has('methods', 4));
+    $this->get(route('admin.shipping-methods.index'))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Index')->has('methods.data', 4));
     $this->get(route('admin.shipping-methods.edit', $method))->assertOk()->assertInertia(fn ($page) => $page->component('Admin/ShippingMethods/Form')->where('method.translations.ar.name', 'توصيل للقدس'));
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin;
 
+use App\Enums\StockStatus;
 use App\Models\Product;
 use App\Support\Money;
 use Illuminate\Http\Request;
@@ -30,8 +31,13 @@ class ProductListResource extends JsonResource
             ),
             'variants_count' => $this->variants->count(),
             'categories' => $this->categories->pluck('name'),
+            'brand' => $this->brand?->name,
+            'in_stock' => $this->variants->contains(fn ($v) => $v->stock_status !== StockStatus::OutOfStock),
+            'stock' => $this->variants->contains(fn ($v) => $v->manage_stock) ? (int) $this->variants->sum('stock_quantity') : null,
             'updated_at' => $this->updated_at?->diffForHumans(),
-            'edit_url' => route('admin.products.edit', $this->id),
+            'created_at' => $this->created_at?->format('Y-m-d'),
+            'edit_url' => $request->user()?->can('products.update') ? route('admin.products.edit', $this->id) : null,
+            'delete_url' => $request->user()?->can('products.delete') ? route('admin.products.destroy', $this->id) : null,
             'view_url' => $this->isPublished() ? route('storefront.product', ['slug' => $this->slug]) : null,
         ];
     }

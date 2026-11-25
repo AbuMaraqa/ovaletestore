@@ -2,6 +2,7 @@
 
 use App\Actions\Products\SaveProduct;
 use App\Models\Attribute;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ShippingMethod;
 use App\Models\User;
@@ -67,6 +68,16 @@ function honeypotFields(): array
 }
 
 /** A valid checkout form (west-bank delivery) including the honeypot fields. */
+/** Places a storefront order for one new simple product (cart → checkout), as the current visitor. */
+function placeWebOrder(int $quantity = 1, string $price = '10.00', array $variant = []): Order
+{
+    $product = makeSimpleProduct(price: $price, variant: $variant);
+    test()->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => $quantity]);
+    test()->post(route('storefront.checkout.store'), checkoutPayload())->assertSessionHasNoErrors();
+
+    return Order::query()->latest('id')->firstOrFail();
+}
+
 function checkoutPayload(): array
 {
     return [

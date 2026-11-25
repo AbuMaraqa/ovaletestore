@@ -6,6 +6,7 @@ use App\Enums\ProductStatus;
 use App\Enums\ProductType;
 use App\Models\Concerns\HasOptimizedImages;
 use App\Models\Concerns\HasTranslations;
+use App\Models\Concerns\RecordsActivity;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -14,8 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -31,7 +30,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class Product extends Model implements HasMedia, TranslatableContract
 {
-    use HasOptimizedImages, HasTranslations, LogsActivity, SoftDeletes;
+    use HasOptimizedImages, HasTranslations, RecordsActivity, SoftDeletes;
 
     /** @var list<string> */
     public array $translatedAttributes = ['name', 'slug', 'short_description', 'description', 'meta_title', 'meta_description'];
@@ -48,6 +47,7 @@ class Product extends Model implements HasMedia, TranslatableContract
         ];
     }
 
+    /** @return BelongsTo<Brand, $this> */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
@@ -117,10 +117,5 @@ class Product extends Model implements HasMedia, TranslatableContract
     protected function optimizedImageCollections(): array
     {
         return ['gallery'];
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logOnlyDirty();
     }
 }

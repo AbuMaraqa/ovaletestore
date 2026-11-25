@@ -47,6 +47,8 @@ class WooVerifyOrders extends Command
                 OrderItem::query()->whereIn('order_id', $local->pluck('id'))->count()],
             ['Items linked to a product', '-', '-',
                 OrderItem::query()->whereIn('order_id', $local->pluck('id'))->whereNotNull('product_id')->count()],
+            ['Placed from a customer account', '-', $source->whereNotNull('customer_source_id')->count(),
+                $local->whereNotNull('user_id')->count()],
         ];
         foreach ($source->countBy('status')->sortKeys() as $status => $count) {
             $rows[] = ["Status: {$status}", '-', $count, $local->filter(fn (Order $o) => $o->status->value === $status)->count()];
@@ -55,6 +57,11 @@ class WooVerifyOrders extends Command
         $this->table(['Check', 'WooCommerce', 'Export', 'Imported'], $rows);
         $this->line('Missing orders: '.($missing->isEmpty() ? 'none' : $missing->implode(', ')));
         $this->line('Orders with a different total/status/item count: '.($mismatched->isEmpty() ? 'none' : $mismatched->implode(', ')));
+
+        // Account orders whose WooCommerce customer was not imported (e.g. placed by a WordPress administrator).
+        $unlinked = $source->filter(fn (array $row) => ($row['customer_source_id'] ?? null) && ! $local->get($row['source_id'])?->user_id);
+        $this->line('Account orders without a local account: '.($unlinked->isEmpty() ? 'none'
+            : $unlinked->map(fn ($r) => "{$r['number']} (customer #{$r['customer_source_id']})")->implode(', ')));
 
         $ok = $missing->isEmpty() && $mismatched->isEmpty() && $source->count() === (int) ($data['source_total'] ?? $source->count());
 

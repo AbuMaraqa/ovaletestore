@@ -29,6 +29,9 @@ class CatalogImportTranslations extends Command
 {
     public function handle(): int
     {
+        // Bulk import: thousands of rows would bury the human audit trail.
+        activity()->disableLogging();
+
         $base = $this->option('path') ?: database_path('data/translations');
         $locales = $this->option('locale') ?: array_map('basename', File::directories($base));
         $supported = array_keys((array) config('laravellocalization.supportedLocales'));

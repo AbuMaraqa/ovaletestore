@@ -50,6 +50,12 @@
 
     @routes($isAdmin ? 'admin' : 'storefront', Vite::cspNonce())
     @vite(['resources/js/app.ts', $isAdmin ? 'resources/css/admin.css' : 'resources/css/storefront.css'])
+
+    {{-- Custom site font (Admin → Settings → General); after the bundle so its --font-sans wins. --}}
+    @if ($fontCss = \App\Support\SiteFont::css($isAdmin))
+        <link rel="preload" href="{{ \App\Support\SiteFont::preloadUrl($isAdmin) }}" as="font" crossorigin>
+        <style nonce="{{ Vite::cspNonce() }}">{!! $fontCss !!}</style>
+    @endif
 </head>
 <body @class(['h-full antialiased', 'demo1 kt-sidebar-fixed kt-header-fixed text-base text-foreground bg-background' => $isAdmin])>
     @inertia

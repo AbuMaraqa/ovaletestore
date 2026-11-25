@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductTranslation;
 use App\Models\ProductVariant;
+use App\Support\CurrencyContext;
 use App\Support\Money;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class DashboardController extends Controller
         return Inertia::render('Admin/Dashboard/Index', [
             'kpis' => $canSeeOrders ? $this->kpis() : null,
             'chart' => $canSeeOrders ? Inertia::defer(fn () => $this->revenueChart()) : null,
+            'currencySymbol' => app(CurrencyContext::class)->base()->symbol(),
             'catalog' => $this->catalogHealth(),
             'topCategories' => Category::query()->with('translations')
                 ->withCount(['products' => fn ($q) => $q->published()])
@@ -51,8 +53,8 @@ class DashboardController extends Controller
         $lastStart = now()->subMonthNoOverflow()->startOfMonth();
         $lastEnd = now()->subMonthNoOverflow();
 
-        $revenueNow = (int) Order::query()->tap($valid)->where('placed_at', '>=', $thisStart)->sum('total');
-        $revenueLast = (int) Order::query()->tap($valid)->whereBetween('placed_at', [$lastStart, $lastEnd])->sum('total');
+        $revenueNow = (int) Order::query()->tap($valid)->where('placed_at', '>=', $thisStart)->sum('base_total');
+        $revenueLast = (int) Order::query()->tap($valid)->whereBetween('placed_at', [$lastStart, $lastEnd])->sum('base_total');
         $ordersNow = Order::query()->tap($valid)->where('placed_at', '>=', $thisStart)->count();
         $ordersLast = Order::query()->tap($valid)->whereBetween('placed_at', [$lastStart, $lastEnd])->count();
 
@@ -77,7 +79,7 @@ class DashboardController extends Controller
         $rows = Order::query()
             ->where('status', '!=', OrderStatus::Cancelled)
             ->where('placed_at', '>=', $from)
-            ->selectRaw('DATE(placed_at) as day, SUM(total) as revenue, COUNT(*) as orders')
+            ->selectRaw('DATE(placed_at) as day, SUM(base_total) as revenue, COUNT(*) as orders')
             ->groupBy('day')
             ->get()
             ->keyBy('day');

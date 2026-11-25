@@ -7,6 +7,7 @@ import MobileMenu from '@/Components/Storefront/MobileMenu.vue';
 import SearchOverlay from '@/Components/Storefront/SearchOverlay.vue';
 import SocialIcon from '@/Components/Storefront/SocialIcon.vue';
 import { onClickOutside } from '@/Composables/onClickOutside';
+import { useCurrency } from '@/Composables/useCurrency';
 import { useLocale } from '@/Composables/useLocale';
 import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
@@ -15,6 +16,7 @@ import type { SharedProps } from '@/types';
 const page = usePage<SharedProps & { nav_categories: { id: number; name: string; url: string }[] }>();
 const { t } = useTrans();
 const { current, available } = useLocale();
+const currency = useCurrency();
 
 const site = computed(() => page.props.site);
 const user = computed(() => page.props.auth.user);
@@ -24,7 +26,7 @@ const socials = computed(() => Object.entries(site.value.social ?? {}));
 
 const searchOpen = ref(false);
 const mobileOpen = ref(false);
-const openMenu = ref<'lang' | 'categories' | 'about' | 'account' | null>(null);
+const openMenu = ref<'lang' | 'currency' | 'categories' | 'about' | 'account' | null>(null);
 const header = ref<HTMLElement | null>(null);
 onClickOutside(header, () => (openMenu.value = null));
 const toggle = (menu: typeof openMenu.value) => (openMenu.value = openMenu.value === menu ? null : menu);
@@ -61,7 +63,25 @@ const logout = () => router.post(route('logout'));
                             </li>
                         </ul>
                     </div>
-                    <span class="inline-flex items-center gap-1.5">{{ t('storefront.currency') }} <b class="font-bold text-white">{{ site.currency }}</b></span>
+                    <div v-if="currency.options.value.length" class="relative">
+                        <button type="button" class="inline-flex items-center gap-1.5 hover:text-white" :aria-expanded="openMenu === 'currency'" @click="toggle('currency')">
+                            {{ t('storefront.currency') }} <b class="font-bold text-white" dir="ltr">{{ site.currency }}</b>
+                            <Icon name="chevron" class="size-3 rotate-90" />
+                        </button>
+                        <ul v-if="openMenu === 'currency'" class="absolute end-0 top-full z-50 mt-2 w-52 rounded-xl bg-white p-1.5 text-cocoa shadow-lift ring-1 ring-stone-100">
+                            <li v-for="c in currency.options.value" :key="c.code">
+                                <button
+                                    type="button"
+                                    :class="['flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-start hover:bg-stone-50', c.code === site.currency && 'font-bold text-brand-700']"
+                                    @click="currency.choose(c.code); openMenu = null"
+                                >
+                                    <span>{{ c.label }}</span>
+                                    <span class="inline-flex items-center gap-1.5 text-xs text-stone-500" dir="ltr">{{ c.symbol }} {{ c.code }}<Icon v-if="c.code === site.currency" name="check" class="size-4 text-brand-700" /></span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <span v-else class="inline-flex items-center gap-1.5">{{ t('storefront.currency') }} <b class="font-bold text-white" dir="ltr">{{ site.currency }}</b></span>
                     <span v-if="socials.length || site.phone" class="h-4 w-px bg-white/20" aria-hidden="true" />
                     <div class="flex items-center gap-3.5 text-[#e4cfa3]">
                         <a v-for="[network, url] in socials" :key="network" :href="url" target="_blank" rel="noopener" :aria-label="network" class="transition hover:scale-110 hover:text-white">

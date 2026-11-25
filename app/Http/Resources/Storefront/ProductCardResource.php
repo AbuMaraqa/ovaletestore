@@ -5,7 +5,7 @@ namespace App\Http\Resources\Storefront;
 use App\Http\Resources\ImageResource;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Support\Money;
+use App\Support\CurrencyContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,6 +26,7 @@ class ProductCardResource extends JsonResource
         // The struck-through price must belong to the variant whose price is shown ("from" = cheapest).
         $cheapest = $variants->sortBy(fn (ProductVariant $v) => $v->effectivePrice())->first();
         $image = $this->getFirstMedia('gallery');
+        $currency = app(CurrencyContext::class);
 
         return [
             'id' => $this->id,
@@ -33,9 +34,10 @@ class ProductCardResource extends JsonResource
             'url' => route('storefront.product', ['slug' => $this->slug]),
             'image' => $image ? new ImageResource($image) : null,
             'is_variable' => $this->isVariable(),
-            'price' => Money::format($min),
-            'price_max' => $max > $min ? Money::format($max) : null,
-            'regular_price' => $cheapest && $cheapest->isOnSale() ? Money::format($cheapest->regular_price) : null,
+            'price' => $currency->format($min),
+            'price_max' => $max > $min ? $currency->format($max) : null,
+            'regular_price' => $cheapest && $cheapest->effectivePrice() < $cheapest->regular_price ? $currency->format($cheapest->regular_price) : null,
+            'trade_price' => $cheapest?->hasTradePrice() ?? false,
             'on_sale' => $variants->contains(fn (ProductVariant $v) => $v->isOnSale()),
             // Best saving across variants ("up to -X%" for variable products).
             'discount_percent' => $variants->map(fn (ProductVariant $v) => $v->discountPercent())->filter()->max(),

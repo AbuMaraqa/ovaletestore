@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Enums\StockStatus;
 use App\Models\Concerns\HasOptimizedImages;
+use App\Models\Concerns\RecordsActivity;
+use App\Support\PriceContext;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 
 /**
@@ -28,7 +31,7 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class ProductVariant extends Model implements HasMedia
 {
-    use HasOptimizedImages;
+    use HasOptimizedImages, RecordsActivity;
 
     protected $fillable = [
         'product_id', 'signature', 'sku', 'regular_price', 'sale_price', 'sale_starts_at', 'sale_ends_at',
@@ -72,9 +75,31 @@ class ProductVariant extends Model implements HasMedia
             && ($this->sale_ends_at === null || $this->sale_ends_at->gt($at));
     }
 
-    public function effectivePrice(?CarbonInterface $at = null): int
+    /** What a retail customer pays now (sale price while a sale runs). */
+    public function retailPrice(?CarbonInterface $at = null): int
     {
         return $this->isOnSale($at) ? (int) $this->sale_price : $this->regular_price;
+    }
+
+    /**
+     * What the current shopper pays: retail, or the trader price for an approved trader
+     * (App\Support\PriceContext — never above retail). Cart, checkout and every price shown use this.
+     */
+    public function effectivePrice(?CarbonInterface $at = null): int
+    {
+        return app(PriceContext::class)->priceFor($this, $this->retailPrice($at));
+    }
+
+    /** The shopper sees a trader price below what retail customers pay. */
+    public function hasTradePrice(): bool
+    {
+        return app(PriceContext::class)->tier() !== null && $this->effectivePrice() < $this->retailPrice();
+    }
+
+    /** @return HasMany<PriceTierPrice, $this> */
+    public function tierPrices(): HasMany
+    {
+        return $this->hasMany(PriceTierPrice::class);
     }
 
     /** Whole-percent saving for the "-20%" badge; null when not on sale or the saving rounds to 0. */
@@ -132,5 +157,10 @@ class ProductVariant extends Model implements HasMedia
     protected function optimizedImageCollections(): array
     {
         return ['image'];
+    }
+
+    public function activityParent(): ?array
+    {
+        return [Product::class, $this->attributes['product_id'] ?? null];
     }
 }

@@ -47,4 +47,6 @@ return [
     'register_subtitle' => 'تابع طلباتك واطلب أسرع في المرة القادمة.',
     'no_account' => 'ليس لديك حساب؟',
     'have_account' => 'لديك حساب بالفعل؟',
+    'view' => 'عرض',
+    'delete_named' => 'حذف «:name»؟',
 ];

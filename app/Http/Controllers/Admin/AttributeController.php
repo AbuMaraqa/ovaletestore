@@ -6,8 +6,10 @@ use App\Enums\AttributeDisplayType;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\AttributeTerm;
+use App\Support\DataTable;
 use App\Support\TranslationInput;
 use Astrotomic\Translatable\Validation\RuleFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,36 +17,57 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 /** Global (reusable) attributes and their terms, edited together in one form. */
 class AttributeController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $this->authorize('attributes.manage');
+        $this->authorize('attributes.view');
+
+        $attributes = QueryBuilder::for(Attribute::query()->global()->with(['translations', 'terms.translations'])->withCount('terms'))
+            ->allowedFilters(...[
+                AllowedFilter::callback('search', function (Builder $q, $term) {
+                    $like = DataTable::like($term);
+                    $q->where(fn ($w) => $w->where('code', 'like', $like)->orWhereHas('translations', fn ($t) => $t->where('name', 'like', $like)));
+                }),
+                AllowedFilter::exact('display', 'display_type'),
+            ])
+            ->allowedSorts(...['sort_order', 'terms_count', 'code', 'id'])
+            ->defaultSort('sort_order')
+            ->paginate(DataTable::perPage($request))
+            ->withQueryString();
+
+        $user = $request->user();
 
         return Inertia::render('Admin/Attributes/Index', [
-            'attributes' => Attribute::query()->global()->with(['translations', 'terms.translations'])->withCount('terms')->orderBy('sort_order')->get()
-                ->map(fn (Attribute $a) => [
-                    'id' => $a->id,
-                    'name' => $a->name,
-                    'code' => $a->code,
-                    'display_type' => $a->display_type->value,
-                    'terms' => $a->terms->pluck('name'),
-                ]),
+            'attributes' => $attributes->through(fn (Attribute $a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'code' => $a->code,
+                'display_type' => $a->display_type->value,
+                'terms' => $a->terms->pluck('name'),
+                'terms_count' => $a->terms_count,
+                'edit_url' => $user->can('attributes.update') ? route('admin.attributes.edit', $a) : null,
+                'delete_url' => $user->can('attributes.delete') ? route('admin.attributes.destroy', $a) : null,
+            ]),
+            'state' => DataTable::state($request),
+            'display_types' => array_column(AttributeDisplayType::cases(), 'value'),
         ]);
     }
 
     public function create(): Response
     {
-        $this->authorize('attributes.manage');
+        $this->authorize('attributes.create');
 
         return Inertia::render('Admin/Attributes/Form', ['attribute' => null, 'displayTypes' => array_column(AttributeDisplayType::cases(), 'value')]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorize('attributes.manage');
+        $this->authorize('attributes.create');
         $attribute = $this->save($request, new Attribute);
 
         return to_route('admin.attributes.edit', $attribute)->with('success', __('admin.created'));
@@ -52,7 +75,7 @@ class AttributeController extends Controller
 
     public function edit(Attribute $attribute): Response
     {
-        $this->authorize('attributes.manage');
+        $this->authorize('attributes.update');
         abort_unless($attribute->isGlobal(), 404);
         $attribute->load(['translations', 'terms.translations']);
 
@@ -78,7 +101,7 @@ class AttributeController extends Controller
 
     public function update(Request $request, Attribute $attribute): RedirectResponse
     {
-        $this->authorize('attributes.manage');
+        $this->authorize('attributes.update');
         abort_unless($attribute->isGlobal(), 404);
         $this->save($request, $attribute);
 
@@ -87,7 +110,7 @@ class AttributeController extends Controller
 
     public function destroy(Attribute $attribute): RedirectResponse
     {
-        $this->authorize('attributes.manage');
+        $this->authorize('attributes.delete');
         abort_unless($attribute->isGlobal(), 404);
         $attribute->delete();
 

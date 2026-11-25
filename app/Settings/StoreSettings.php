@@ -6,7 +6,7 @@ use Spatie\LaravelSettings\Settings;
 
 class StoreSettings extends Settings
 {
-    public string $currency;
+    // Currencies (and the base currency) live in App\Models\Currency (admin → Currencies).
 
     public int $products_per_page;
 

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Actions\Traders\RequestTraderAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -23,11 +24,15 @@ class CreateNewUser implements CreatesNewUsers
             'email' => ['required', 'string', 'email:rfc', 'max:190', Rule::unique(User::class, 'email')],
             'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-]{7,20}$/'],
             'password' => $this->passwordRules(),
+            // Optional trader (wholesale) request; reviewed by staff before any trader price applies.
+            'trader_request' => ['nullable', 'boolean'],
+            'business_name' => ['nullable', 'required_if_accepted:trader_request', 'string', 'min:2', 'max:150'],
         ], attributes: [
             'name' => __('cart.name'),
             'email' => __('common.email'),
             'phone' => __('cart.phone'),
             'password' => __('common.password'),
+            'business_name' => __('traders.business_name'),
         ])->validate();
 
         $user = User::query()->create([
@@ -38,6 +43,12 @@ class CreateNewUser implements CreatesNewUsers
             'locale' => app()->getLocale(),
         ]);
 
-        return $user->assignRole('customer');
+        $user->assignRole('customer');
+
+        if (! empty($data['trader_request'])) {
+            app(RequestTraderAccount::class)->handle($user, trim((string) $data['business_name']));
+        }
+
+        return $user;
     }
 }

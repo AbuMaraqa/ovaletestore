@@ -1,24 +1,21 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { gsap } from 'gsap';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import ActivityPanel from '@/Components/Activity/ActivityPanel.vue';
 import FlashToast from '@/Components/Common/FlashToast.vue';
+import PageLoader from '@/Components/Common/PageLoader.vue';
 import AdminFooter from '@/Components/Navigation/AdminFooter.vue';
 import AdminHeader from '@/Components/Navigation/AdminHeader.vue';
 import AdminSidebar from '@/Components/Navigation/AdminSidebar.vue';
-import { prefersReducedMotion } from '@/Composables/useMotion';
+import ConfirmHost from '@/Components/UI/ConfirmHost.vue';
+import { usePressFeedback } from '@/Composables/usePressFeedback';
 
 /** Metronic demo1 shell: fixed sidebar + fixed header + content + footer (body classes from app.blade.php). */
 const mobileOpen = ref(false);
-const content = ref<HTMLElement | null>(null);
+usePressFeedback();
 
-// Subtle page-enter motion for the content area on every Inertia visit.
-const off = router.on('navigate', () => {
-    mobileOpen.value = false;
-    if (content.value && !prefersReducedMotion()) {
-        gsap.fromTo(content.value, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power2.out', clearProps: 'all' });
-    }
-});
+// Page enter/loading motion lives in <PageLoader> (only real page changes animate, not filters or polling).
+const off = router.on('navigate', () => (mobileOpen.value = false));
 
 function toggleCollapse(): void {
     document.body.classList.toggle('kt-sidebar-collapse');
@@ -49,12 +46,15 @@ onBeforeUnmount(() => {
         <div class="kt-wrapper flex min-h-screen grow flex-col">
             <AdminHeader @open-sidebar="mobileOpen = true" />
             <main id="content" class="grow pt-5" role="main">
-                <div ref="content" class="kt-container-fixed pb-7.5">
+                <div id="admin-page" class="kt-container-fixed pb-7.5">
                     <slot />
                 </div>
             </main>
             <AdminFooter />
         </div>
     </div>
+    <PageLoader content="#admin-page" tone="admin" />
     <FlashToast />
+    <ConfirmHost />
+    <ActivityPanel />
 </template>

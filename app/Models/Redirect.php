@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 
 class Redirect extends Model
 {
+    use RecordsActivity;
+
     protected $fillable = ['from_path', 'to_path', 'status_code'];
 
     protected function casts(): array

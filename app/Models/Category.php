@@ -4,14 +4,13 @@ namespace App\Models;
 
 use App\Models\Concerns\HasOptimizedImages;
 use App\Models\Concerns\HasTranslations;
+use App\Models\Concerns\RecordsActivity;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 
 /**
@@ -25,7 +24,7 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class Category extends Model implements HasMedia, TranslatableContract
 {
-    use HasOptimizedImages, HasTranslations, LogsActivity;
+    use HasOptimizedImages, HasTranslations, RecordsActivity;
 
     /** @var list<string> */
     public array $translatedAttributes = ['name', 'slug', 'description', 'meta_title', 'meta_description'];
@@ -37,6 +36,7 @@ class Category extends Model implements HasMedia, TranslatableContract
         return ['is_active' => 'boolean', 'sort_order' => 'integer'];
     }
 
+    /** @return BelongsTo<Category, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
@@ -84,10 +84,5 @@ class Category extends Model implements HasMedia, TranslatableContract
     protected function optimizedImageCollections(): array
     {
         return ['image'];
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logOnlyDirty();
     }
 }

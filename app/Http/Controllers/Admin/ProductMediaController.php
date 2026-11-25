@@ -36,6 +36,7 @@ class ProductMediaController extends Controller
                 ->usingFileName(Str::limit($baseName, 60, '').'-'.Str::lower(Str::random(8)).'.'.$file->guessExtension())
                 ->toMediaCollection('gallery');
         }
+        $this->log($product, 'images_added', ['count' => count($request->file('images'))]);
 
         return back()->with('success', __('admin.updated'));
     }
@@ -48,6 +49,7 @@ class ProductMediaController extends Controller
         $owned = $product->getMedia('gallery')->pluck('id')->all();
 
         Media::setNewOrder(array_values(array_intersect($ids, $owned)));
+        $this->log($product, 'images_reordered');
 
         return back();
     }
@@ -58,7 +60,16 @@ class ProductMediaController extends Controller
         abort_unless($media->model_type === $product->getMorphClass() && (int) $media->model_id === $product->id, 404);
 
         $media->delete();
+        $this->log($product, 'image_removed', ['file' => $media->file_name]);
 
         return back()->with('success', __('admin.deleted'));
+    }
+
+    /** Gallery changes are media rows, not product attributes: recorded on the product's history by hand. */
+    private function log(Product $product, string $event, array $properties = []): void
+    {
+        activity('catalog')->event($event)->performedOn($product)
+            ->withProperties([...$properties, 'label' => (string) $product->translate('ar', true)?->getAttribute('name')])
+            ->log($event);
     }
 }

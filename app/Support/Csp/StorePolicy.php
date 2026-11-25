@@ -20,7 +20,7 @@ class StorePolicy implements Preset
             ->add(Directive::BASE, Keyword::SELF)
             ->add(Directive::DEFAULT, Keyword::SELF)
             ->add(Directive::CONNECT, Keyword::SELF)
-            ->add(Directive::FONT, [Keyword::SELF, 'data:'])
+            ->add(Directive::FONT, [Keyword::SELF, 'data:', 'blob:']) // blob: = font preview before upload
             ->add(Directive::FORM_ACTION, Keyword::SELF)
             ->add(Directive::FRAME_ANCESTORS, Keyword::SELF)
             // Store-location maps (Google Maps embed, no API key / no script on our pages).

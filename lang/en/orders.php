@@ -16,4 +16,13 @@ return [
     'invalid_transition' => 'An order cannot move from :from to :to.',
     'filter_status' => 'Any status',
     'search' => 'Search number, name or phone…',
+    'move_to' => 'Move the order to',
+    'cancel_restocks' => 'Quantities return to stock',
+    'move_to_status' => 'Move to: :status',
+    'cancel_order' => 'Cancel order',
+    'confirm_cancel' => 'The order is cancelled and its quantities return to stock. It cannot be reopened.',
+    'confirm_skip' => 'You are skipping steps. An order can never move back to an earlier status.',
+    'step_done' => 'done',
+    'step_current' => 'current',
+    'step_upcoming' => 'upcoming',
 ];

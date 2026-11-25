@@ -5,6 +5,7 @@ namespace App\Actions\Products;
 use App\Enums\ProductType;
 use App\Enums\StockStatus;
 use App\Models\AttributeTerm;
+use App\Models\PriceTier;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
  * longer submitted, and guarantees exactly one default variant.
  *
  * Each variant payload: term_ids, sku, regular_price, sale_price, manage_stock, stock_quantity,
- * stock_status, weight_grams, length_mm, width_mm, height_mm, is_active, is_default (prices in minor units).
+ * stock_status, weight_grams, length_mm, width_mm, height_mm, is_active, is_default, tier_prices (prices in minor units).
  */
 class SyncProductVariants
 {
@@ -60,6 +61,9 @@ class SyncProductVariants
                 );
 
                 $variant->terms()->sync($termIds);
+                if (array_key_exists('tier_prices', $payload)) {
+                    $this->syncTierPrices($variant, (array) $payload['tier_prices']);
+                }
                 $keptIds[$signature] = $variant->id;
             }
 
@@ -67,6 +71,30 @@ class SyncProductVariants
 
             $this->ensureSingleDefault($product);
         });
+    }
+
+    /**
+     * Exact trader prices per tier: a number sets it, empty removes it (the tier's automatic % applies).
+     * Unknown tier ids are ignored. Saved through Eloquent so every change lands in the product history.
+     *
+     * @param  array<int|string, int|null>  $prices
+     */
+    private function syncTierPrices(ProductVariant $variant, array $prices): void
+    {
+        $tierIds = PriceTier::query()->whereIn('id', array_keys($prices))->pluck('id');
+
+        foreach ($tierIds as $tierId) {
+            $price = $prices[$tierId] ?? null;
+            $existing = $variant->tierPrices()->where('price_tier_id', $tierId)->first();
+
+            if ($price === null) {
+                $existing?->delete();
+            } elseif ($existing) {
+                $existing->update(['price' => $price]);
+            } else {
+                $variant->tierPrices()->create(['price_tier_id' => $tierId, 'price' => $price]);
+            }
+        }
     }
 
     /** @return list<int>|null null = simple product (no terms allowed) */

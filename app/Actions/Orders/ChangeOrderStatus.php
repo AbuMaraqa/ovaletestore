@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Enums\OrderStatus;
 use App\Enums\StockStatus;
+use App\Events\OrderStatusChanged;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
@@ -30,6 +31,7 @@ class ChangeOrderStatus
             }
 
             $order->update(['status' => $next]);
+            OrderStatusChanged::dispatch($order, $current->status, $next); // after commit
 
             if ($note) {
                 $order->notes()->create(['user_id' => $actor->id, 'body' => $note]);
@@ -43,7 +45,7 @@ class ChangeOrderStatus
      * Returns the quantities to stock. Goes through Eloquent so a variant that sold out becomes
      * purchasable again and the catalog caches are flushed by CatalogCacheObserver.
      */
-    private function restock(Order $order): void
+    public function restock(Order $order): void
     {
         $order->loadMissing('items');
 

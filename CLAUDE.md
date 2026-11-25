@@ -6,10 +6,13 @@ Multilingual: **ar (default, RTL)**, en (LTR), he (RTL). Currency: ILS (stored i
 ## Commands (Windows: run php/composer/npm through PowerShell)
 - `composer dev` — server + queue + vite
 - `php artisan test` (Pest) · `vendor/bin/pint` · `vendor/bin/phpstan analyse`
-- `npm run build` · `npm run types` (vue-tsc)
+- `npm run build` · `npx vue-tsc --noEmit` (type check)
 - `php artisan woo:inspect | woo:migrate [--images] [--dry-run] | woo:verify`
 - `php artisan woo:export-orders` → `db:seed --class=OrderSeeder` → `woo:verify-orders` (orders file holds customer data: git-ignored)
 - `php artisan sitemap:generate`
+- `php artisan woo:export-customers` → `db:seed --class=CustomerSeeder` (before OrderSeeder; personal data: git-ignored)
+- Deploy: `migrate --force` → `permissions:sync` → `config:cache` + `route:trans:cache` + `view:cache` + `event:cache` (never plain `route:cache`/`optimize`: mcamara needs per-locale routes) — see documentation/deployment-guide.md; + a queue worker and cron `schedule:run`
+- Admin features (permissions, activity log, DataTable, customers, traders, currencies, email): documentation/admin-operations.md
 
 ## Architecture (see documentation/architecture.md)
 - `app/Actions/<Domain>` — one business operation per class, `handle()` method, transactional where needed.

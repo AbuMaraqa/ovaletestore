@@ -61,6 +61,7 @@ class ProductFormResource extends JsonResource
                 'height_mm' => $v->height_mm,
                 'is_active' => $v->is_active,
                 'is_default' => $v->is_default,
+                'tier_prices' => (object) $v->tierPrices->mapWithKeys(fn ($p) => [$p->price_tier_id => Money::toMajor($p->price)])->all(),
             ]),
             'media' => $this->getMedia('gallery')->map(fn (Media $m) => [
                 'id' => $m->id,

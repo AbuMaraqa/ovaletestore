@@ -82,6 +82,9 @@ class ProductRequest extends FormRequest
             'variants.*.height_mm' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'variants.*.is_active' => ['boolean'],
             'variants.*.is_default' => ['boolean'],
+            // Trader prices: {price_tier_id: price}; empty = the tier's automatic % applies.
+            'variants.*.tier_prices' => ['nullable', 'array'],
+            'variants.*.tier_prices.*' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
         ];
     }
 
@@ -98,9 +101,16 @@ class ProductRequest extends FormRequest
     {
         $data = $this->validated();
 
-        $data['variants'] = collect($data['variants'])->map(function (array $variant) {
+        $canPriceTiers = (bool) $this->user()?->can('price_tiers.update');
+
+        $data['variants'] = collect($data['variants'])->map(function (array $variant) use ($canPriceTiers) {
             $variant['regular_price'] = Money::toMinor($variant['regular_price']);
             $variant['sale_price'] = Money::toMinor($variant['sale_price'] ?? null);
+            if (! $canPriceTiers) {
+                unset($variant['tier_prices']); // trader prices are a price-tier permission, not products.update
+            } elseif (array_key_exists('tier_prices', $variant)) {
+                $variant['tier_prices'] = collect((array) $variant['tier_prices'])->map(fn ($price) => Money::toMinor($price))->all();
+            }
 
             return $variant;
         })->all();

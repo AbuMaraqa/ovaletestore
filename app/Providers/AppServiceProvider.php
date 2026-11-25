@@ -9,6 +9,8 @@ use App\Models\ProductTranslation;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Observers\CatalogCacheObserver;
+use App\Support\CurrencyContext;
+use App\Support\PriceContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -19,9 +21,18 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Activitylog\Actions\LogActivityAction;
+use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 
 class AppServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        // One pricing context per request / queue job (trader tier of the signed-in user).
+        $this->app->scoped(PriceContext::class);
+        $this->app->scoped(CurrencyContext::class);
+    }
+
     public function boot(): void
     {
         // Fail loudly outside production on silently discarded / missing attributes,
@@ -48,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureAuthorization();
         $this->configureRateLimiting();
+        $this->configureActivityLog();
 
         // ProductVariant too: prices and stock shown in the POS catalog.
         foreach ([Product::class, ProductVariant::class, Category::class, ProductTranslation::class, CategoryTranslation::class] as $model) {
@@ -61,6 +73,21 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('access-admin', fn (User $user) => $user->is_active && $user->can('admin.access'));
         Gate::define('access-pos', fn (User $user) => $user->is_active && $user->can('pos.access'));
+    }
+
+    /** Every audit entry records where it came from (IP + browser) when it happens during a web request. */
+    private function configureActivityLog(): void
+    {
+        LogActivityAction::beforeLogging(function (ActivityContract $activity): void {
+            if (! $activity instanceof Model || ($this->app->runningInConsole() && ! $this->app->runningUnitTests())) {
+                return;
+            }
+            $request = request();
+            $activity->setAttribute('properties', collect($activity->getAttribute('properties'))->merge([
+                'ip' => $request->ip(),
+                'agent' => mb_substr((string) $request->userAgent(), 0, 255),
+            ]));
+        });
     }
 
     private function configureRateLimiting(): void

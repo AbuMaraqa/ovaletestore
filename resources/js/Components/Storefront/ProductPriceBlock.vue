@@ -9,6 +9,7 @@ const props = defineProps<{
         price: string;
         regular_price: string | null;
         on_sale: boolean;
+        trade_price?: boolean;
         discount_percent: number | null;
         saving: string | null;
         sale_ends_at: string | null;
@@ -32,9 +33,10 @@ const stock = computed(() => {
     <div class="mt-5" aria-live="polite">
         <template v-if="variant">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span class="text-3xl font-extrabold sm:text-4xl" :class="variant.on_sale ? 'text-brand-700' : 'text-cocoa'" dir="ltr">{{ variant.price }}</span>
+                <span class="text-3xl font-extrabold sm:text-4xl" :class="variant.on_sale || variant.trade_price ? 'text-brand-700' : 'text-cocoa'" dir="ltr">{{ variant.price }}</span>
                 <span v-if="variant.regular_price" class="text-lg text-stone-500 line-through" dir="ltr">{{ variant.regular_price }}</span>
-                <span v-if="variant.on_sale" class="rounded-full bg-brand-600 px-3 py-1 text-sm font-bold text-white" dir="ltr">
+                <span v-if="variant.trade_price" class="rounded-full bg-cocoa px-3 py-1 text-sm font-bold text-white">{{ t('storefront.trade_price') }}</span>
+                <span v-else-if="variant.on_sale" class="rounded-full bg-brand-600 px-3 py-1 text-sm font-bold text-white" dir="ltr">
                     {{ variant.discount_percent ? t('storefront.discount_badge', { percent: variant.discount_percent }) : t('storefront.sale') }}
                 </span>
             </div>

@@ -46,7 +46,7 @@ class CatalogQuery
         }
 
         if ($filters['on_sale'] ?? false) {
-            $query->whereHas('activeVariants', fn (Builder $q) => $q->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'regular_price'));
+            $query->whereHas('activeVariants', fn (Builder $q) => $q->whereRaw(self::saleActiveSql(), self::saleBindings()));
         }
 
         if ($brandId = $filters['brand_id'] ?? null) {
@@ -62,9 +62,9 @@ class CatalogQuery
         $max = $filters['price_max'] ?? null;
         if ($min !== null || $max !== null) {
             $query->whereHas('activeVariants', function (Builder $q) use ($min, $max) {
-                $price = 'CASE WHEN sale_price IS NOT NULL AND sale_price < regular_price THEN sale_price ELSE regular_price END';
-                $q->when($min !== null, fn ($q) => $q->whereRaw("{$price} >= ?", [$min]))
-                    ->when($max !== null, fn ($q) => $q->whereRaw("{$price} <= ?", [$max]));
+                $price = 'CASE WHEN '.self::saleActiveSql().' THEN sale_price ELSE regular_price END';
+                $q->when($min !== null, fn ($q) => $q->whereRaw("{$price} >= ?", [...self::saleBindings(), $min]))
+                    ->when($max !== null, fn ($q) => $q->whereRaw("{$price} <= ?", [...self::saleBindings(), $max]));
             });
         }
 
@@ -99,5 +99,20 @@ class CatalogQuery
             ),
             default => $query->orderByDesc('is_featured')->orderByDesc('published_at')->orderByDesc('id'),
         };
+    }
+
+    /** SQL for "this variant's sale price applies right now" — mirrors ProductVariant::isOnSale(). */
+    public static function saleActiveSql(): string
+    {
+        return '(sale_price IS NOT NULL AND sale_price < regular_price'
+            .' AND (sale_starts_at IS NULL OR sale_starts_at <= ?) AND (sale_ends_at IS NULL OR sale_ends_at > ?))';
+    }
+
+    /** @return array{0: string, 1: string} */
+    public static function saleBindings(): array
+    {
+        $now = now()->toDateTimeString();
+
+        return [$now, $now];
     }
 }

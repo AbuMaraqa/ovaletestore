@@ -24,7 +24,7 @@ const { t } = useTrans();
                     <dd class="mt-1 font-semibold" dir="ltr">{{ order.total }}</dd>
                 </div>
             </dl>
-            <p class="mt-6 text-sm text-stone-600">{{ t('cart.we_will_contact', { phone: order.phone }) }}</p>
+            <p class="mt-6 text-sm text-stone-600">{{ t('cart.we_will_contact', { phone: `\u2066${order.phone}\u2069` }) }}</p>
             <Link :href="route('storefront.shop')" class="btn-primary mt-8">{{ t('cart.continue_shopping') }}</Link>
         </div>
     </div>

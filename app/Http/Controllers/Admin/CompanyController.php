@@ -9,30 +9,41 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanyPayment;
 use App\Models\Order;
+use App\Support\DataTable;
 use App\Support\Money;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 /** B2B companies the sales reps order for, with their account statement (orders on account − payments). */
 class CompanyController extends Controller
 {
     public function index(Request $request): Response
     {
-        $this->authorize('companies.manage');
-        $search = trim((string) $request->query('search', ''));
+        $this->authorize('companies.view');
 
-        $companies = Company::query()->withBalance()->withCount('orders')
-            ->when($search !== '', function ($q) use ($search) {
-                $like = '%'.addcslashes($search, '%_\\').'%';
-                $q->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('phone', 'like', $like)->orWhere('city', 'like', $like));
-            })
-            ->orderByDesc('is_active')->orderBy('name')
-            ->paginate(25)->withQueryString();
+        $companies = QueryBuilder::for(Company::query()->withBalance()->withCount('orders'))
+            ->allowedFilters(...[
+                AllowedFilter::callback('search', function (Builder $q, $term) {
+                    $like = DataTable::like($term);
+                    $q->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('phone', 'like', $like)
+                        ->orWhere('city', 'like', $like)->orWhere('contact_name', 'like', $like));
+                }),
+                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
+                AllowedFilter::exact('city'),
+            ])
+            ->allowedSorts(...['name', 'orders_count', 'created_at', 'id'])
+            ->defaultSort('name')
+            ->paginate(DataTable::perPage($request))
+            ->withQueryString();
 
         $outstanding = Company::query()->withBalance()->get()->sum(fn (Company $c) => max(0, $c->balance()));
+        $user = $request->user();
 
         return Inertia::render('Admin/Companies/Index', [
             'companies' => $companies->through(fn (Company $c) => [
@@ -45,22 +56,27 @@ class CompanyController extends Controller
                 'orders_count' => $c->orders_count,
                 'balance' => Money::format($c->balance()),
                 'has_debt' => $c->balance() > 0,
+                'show_url' => route('admin.companies.show', $c),
+                'edit_url' => $user->can('companies.update') ? route('admin.companies.edit', $c) : null,
+                'delete_url' => $user->can('companies.delete') ? route('admin.companies.destroy', $c) : null,
             ]),
+            'state' => DataTable::state($request),
             'outstanding' => Money::format($outstanding),
-            'search' => $search,
+            'cities' => Company::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city')
+                ->map(fn (string $city) => ['value' => $city, 'label' => $city]),
         ]);
     }
 
     public function create(): Response
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.create');
 
         return Inertia::render('Admin/Companies/Form', ['company' => null]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.create');
         $company = Company::query()->create($this->validated($request));
 
         return to_route('admin.companies.show', $company)->with('success', __('admin.created'));
@@ -68,7 +84,7 @@ class CompanyController extends Controller
 
     public function show(Company $company): Response
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.view');
 
         return Inertia::render('Admin/Companies/Show', [
             'company' => [
@@ -84,7 +100,7 @@ class CompanyController extends Controller
 
     public function edit(Company $company): Response
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.update');
 
         return Inertia::render('Admin/Companies/Form', [
             'company' => $company->only(['id', 'name', 'contact_name', 'phone', 'city', 'address', 'notes', 'is_active']),
@@ -93,7 +109,7 @@ class CompanyController extends Controller
 
     public function update(Request $request, Company $company): RedirectResponse
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.update');
         $company->update($this->validated($request, $company));
 
         return to_route('admin.companies.show', $company)->with('success', __('admin.updated'));
@@ -102,7 +118,7 @@ class CompanyController extends Controller
     /** Only companies without orders or payments can be deleted; otherwise deactivate them. */
     public function destroy(Company $company): RedirectResponse
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.delete');
 
         if ($company->orders()->exists() || $company->payments()->exists()) {
             return back()->with('error', __('admin.company_has_history'));
@@ -150,7 +166,7 @@ class CompanyController extends Controller
                 'reference' => $order->number,
                 'detail' => $order->salesRep?->getAttribute('name'),
                 'status' => $order->status->value,
-                'debit' => $cancelled ? 0 : $order->total,
+                'debit' => $cancelled ? 0 : $order->base_total,
                 'credit' => 0,
             ];
         }

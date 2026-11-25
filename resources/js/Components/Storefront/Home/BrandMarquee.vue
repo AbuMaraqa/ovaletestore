@@ -1,33 +1,47 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import Icon from '@/Components/Storefront/Icon.vue';
 import { useGsap } from '@/Composables/useMotion';
 import { useLocale } from '@/Composables/useLocale';
 import { useTrans } from '@/Composables/useTrans';
 
 /**
- * Infinite logo marquee (GSAP). The list is rendered twice and the track moves exactly one copy's
- * width, so the loop is seamless. Direction follows reading direction; hover/focus pauses it.
- * With reduced motion it is a plain, scrollable row.
+ * Two logo rows drifting in opposite directions (GSAP). Each row is rendered twice and moves exactly one
+ * copy's width, so the loop is seamless; hover/focus pauses that row. The rows have vertical padding
+ * inside the clipping box, so card frames and hover shadows are never cut.
+ * With reduced motion the rows are plain, scrollable strips.
  */
-const props = defineProps<{ brands: { id: number; name: string; url: string; logo: string | null }[] }>();
+type Brand = { id: number; name: string; url: string; logo: string | null };
+const props = defineProps<{ brands: Brand[] }>();
 const { t } = useTrans();
 const { isRtl } = useLocale();
 const root = ref<HTMLElement | null>(null);
 
-useGsap(root, ({ gsap }) => {
-    const tween = gsap.to('[data-marquee-track]', {
-        xPercent: isRtl.value ? 50 : -50,
-        duration: props.brands.length * 3.2,
-        ease: 'none',
-        repeat: -1,
-    });
+/** Split in two; with only a few brands both rows show all of them (the second one reversed). */
+const rows = computed<Brand[][]>(() => {
+    const list = props.brands;
+    if (list.length < 10) return [list, [...list].reverse()];
+    const half = Math.ceil(list.length / 2);
+    return [list.slice(0, half), list.slice(half)];
+});
 
-    const track = root.value!.querySelector('[data-marquee]')!;
-    track.addEventListener('mouseenter', () => tween.pause());
-    track.addEventListener('mouseleave', () => tween.resume());
-    track.addEventListener('focusin', () => tween.pause());
-    track.addEventListener('focusout', () => tween.resume());
+useGsap(root, ({ gsap }) => {
+    root.value!.querySelectorAll<HTMLElement>('[data-marquee-row]').forEach((row, index) => {
+        const track = row.querySelector('[data-marquee-track]')!;
+        const away = isRtl.value ? 50 : -50;
+        const reverse = index % 2 === 1;
+        const tween = gsap.fromTo(track, { xPercent: reverse ? away : 0 }, {
+            xPercent: reverse ? 0 : away,
+            duration: Math.max(18, (rows.value[index]?.length ?? 6) * 3.6),
+            ease: 'none',
+            repeat: -1,
+        });
+        row.addEventListener('mouseenter', () => tween.pause());
+        row.addEventListener('mouseleave', () => tween.resume());
+        row.addEventListener('focusin', () => tween.pause());
+        row.addEventListener('focusout', () => tween.resume());
+    });
 });
 </script>
 
@@ -37,24 +51,45 @@ useGsap(root, ({ gsap }) => {
             <h2 data-reveal class="text-3xl font-extrabold tracking-tight text-cocoa sm:text-4xl">{{ t('storefront.brands_title') }}</h2>
             <p data-reveal class="mx-auto mt-3 max-w-xl text-stone-500">{{ t('storefront.brands_subtitle') }}</p>
         </div>
-        <div data-marquee class="relative mt-10 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)]">
-            <div data-marquee-track class="flex w-max gap-5 will-change-transform">
-                <Link
-                    v-for="(brand, i) in [...brands, ...brands]"
-                    :key="i"
-                    :href="brand.url"
-                    class="flex h-28 w-44 shrink-0 items-center justify-center rounded-3xl bg-white p-4 ring-1 ring-stone-100 transition hover:ring-brand-300 sm:h-32 sm:w-52"
-                    :aria-hidden="i >= brands.length"
-                    :tabindex="i >= brands.length ? -1 : undefined"
-                    :aria-label="brand.name"
-                >
-                    <img v-if="brand.logo" :src="brand.logo" :alt="brand.name" loading="lazy" decoding="async" class="max-h-full w-auto object-contain mix-blend-multiply transition duration-300 hover:scale-105" width="200" height="200" />
-                    <span v-else class="font-bold text-cocoa">{{ brand.name }}</span>
-                </Link>
+
+        <div class="mt-8 space-y-1 [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
+            <div
+                v-for="(row, r) in rows"
+                :key="r"
+                data-marquee-row
+                class="overflow-hidden py-3 motion-reduce:overflow-x-auto"
+            >
+                <div data-marquee-track class="flex w-max gap-4 px-2 will-change-transform">
+                    <Link
+                        v-for="(brand, i) in [...row, ...row]"
+                        :key="`${r}-${i}`"
+                        :href="brand.url"
+                        class="group flex h-24 w-40 shrink-0 items-center justify-center rounded-2xl bg-white px-5 py-3 ring-1 ring-stone-200/80 transition duration-300 hover:-translate-y-0.5 hover:shadow-lift hover:ring-brand-300 focus-visible:ring-2 focus-visible:ring-brand-500 sm:h-28 sm:w-48"
+                        :aria-hidden="i >= row.length"
+                        :tabindex="i >= row.length ? -1 : undefined"
+                        :aria-label="brand.name"
+                    >
+                        <img
+                            v-if="brand.logo"
+                            :src="brand.logo"
+                            :alt="brand.name"
+                            loading="lazy"
+                            decoding="async"
+                            class="max-h-full w-auto object-contain mix-blend-multiply transition duration-300 group-hover:scale-105"
+                            width="200"
+                            height="200"
+                        />
+                        <span v-else class="font-bold text-cocoa">{{ brand.name }}</span>
+                    </Link>
+                </div>
             </div>
         </div>
-        <div class="mt-6 text-center">
-            <Link :href="route('storefront.brands')" class="text-sm font-semibold text-brand-700 hover:underline">{{ t('storefront.view_all') }}</Link>
+
+        <div class="mt-8 text-center">
+            <Link :href="route('storefront.brands')" class="btn-ghost group h-11 gap-2 px-6 text-sm font-bold">
+                {{ t('storefront.all_brands') }}
+                <Icon name="arrow" class="size-4 transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" />
+            </Link>
         </div>
     </section>
 </template>

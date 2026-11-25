@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Products\BulkUpdateProducts;
 use App\Actions\Products\SaveProduct;
 use App\Enums\ProductStatus;
+use App\Enums\StockStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Resources\Admin\ProductFormResource;
@@ -11,10 +13,13 @@ use App\Http\Resources\Admin\ProductListResource;
 use App\Models\Attribute;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\PriceTier;
 use App\Models\Product;
+use App\Support\DataTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -28,27 +33,51 @@ class ProductController extends Controller
         $this->authorize('viewAny', Product::class);
 
         $products = QueryBuilder::for(Product::class)
-            ->with(['translations', 'variants', 'media', 'categories.translations'])
+            ->with(['translations', 'variants', 'media', 'categories.translations', 'brand.translations'])
             ->allowedFilters(...[
                 AllowedFilter::exact('status'),
+                AllowedFilter::exact('type'),
+                AllowedFilter::exact('brand', 'brand_id'),
+                AllowedFilter::callback('featured', fn (Builder $q, $v) => $q->where('is_featured', $v === 'yes')),
+                AllowedFilter::callback('stock', fn (Builder $q, $v) => $v === 'out'
+                    ? $q->whereDoesntHave('variants', fn ($w) => $w->where('stock_status', '!=', StockStatus::OutOfStock))
+                    : $q->whereHas('variants', fn ($w) => $w->where('stock_status', '!=', StockStatus::OutOfStock))),
                 AllowedFilter::callback('category', fn (Builder $q, $id) => $q->whereHas('categories', fn ($c) => $c->where('categories.id', $id))),
                 AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = '%'.addcslashes((string) $term, '%_\\').'%';
+                    $like = DataTable::like($term);
                     $q->where(fn ($w) => $w->whereHas('translations', fn ($t) => $t->where('name', 'like', $like))
                         ->orWhereHas('variants', fn ($v) => $v->where('sku', 'like', $like)));
                 }),
+                ...DataTable::dateRange('created_at'),
             ])
-            ->allowedSorts(...['id', 'created_at', 'updated_at', AllowedSort::field('status')])
+            ->allowedSorts(...['id', 'created_at', 'updated_at', AllowedSort::field('status'), AllowedSort::field('is_featured')])
             ->defaultSort('-id')
-            ->paginate(25)
+            ->paginate(DataTable::perPage($request))
             ->withQueryString();
 
         return Inertia::render('Admin/Products/Index', [
             'products' => ProductListResource::collection($products),
-            'filters' => $request->only(['filter', 'sort']),
+            'state' => DataTable::state($request),
             'categories' => $this->categoryOptions(),
+            'brands' => Brand::query()->with('translations')->orderBy('sort_order')->get()->map(fn (Brand $b) => ['value' => $b->id, 'label' => $b->name]),
             'statuses' => array_column(ProductStatus::cases(), 'value'),
         ]);
+    }
+
+    /** Bulk actions from the list: publish / draft / archive / delete the selected products. */
+    /** Bulk actions from the list (publish / draft / archive / delete the selected products). */
+    public function bulk(Request $request, BulkUpdateProducts $bulk): RedirectResponse
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(BulkUpdateProducts::ACTIONS)],
+            'ids' => ['required', 'array', 'max:200'],
+            'ids.*' => ['integer'],
+        ]);
+        $this->authorize($data['action'] === 'delete' ? 'products.delete' : 'products.update');
+
+        $count = $bulk->handle($data['action'], array_map('intval', $data['ids']));
+
+        return back()->with('success', __('admin.bulk_done', ['count' => $count]));
     }
 
     public function create(): Response
@@ -71,7 +100,7 @@ class ProductController extends Controller
 
         $product->load([
             'translations', 'categories', 'media',
-            'productAttributes.terms', 'variants.terms', 'variants.media',
+            'productAttributes.terms', 'variants.terms', 'variants.media', 'variants.tierPrices',
         ]);
 
         return Inertia::render('Admin/Products/Form', [
@@ -108,6 +137,9 @@ class ProductController extends Controller
                     'terms' => $a->terms->map(fn ($t) => ['id' => $t->id, 'name' => $t->name]),
                 ]),
             'locales' => config('translatable.locales'),
+            'tiers' => PriceTier::query()->orderBy('sort_order')->get()->map(fn (PriceTier $t) => [
+                'id' => $t->id, 'name' => $t->label(), 'discount_percent' => (float) $t->discount_percent, 'is_active' => $t->is_active,
+            ]),
         ];
     }
 

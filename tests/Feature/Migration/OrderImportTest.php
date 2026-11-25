@@ -63,8 +63,10 @@ it('seeds orders idempotently without touching stock, linking products, customer
     $product = makeSimpleProduct('مشروب', '16.50', ['manage_stock' => true, 'stock_quantity' => 5]);
     $product->forceFill(['source_id' => 9101])->save();
     $customer = User::factory()->create(['email' => 'sami@example.test']);
+    $customer->forceFill(['source_id' => 501])->save();
     $path = writeOrderExport([
-        WooOrderMapper::map(wooOrder(), [['note' => 'اتصلنا بالزبون', 'author' => 'Oswa', 'customer_note' => true, 'date_created_gmt' => '2026-10-01T10:00:00']]),
+        WooOrderMapper::map(wooOrder(['customer_id' => 501]), [['note' => 'اتصلنا بالزبون', 'author' => 'Oswa', 'customer_note' => true, 'date_created_gmt' => '2026-10-01T10:00:00']]),
+        // Same email but placed as a guest: stays a guest order.
         WooOrderMapper::map(wooOrder(['id' => 7002, 'number' => '7002', 'status' => 'cancelled'])),
     ]);
 

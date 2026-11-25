@@ -4,6 +4,7 @@ import type { SharedProps } from '@/types';
 
 export interface AdminNotification {
     id: string;
+    type: 'order.placed' | 'trader.requested';
     number: string | null;
     customer: string | null;
     total: string | null;
@@ -13,7 +14,7 @@ export interface AdminNotification {
 
 interface Props extends SharedProps {
     admin_notifications: { unread: number; items: AdminNotification[] } | null;
-    admin_badges: { pending_orders: number } | null;
+    admin_badges: { pending_orders?: number; pending_traders?: number } | null;
 }
 
 /**

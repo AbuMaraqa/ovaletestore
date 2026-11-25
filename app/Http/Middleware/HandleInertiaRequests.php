@@ -4,11 +4,14 @@ namespace App\Http\Middleware;
 
 use App\Actions\Cart\ResolveCart;
 use App\Enums\OrderStatus;
+use App\Enums\TraderStatus;
 use App\Models\Category;
+use App\Models\Currency;
 use App\Models\Order;
+use App\Models\User;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
-use App\Settings\StoreSettings;
+use App\Support\CurrencyContext;
 use App\Support\Translations;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,9 +25,16 @@ class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
 
+    /**
+     * The admin and the storefront ship different CSS bundles and Ziggy route lists (app.blade.php),
+     * so crossing between them (e.g. login → admin) must be a full page load: a per-area asset
+     * version makes Inertia answer 409 + location instead of swapping the page in place.
+     */
     public function version(Request $request): ?string
     {
-        return parent::version($request);
+        $area = $request->routeIs('admin.*', 'two-factor.*', 'password.confirm*') ? 'admin' : 'storefront';
+
+        return parent::version($request).'|'.$area;
     }
 
     public function share(Request $request): array
@@ -73,7 +83,8 @@ class HandleInertiaRequests extends Middleware
                 'social' => array_filter(app(ContactSettings::class)->social_links),
                 'phone_lines' => app(ContactSettings::class)->phoneLinesFor($locale),
                 'locations' => app(ContactSettings::class)->locationsFor($locale),
-                'currency' => app(StoreSettings::class)->currency,
+                // Storefront: the visitor's currency; admin/POS: the base currency (ApplyStorefrontCurrency).
+                'currency' => app(CurrencyContext::class)->current()->code,
             ],
 
             'cart_count' => fn () => $request->routeIs('admin.*') ? 0
@@ -85,15 +96,17 @@ class HandleInertiaRequests extends Middleware
             ],
 
             // Admin header badges (only for staff who may see orders).
-            'admin_badges' => fn () => $area === 'admin' && $user?->can('orders.view')
-                ? ['pending_orders' => Order::query()->where('status', OrderStatus::Pending)->count()]
-                : null,
+            'admin_badges' => fn () => $area === 'admin' && $user ? array_filter([
+                'pending_orders' => $user->can('orders.view') ? Order::query()->where('status', OrderStatus::Pending)->count() : null,
+                'pending_traders' => $user->can('traders.view') ? User::query()->where('trader_status', TraderStatus::Pending)->count() : null,
+            ], fn ($count) => $count !== null) ?: null : null,
 
             // Staff notifications (new orders) for the header bell; polled by the admin layout.
             'admin_notifications' => fn () => $area === 'admin' && $user ? [
                 'unread' => $user->unreadNotifications()->count(),
                 'items' => $user->notifications()->latest()->limit(8)->get()->map(fn ($n) => [
                     'id' => $n->id,
+                    'type' => $n->data['type'] ?? 'order.placed',
                     'number' => $n->data['number'] ?? null,
                     'customer' => $n->data['customer'] ?? null,
                     'total' => $n->data['total'] ?? null,
@@ -103,6 +116,11 @@ class HandleInertiaRequests extends Middleware
             ] : null,
 
             // Storefront navigation (top-level categories), sent once per locale.
+            // Currency switcher (storefront only; hidden when the store sells in a single currency).
+            'currencies' => fn () => $area === 'storefront' && ($list = app(CurrencyContext::class)->active())->count() > 1
+                ? $list->map(fn (Currency $c) => ['code' => $c->code, 'label' => $c->label($locale), 'symbol' => $c->symbol($locale)])->values()->all()
+                : null,
+
             'nav_categories' => $area === 'storefront'
                 ? Inertia::once(fn () => Category::query()->active()->whereNull('parent_id')->ordered()
                     ->with('translations')

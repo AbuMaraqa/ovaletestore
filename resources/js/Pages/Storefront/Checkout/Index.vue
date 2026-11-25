@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 import OrderSummary from '@/Components/Storefront/OrderSummary.vue';
 import StoreField from '@/Components/Storefront/StoreField.vue';
 import { useTrans } from '@/Composables/useTrans';
+import type { SharedProps } from '@/types';
 import type { CartPayload } from '@/types/cart';
 
 type ShippingOption = { id: number; name: string; description: string | null; requires_address: boolean; cost: string | null; total: string; free_over: string | null };
@@ -12,10 +13,12 @@ const props = defineProps<{
     cart: CartPayload;
     shipping_options: ShippingOption[];
     prefill: { customer_name: string; customer_email: string | null; customer_phone: string | null } | null;
+    currency_note: string | null;
 }>();
 
 const { t } = useTrans();
-const honeypot = usePage().props.honeypot as { nameFieldName: string; validFromFieldName: string; encryptedValidFrom: string; enabled: boolean } | undefined;
+const page = usePage<SharedProps>();
+const honeypot = page.props.honeypot as { nameFieldName: string; validFromFieldName: string; encryptedValidFrom: string; enabled: boolean } | undefined;
 
 const form = useForm({
     customer_name: props.prefill?.customer_name ?? '',
@@ -25,6 +28,7 @@ const form = useForm({
     shipping_city: '',
     shipping_address: '',
     customer_note: '',
+    currency: page.props.site.currency, // refused server-side if it changed since this page was shown
     ...(honeypot?.enabled ? { [honeypot.nameFieldName]: '', [honeypot.validFromFieldName]: honeypot.encryptedValidFrom } : {}),
 });
 
@@ -38,7 +42,16 @@ const summary = computed<CartPayload>(() =>
 const cartError = computed(() => (form.errors as Record<string, string>).cart);
 
 function submit(): void {
-    form.post(route('storefront.checkout.store'), { preserveScroll: true });
+    form.post(route('storefront.checkout.store'), {
+        preserveScroll: true,
+        // On a phone the button is far below the fields: bring the first problem into view and focus it.
+        onError: () =>
+            nextTick(() => {
+                const first = document.querySelector<HTMLElement>('[aria-invalid="true"], [role="alert"]');
+                first?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (first?.matches('input, select, textarea')) first.focus({ preventScroll: true });
+            }),
+    });
 }
 </script>
 
@@ -108,8 +121,11 @@ function submit(): void {
                             <span class="shrink-0" dir="ltr">{{ item.line_total }}</span>
                         </li>
                     </ul>
-                    <button type="submit" class="btn-accent mt-6 h-12 w-full text-base" :disabled="form.processing">{{ t('cart.place_order') }}</button>
-                    <p class="mt-3 text-center text-xs text-stone-500">{{ t('cart.payment_note') }}</p>
+                    <p v-if="currency_note" class="mt-5 rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 ring-1 ring-amber-200">{{ currency_note }}</p>
+                    <button type="submit" class="btn-accent mt-6 h-12 w-full text-base" :disabled="form.processing" :aria-busy="form.processing">
+                        {{ form.processing ? t('common.loading') : t('cart.place_order') }}
+                    </button>
+                    <p class="mt-3 text-center text-sm text-stone-600">{{ t('cart.payment_note') }}</p>
                 </OrderSummary>
             </aside>
         </form>

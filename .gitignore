@@ -25,3 +25,4 @@ Thumbs.db
 /storage/framework/phpstan/
 # Exported WooCommerce orders contain customer personal data: never commit
 /database/data/orders/
+/database/data/customers/

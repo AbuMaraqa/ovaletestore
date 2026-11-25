@@ -57,11 +57,19 @@ export interface StoreLocation {
     directions: string;
 }
 
+export interface CurrencyOption {
+    code: string;
+    label: string;
+    symbol: string;
+}
+
 export interface SharedProps {
     auth: { user: AuthUser | null; permissions: string[] };
     locale: { current: 'ar' | 'en' | 'he'; dir: 'rtl' | 'ltr'; available: LocaleOption[] };
     site: { name: string; tagline: string | null; logo: string | null; whatsapp: string | null; phone: string | null; social: Record<string, string>; phone_lines: PhoneLine[]; locations: StoreLocation[]; currency: string };
     cart_count: number;
+    /** Storefront currency switcher; null when the store sells in one currency. */
+    currencies?: CurrencyOption[] | null;
     flash: { success: string | null; error: string | null };
     translations: Record<string, Record<string, unknown>>;
     seo?: Seo;
@@ -93,6 +101,8 @@ export interface ProductCard {
     price_max: string | null;
     regular_price: string | null;
     on_sale: boolean;
+    /** The signed-in trader sees their trader price (below retail). */
+    trade_price?: boolean;
     discount_percent: number | null;
     in_stock: boolean;
     default_variant_id: number | null;

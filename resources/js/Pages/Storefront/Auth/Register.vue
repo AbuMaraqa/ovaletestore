@@ -13,6 +13,8 @@ const form = useForm<Record<string, string>>({
     phone: '',
     password: '',
     password_confirmation: '',
+    trader_request: '',
+    business_name: '',
     ...(props.honeypot?.enabled ? { [props.honeypot.nameFieldName]: '', [props.honeypot.validFromFieldName]: props.honeypot.encryptedValidFrom } : {}),
 });
 const submit = () => form.post(route('register.store'), { onFinish: () => form.reset('password', 'password_confirmation') });
@@ -29,6 +31,26 @@ const submit = () => form.post(route('register.store'), { onFinish: () => form.r
             <div class="grid gap-5 sm:grid-cols-2">
                 <StoreField id="password" v-model="form.password" type="password" :label="t('common.password')" :error="form.errors.password" autocomplete="new-password" required />
                 <StoreField id="password_confirmation" v-model="form.password_confirmation" type="password" :label="t('common.confirm_password')" autocomplete="new-password" required />
+            </div>
+            <!-- Optional trader (wholesale) request: reviewed by the shop before trader prices apply. -->
+            <div class="rounded-2xl bg-cream p-4 ring-1 ring-stone-200/70">
+                <label class="flex cursor-pointer items-start gap-3">
+                    <input v-model="form.trader_request" type="checkbox" true-value="1" false-value="" class="mt-1 size-4 accent-brand-600" />
+                    <span>
+                        <span class="block text-sm font-bold text-cocoa">{{ t('storefront.trader_signup') }}</span>
+                        <span class="block text-xs text-stone-600">{{ t('storefront.trader_signup_help') }}</span>
+                    </span>
+                </label>
+                <StoreField
+                    v-if="form.trader_request"
+                    id="business_name"
+                    v-model="form.business_name"
+                    class="mt-4"
+                    :label="t('storefront.business_name')"
+                    :error="form.errors.business_name"
+                    autocomplete="organization"
+                    required
+                />
             </div>
             <div v-if="honeypot?.enabled" class="hidden" aria-hidden="true">
                 <input v-model="form[honeypot.nameFieldName]" type="text" tabindex="-1" autocomplete="off" />

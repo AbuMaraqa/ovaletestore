@@ -39,6 +39,9 @@ class CatalogAssignBrands extends Command
 
     public function handle(): int
     {
+        // Bulk import: thousands of rows would bury the human audit trail.
+        activity()->disableLogging();
+
         $dryRun = (bool) $this->option('dry-run');
         $rows = [];
 

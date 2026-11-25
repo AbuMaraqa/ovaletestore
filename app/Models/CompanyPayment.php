@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CompanyPaymentMethod;
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -21,6 +22,8 @@ use Illuminate\Support\Carbon;
  */
 class CompanyPayment extends Model
 {
+    use RecordsActivity;
+
     protected $fillable = ['company_id', 'amount', 'method', 'reference', 'note', 'paid_at', 'recorded_by'];
 
     protected function casts(): array
@@ -36,5 +39,10 @@ class CompanyPayment extends Model
     public function recorder(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    public function activityParent(): ?array
+    {
+        return [Company::class, $this->attributes['company_id'] ?? null];
     }
 }

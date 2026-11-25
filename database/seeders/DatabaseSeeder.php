@@ -10,7 +10,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([RolesAndPermissionsSeeder::class, ShippingMethodSeeder::class, CatalogSeeder::class, OrderSeeder::class]);
+        $this->call([RolesAndPermissionsSeeder::class, ShippingMethodSeeder::class, CatalogSeeder::class, WholesalePriceSeeder::class, CustomerSeeder::class, OrderSeeder::class]);
 
         $email = (string) env('ADMIN_EMAIL', 'admin@ovalete.test');
 

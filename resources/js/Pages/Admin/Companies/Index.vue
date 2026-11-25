@@ -1,63 +1,57 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import DataTable from '@/Components/DataTable/DataTable.vue';
+import RowActions from '@/Components/DataTable/RowActions.vue';
+import type { Column, Filter, FilterOption, TablePage, TableState } from '@/Components/DataTable/types';
 import KtBadge from '@/Components/UI/KtBadge.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
-import KtCard from '@/Components/UI/KtCard.vue';
-import KtPagination from '@/Components/UI/KtPagination.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
-import { useDebounce } from '@/Composables/useDebounce';
+import { useCan } from '@/Composables/useCan';
 import { useTrans } from '@/Composables/useTrans';
-import type { PaginationLink } from '@/types';
 
-interface Row { id: number; name: string; contact_name: string | null; phone: string | null; city: string | null; is_active: boolean; orders_count: number; balance: string; has_debt: boolean }
-const props = defineProps<{
-    companies: { data: Row[]; links: PaginationLink[]; total: number; from: number | null; to: number | null };
-    outstanding: string;
-    search: string;
-}>();
+interface Row {
+    id: number; name: string; contact_name: string | null; phone: string | null; city: string | null; is_active: boolean;
+    orders_count: number; balance: string; has_debt: boolean; show_url: string; edit_url: string | null; delete_url: string | null;
+}
 
+const props = defineProps<{ companies: TablePage<Row>; state: TableState; outstanding: string; cities: FilterOption[] }>();
 const { t } = useTrans();
-const search = ref(props.search);
-watch(search, useDebounce(() => router.get(route('admin.companies.index'), search.value ? { search: search.value } : {}, { preserveState: true, replace: true }), 350));
+const { can } = useCan();
+
+const columns = computed<Column[]>(() => [
+    { key: 'name', label: t('admin.company'), sortable: true, fixed: true },
+    { key: 'contact_name', label: t('admin.contact_name') },
+    { key: 'phone', label: t('admin.phone') },
+    { key: 'orders_count', label: t('admin.orders'), sortable: true, align: 'center' },
+    { key: 'balance', label: t('admin.balance'), align: 'end' },
+    { key: 'is_active', label: t('common.status') },
+]);
+const filters = computed<Filter[]>(() => [
+    { key: 'status', label: t('common.status'), type: 'select', options: [{ value: 'active', label: t('admin.active') }, { value: 'inactive', label: t('admin.inactive') }] },
+    { key: 'city', label: t('admin.city'), type: 'select', options: props.cities },
+]);
 </script>
 
 <template>
     <PageHeader :title="t('admin.companies')" :description="`${t('admin.outstanding_total')}: ${outstanding}`">
-        <template #actions><KtButton :href="route('admin.companies.create')" icon="plus">{{ t('admin.new_company') }}</KtButton></template>
+        <template #actions><KtButton v-if="can('companies.create')" :href="route('admin.companies.create')" icon="plus">{{ t('admin.new_company') }}</KtButton></template>
     </PageHeader>
-    <KtCard flush>
-        <template #toolbar>
-            <input v-model="search" type="search" class="kt-input w-72" :placeholder="t('admin.search_companies')" :aria-label="t('common.search')" />
+
+    <DataTable :page="companies" :state="state" :columns="columns" :filters="filters" :url="route('admin.companies.index')" storage-key="companies" :search-placeholder="t('admin.search_companies')" :title="t('admin.companies')">
+        <template #cell-name="{ row }">
+            <Link :href="row.show_url" class="font-medium text-mono hover:text-primary">{{ row.name }}</Link>
+            <span v-if="row.city" class="block text-xs text-muted-foreground">{{ row.city }}</span>
         </template>
-        <div class="kt-table-wrapper overflow-x-auto">
-            <table class="kt-table">
-                <thead>
-                    <tr>
-                        <th>{{ t('admin.company') }}</th>
-                        <th>{{ t('admin.contact_name') }}</th>
-                        <th>{{ t('admin.phone') }}</th>
-                        <th class="text-center">{{ t('admin.orders') }}</th>
-                        <th class="text-end">{{ t('admin.balance') }}</th>
-                        <th>{{ t('common.status') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="c in companies.data" :key="c.id">
-                        <td>
-                            <Link :href="route('admin.companies.show', c.id)" class="font-medium text-mono hover:text-primary">{{ c.name }}</Link>
-                            <span v-if="c.city" class="block text-xs text-muted-foreground">{{ c.city }}</span>
-                        </td>
-                        <td class="text-sm">{{ c.contact_name ?? '—' }}</td>
-                        <td class="text-sm" dir="ltr">{{ c.phone ?? '—' }}</td>
-                        <td class="text-center tabular-nums">{{ c.orders_count }}</td>
-                        <td class="text-end font-semibold tabular-nums" :class="c.has_debt ? 'text-destructive' : 'text-muted-foreground'" dir="ltr">{{ c.balance }}</td>
-                        <td><KtBadge :variant="c.is_active ? 'success' : 'secondary'">{{ c.is_active ? t('admin.active') : t('admin.inactive') }}</KtBadge></td>
-                    </tr>
-                    <tr v-if="!companies.data.length"><td colspan="6" class="py-12 text-center text-muted-foreground">{{ t('admin.no_companies') }}</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <template #footer><KtPagination :links="companies.links" :total="companies.total" :from="companies.from" :to="companies.to" class="w-full" /></template>
-    </KtCard>
+        <template #cell-contact_name="{ row }"><span class="text-sm">{{ row.contact_name ?? '—' }}</span></template>
+        <template #cell-phone="{ row }"><span class="text-sm" dir="ltr">{{ row.phone ?? '—' }}</span></template>
+        <template #cell-orders_count="{ row }"><span class="tabular-nums">{{ row.orders_count }}</span></template>
+        <template #cell-balance="{ row }">
+            <span :class="['font-semibold tabular-nums', row.has_debt ? 'text-destructive' : 'text-muted-foreground']" dir="ltr">{{ row.balance }}</span>
+        </template>
+        <template #cell-is_active="{ row }"><KtBadge :variant="row.is_active ? 'success' : 'secondary'">{{ row.is_active ? t('admin.active') : t('admin.inactive') }}</KtBadge></template>
+        <template #actions="{ row }">
+            <RowActions :view-url="row.show_url" :edit-url="row.edit_url" :delete-url="row.delete_url" :label="row.name" :activity="{ type: 'company', id: row.id }" />
+        </template>
+    </DataTable>
 </template>

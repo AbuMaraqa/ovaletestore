@@ -108,6 +108,46 @@ class AdminApiClient
         return $this->api()->get("/orders/{$orderId}/notes", ['type' => 'any'])->throw()->json() ?? [];
     }
 
+    /**
+     * Registered WordPress users of every role (customers, shop managers, admins), oldest first.
+     *
+     * @return Generator<int, list<array<string, mixed>>>
+     */
+    public function customerPages(): Generator
+    {
+        $page = 1;
+
+        do {
+            $response = $this->api()->get('/customers', [
+                'per_page' => $this->perPage,
+                'page' => $page,
+                'role' => 'all',
+                'orderby' => 'id',
+                'order' => 'asc',
+            ])->throw();
+
+            $items = $response->json() ?? [];
+            if ($items !== []) {
+                yield $page => $items;
+            }
+
+            $totalPages = (int) $response->header('X-WP-TotalPages');
+            $page++;
+        } while ($items !== [] && $page <= $totalPages);
+    }
+
+    /**
+     * One read-only GET against wc/v3 (e.g. probing product meta during a migration).
+     *
+     * @return array{items: array<int, mixed>, total: int}
+     */
+    public function get(string $path, array $query = []): array
+    {
+        $response = $this->api()->get('/'.ltrim($path, '/'), $query)->throw();
+
+        return ['items' => $response->json() ?? [], 'total' => (int) $response->header('X-WP-Total')];
+    }
+
     private function api(): PendingRequest
     {
         if ($this->nonce === null) {

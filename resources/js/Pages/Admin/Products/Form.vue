@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, provide } from 'vue';
 import ProductMedia from '@/Components/Admin/Products/ProductMedia.vue';
 import ProductOrganization from '@/Components/Admin/Products/ProductOrganization.vue';
 import ProductTranslations from '@/Components/Admin/Products/ProductTranslations.vue';
@@ -9,9 +9,10 @@ import VariationsEditor from '@/Components/Admin/Products/VariationsEditor.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
+import KtIcon from '@/Components/UI/KtIcon.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useTrans } from '@/Composables/useTrans';
-import { emptyVariant, type AttributeOption, type ProductForm } from '@/types/admin';
+import { emptyVariant, type AttributeOption, type PriceTierOption, type ProductForm } from '@/types/admin';
 
 const props = defineProps<{
     product: ProductForm | null;
@@ -19,14 +20,19 @@ const props = defineProps<{
     brands: { id: number; name: string }[];
     attributes: AttributeOption[];
     locales: string[];
+    tiers: PriceTierOption[];
 }>();
+
+// Trader price fields inside every variant read the tiers from here.
+provide('priceTiers', computed(() => props.tiers));
 
 const { t } = useTrans();
 const blankTranslation = () => ({ name: '', slug: '', short_description: '', description: '', meta_title: '', meta_description: '' });
 
 const form = useForm<ProductForm>(
     props.product
-        ? structuredClone({ ...props.product, media: undefined, view_url: undefined })
+        ? // JSON round-trip, not structuredClone: page props are reactive proxies, which structuredClone rejects.
+          (JSON.parse(JSON.stringify({ ...props.product, media: undefined, view_url: undefined })) as ProductForm)
         : {
               type: 'simple',
               status: 'draft',
@@ -77,6 +83,12 @@ function onTypeChange(): void {
             <VariationsEditor v-else v-model:attributes="form.attributes" v-model:variants="form.variants" :options="attributes" :errors="errors" />
 
             <ProductMedia v-if="isEdit" :product-id="product!.id!" :media="product!.media ?? []" />
+            <KtCard v-else :title="t('admin.product_photos')">
+                <p class="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/40 p-5 text-sm text-secondary-foreground">
+                    <KtIcon name="picture" class="text-2xl text-muted-foreground" />
+                    {{ t('admin.save_first_for_photos') }}
+                </p>
+            </KtCard>
         </div>
 
         <aside class="space-y-6 xl:col-span-4">

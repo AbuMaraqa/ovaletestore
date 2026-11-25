@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasOptimizedImages;
 use App\Models\Concerns\HasTranslations;
+use App\Models\Concerns\RecordsActivity;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,7 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class Brand extends Model implements HasMedia, TranslatableContract
 {
-    use HasOptimizedImages, HasTranslations;
+    use HasOptimizedImages, HasTranslations, RecordsActivity;
 
     /** @var list<string> */
     public array $translatedAttributes = ['name', 'slug', 'description'];

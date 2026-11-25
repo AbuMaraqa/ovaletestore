@@ -1,73 +1,89 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import OrderStatusBadge from '@/Components/Admin/OrderStatusBadge.vue';
-import KtCard from '@/Components/UI/KtCard.vue';
-import KtPagination from '@/Components/UI/KtPagination.vue';
+import DataTable from '@/Components/DataTable/DataTable.vue';
+import RowActions from '@/Components/DataTable/RowActions.vue';
+import type { Column, Filter, FilterOption, TablePage, TableState } from '@/Components/DataTable/types';
+import KtIcon from '@/Components/UI/KtIcon.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
-import { useDebounce } from '@/Composables/useDebounce';
 import { useTrans } from '@/Composables/useTrans';
-import type { PaginationLink } from '@/types';
 
-interface Row { id: number; number: string; customer: string; phone: string | null; city: string | null; status: string; channel: 'web' | 'pos'; items_count: number; total: string; date: string }
-const props = defineProps<{
-    orders: { data: Row[]; links: PaginationLink[]; total: number; from: number | null; to: number | null };
-    filters: { filter?: { status?: string; search?: string } };
-    statuses: string[];
-}>();
+interface Row {
+    id: number;
+    number: string;
+    customer: string;
+    customer_url: string | null;
+    phone: string;
+    email: string | null;
+    city: string | null;
+    shipping: string | null;
+    payment: string;
+    status: string;
+    channel: 'web' | 'pos';
+    items_count: number;
+    total: string;
+    date: string;
+    ago: string;
+    show_url: string;
+    delete_url: string | null;
+}
 
+const props = defineProps<{ orders: TablePage<Row>; state: TableState; statuses: string[]; shipping_methods: FilterOption[] }>();
 const { t } = useTrans();
-const search = ref(props.filters.filter?.search ?? '');
-const status = ref(props.filters.filter?.status ?? '');
-const reload = () =>
-    router.get(route('admin.orders.index'), { filter: { ...(search.value ? { search: search.value } : {}), ...(status.value ? { status: status.value } : {}) } }, { preserveState: true, replace: true });
-watch(search, useDebounce(reload, 350));
-watch(status, reload);
+
+const columns = computed<Column[]>(() => [
+    { key: 'number', label: t('orders.number'), sortable: true, fixed: true },
+    { key: 'customer_name', label: t('customers.customer'), sortable: true },
+    { key: 'city', label: t('admin.city') },
+    { key: 'items_count', label: t('admin.items'), sortable: true, align: 'center' },
+    { key: 'channel', label: t('admin.channel'), hidden: true },
+    { key: 'payment', label: t('admin.payment'), hidden: true },
+    { key: 'shipping', label: t('admin.shipping_methods'), hidden: true },
+    { key: 'status', label: t('common.status'), sortable: true },
+    { key: 'total', label: t('admin.total'), sortable: true, align: 'end' },
+    { key: 'placed_at', label: t('admin.date'), sortable: true, align: 'end' },
+]);
+
+const filters = computed<Filter[]>(() => [
+    { key: 'status', label: t('common.status'), type: 'select', options: props.statuses.map((s) => ({ value: s, label: t(`orders.status_${s}`) })) },
+    { key: 'channel', label: t('admin.channel'), type: 'select', options: [{ value: 'web', label: t('admin.channel_web') }, { value: 'pos', label: t('admin.channel_pos') }] },
+    { key: 'account', label: t('customers.account'), type: 'select', options: [{ value: 'registered', label: t('customers.registered_account') }, { value: 'guest', label: t('customers.guest') }] },
+    { key: 'payment', label: t('admin.payment'), type: 'select', options: ['cod', 'on_account'].map((p) => ({ value: p, label: t(`admin.pay_${p}`) })) },
+    { key: 'shipping', label: t('admin.shipping_methods'), type: 'select', options: props.shipping_methods },
+    { key: 'date', label: t('admin.date'), type: 'date_range' },
+]);
 </script>
 
 <template>
     <PageHeader :title="t('admin.orders')" />
-    <KtCard flush>
-        <template #toolbar>
-            <div class="flex flex-wrap gap-2">
-                <input v-model="search" type="search" class="kt-input w-72" :placeholder="t('orders.search')" :aria-label="t('common.search')" />
-                <select v-model="status" class="kt-select w-44" :aria-label="t('common.status')">
-                    <option value="">{{ t('orders.filter_status') }}</option>
-                    <option v-for="s in statuses" :key="s" :value="s">{{ t(`orders.status_${s}`) }}</option>
-                </select>
+
+    <DataTable :page="orders" :state="state" :columns="columns" :filters="filters" :url="route('admin.orders.index')" storage-key="orders" :search-placeholder="t('admin.search_orders')" :title="t('admin.orders')">
+        <template #cell-number="{ row }">
+            <Link :href="row.show_url" class="font-semibold text-primary hover:underline" dir="ltr">{{ row.number }}</Link>
+            <span v-if="row.channel === 'pos'" class="ms-1.5 kt-badge kt-badge-sm kt-badge-outline">POS</span>
+        </template>
+        <template #cell-customer_name="{ row }">
+            <div class="min-w-40">
+                <component :is="row.customer_url ? Link : 'span'" :href="row.customer_url ?? undefined" :class="['font-medium text-mono', { 'hover:text-primary': row.customer_url }]">
+                    {{ row.customer }}
+                    <KtIcon v-if="row.customer_url" name="profile-circle" class="text-xs text-primary" :title="t('customers.registered_account')" />
+                </component>
+                <p class="text-xs text-muted-foreground" dir="ltr">{{ row.phone }}</p>
             </div>
         </template>
-        <div class="kt-table-wrapper overflow-x-auto">
-            <table class="kt-table">
-                <thead>
-                    <tr>
-                        <th>{{ t('orders.number') }}</th>
-                        <th>{{ t('admin.customer') }}</th>
-                        <th>{{ t('admin.phone') }}</th>
-                        <th class="text-center">{{ t('admin.items') }}</th>
-                        <th>{{ t('common.status') }}</th>
-                        <th class="text-end">{{ t('admin.total') }}</th>
-                        <th class="text-end">{{ t('admin.date') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="o in orders.data" :key="o.id">
-                        <td><Link :href="route('admin.orders.show', o.id)" class="font-mono text-sm font-medium text-primary" dir="ltr">{{ o.number }}</Link></td>
-                        <td>
-                            {{ o.customer }}
-                            <span v-if="o.channel === 'pos'" class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline ms-1">POS</span>
-                            <span class="block text-xs text-muted-foreground">{{ o.city }}</span>
-                        </td>
-                        <td dir="ltr" class="text-sm">{{ o.phone }}</td>
-                        <td class="text-center tabular-nums">{{ o.items_count }}</td>
-                        <td><OrderStatusBadge :status="o.status" /></td>
-                        <td class="text-end font-medium" dir="ltr">{{ o.total }}</td>
-                        <td class="text-end text-sm text-muted-foreground" dir="ltr">{{ o.date }}</td>
-                    </tr>
-                    <tr v-if="!orders.data.length"><td colspan="7" class="py-12 text-center text-muted-foreground">{{ t('common.no_results') }}</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <template #footer><KtPagination :links="orders.links" :total="orders.total" :from="orders.from" :to="orders.to" class="w-full" /></template>
-    </KtCard>
+        <template #cell-city="{ row }"><span class="text-sm">{{ row.city ?? '—' }}</span></template>
+        <template #cell-items_count="{ row }"><span class="tabular-nums">{{ row.items_count }}</span></template>
+        <template #cell-channel="{ row }">{{ t(`admin.channel_${row.channel}`) }}</template>
+        <template #cell-payment="{ row }"><span class="text-sm">{{ t(`admin.pay_${row.payment}`) }}</span></template>
+        <template #cell-shipping="{ row }"><span class="text-sm">{{ row.shipping ?? '—' }}</span></template>
+        <template #cell-status="{ row }"><OrderStatusBadge :status="row.status" /></template>
+        <template #cell-total="{ row }"><span class="whitespace-nowrap font-semibold tabular-nums" dir="ltr">{{ row.total }}</span></template>
+        <template #cell-placed_at="{ row }">
+            <time class="whitespace-nowrap text-sm text-secondary-foreground" :title="row.date">{{ row.ago }}</time>
+        </template>
+        <template #actions="{ row }">
+            <RowActions :view-url="row.show_url" :delete-url="row.delete_url" :label="row.number" :activity="{ type: 'order', id: row.id }" />
+        </template>
+    </DataTable>
 </template>

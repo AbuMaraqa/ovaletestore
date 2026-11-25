@@ -4,46 +4,65 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Support\DataTable;
 use App\Support\TranslationInput;
 use Astrotomic\Translatable\Validation\RuleFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class BrandController extends Controller
 {
     private const FIELDS = ['name', 'slug', 'description'];
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $this->authorize('brands.manage');
+        $this->authorize('brands.view');
+
+        $brands = QueryBuilder::for(Brand::query()->with(['translations', 'media'])->withCount('products'))
+            ->allowedFilters(...[
+                AllowedFilter::callback('search', fn (Builder $q, $term) => $q->whereHas('translations', fn ($t) => $t->where('name', 'like', DataTable::like($term)))),
+                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
+                AllowedFilter::callback('featured', fn (Builder $q, $v) => $q->where('is_featured', $v === 'yes')),
+            ])
+            ->allowedSorts(...['sort_order', 'products_count', 'created_at', 'id'])
+            ->defaultSort('sort_order')
+            ->paginate(DataTable::perPage($request))
+            ->withQueryString();
+
+        $user = $request->user();
 
         return Inertia::render('Admin/Brands/Index', [
-            'brands' => Brand::query()->with(['translations', 'media'])->withCount('products')->orderBy('sort_order')->get()
-                ->map(fn (Brand $b) => [
-                    'id' => $b->id,
-                    'name' => $b->name,
-                    'is_active' => $b->is_active,
-                    'is_featured' => $b->is_featured,
-                    'products_count' => $b->products_count,
-                    'logo' => $b->getFirstMediaUrl('logo', 'thumb') ?: $b->getFirstMediaUrl('logo') ?: null,
-                ]),
+            'brands' => $brands->through(fn (Brand $b) => [
+                'id' => $b->id,
+                'name' => $b->name,
+                'is_active' => $b->is_active,
+                'is_featured' => $b->is_featured,
+                'products_count' => $b->products_count,
+                'logo' => $b->getFirstMediaUrl('logo', 'thumb') ?: $b->getFirstMediaUrl('logo') ?: null,
+                'edit_url' => $user->can('brands.update') ? route('admin.brands.edit', $b) : null,
+                'delete_url' => $user->can('brands.delete') ? route('admin.brands.destroy', $b) : null,
+            ]),
+            'state' => DataTable::state($request),
         ]);
     }
 
     public function create(): Response
     {
-        $this->authorize('brands.manage');
+        $this->authorize('brands.create');
 
         return Inertia::render('Admin/Brands/Form', ['brand' => null]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorize('brands.manage');
+        $this->authorize('brands.create');
         $this->save($request, new Brand);
 
         return to_route('admin.brands.index')->with('success', __('admin.created'));
@@ -51,7 +70,7 @@ class BrandController extends Controller
 
     public function edit(Brand $brand): Response
     {
-        $this->authorize('brands.manage');
+        $this->authorize('brands.update');
         $brand->load(['translations', 'media']);
 
         return Inertia::render('Admin/Brands/Form', ['brand' => [
@@ -68,7 +87,7 @@ class BrandController extends Controller
 
     public function update(Request $request, Brand $brand): RedirectResponse
     {
-        $this->authorize('brands.manage');
+        $this->authorize('brands.update');
         $this->save($request, $brand);
 
         return back()->with('success', __('admin.updated'));
@@ -76,7 +95,7 @@ class BrandController extends Controller
 
     public function destroy(Brand $brand): RedirectResponse
     {
-        $this->authorize('brands.manage');
+        $this->authorize('brands.delete');
         $brand->delete();
 
         return to_route('admin.brands.index')->with('success', __('admin.deleted'));

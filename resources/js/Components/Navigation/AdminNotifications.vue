@@ -38,10 +38,17 @@ const readAll = () => router.post(route('admin.notifications.read-all'), {}, { p
             <ul v-if="items.length" class="max-h-[22rem] overflow-y-auto py-1">
                 <li v-for="n in items" :key="n.id">
                     <button type="button" :class="['flex w-full items-start gap-3 px-4 py-3 text-start hover:bg-accent', !n.read && 'bg-primary/5']" @click="openNotification(n.id)">
-                        <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-600"><KtIcon name="handcart" /></span>
+                        <span v-if="n.type === 'trader.requested'" class="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600"><KtIcon name="shop" /></span>
+                        <span v-else class="flex size-9 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-600"><KtIcon name="handcart" /></span>
                         <span class="min-w-0 flex-1 text-sm">
-                            <span class="block font-medium text-mono">{{ t('admin.new_order_from', { name: n.customer ?? '' }) }}</span>
-                            <span class="block text-xs text-muted-foreground"><span dir="ltr">{{ n.number }}</span> · <span dir="ltr">{{ n.total }}</span> · {{ n.time }}</span>
+                            <template v-if="n.type === 'trader.requested'">
+                                <span class="block font-medium text-mono">{{ t('traders.new_request_from', { name: n.customer ?? '' }) }}</span>
+                                <span class="block text-xs text-secondary-foreground">{{ [n.number, n.time].filter(Boolean).join(' · ') }}</span>
+                            </template>
+                            <template v-else>
+                                <span class="block font-medium text-mono">{{ t('admin.new_order_from', { name: n.customer ?? '' }) }}</span>
+                                <span class="block text-xs text-secondary-foreground"><bdi dir="ltr">{{ n.number }}</bdi> · <bdi dir="ltr">{{ n.total }}</bdi> · {{ n.time }}</span>
+                            </template>
                         </span>
                         <span v-if="!n.read" class="mt-2 size-2 shrink-0 rounded-full bg-primary" />
                     </button>

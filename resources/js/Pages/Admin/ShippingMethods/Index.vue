@@ -1,51 +1,56 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import DeleteButton from '@/Components/Admin/DeleteButton.vue';
+import { computed } from 'vue';
+import DataTable from '@/Components/DataTable/DataTable.vue';
+import RowActions from '@/Components/DataTable/RowActions.vue';
+import type { Column, Filter, TablePage, TableState } from '@/Components/DataTable/types';
 import KtBadge from '@/Components/UI/KtBadge.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
-import KtCard from '@/Components/UI/KtCard.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
+import { useCan } from '@/Composables/useCan';
 import { useTrans } from '@/Composables/useTrans';
 
-defineProps<{
-    methods: { id: number; name: string; type: 'delivery' | 'pickup'; cost: string | null; free_over: string | null; min_order: string | null; is_active: boolean; orders_count: number }[];
-}>();
+interface Row {
+    id: number; name: string; type: string; cost: string | null; free_over: string | null; min_order: string | null;
+    is_active: boolean; orders_count: number; edit_url: string | null; delete_url: string | null;
+}
+
+const props = defineProps<{ methods: TablePage<Row>; state: TableState; types: string[] }>();
 const { t } = useTrans();
+const { can } = useCan();
+
+const columns = computed<Column[]>(() => [
+    { key: 'name', label: t('admin.name'), fixed: true },
+    { key: 'type', label: t('admin.shipping_type') },
+    { key: 'cost', label: t('admin.shipping_cost'), sortable: true },
+    { key: 'free_over', label: t('admin.free_over') },
+    { key: 'min_order', label: t('admin.min_order_for_method'), hidden: true },
+    { key: 'orders_count', label: t('admin.orders'), sortable: true, align: 'center' },
+    { key: 'is_active', label: t('common.status') },
+]);
+const filters = computed<Filter[]>(() => [
+    { key: 'type', label: t('admin.shipping_type'), type: 'select', options: props.types.map((type) => ({ value: type, label: t(`admin.shipping_type_${type}`) })) },
+    { key: 'status', label: t('common.status'), type: 'select', options: [{ value: 'active', label: t('admin.active') }, { value: 'inactive', label: t('admin.inactive') }] },
+]);
 </script>
 
 <template>
     <PageHeader :title="t('admin.shipping_methods')" :description="t('admin.shipping_methods_help')">
-        <template #actions><KtButton :href="route('admin.shipping-methods.create')" icon="plus">{{ t('admin.new_shipping_method') }}</KtButton></template>
+        <template #actions><KtButton v-if="can('shipping.create')" :href="route('admin.shipping-methods.create')" icon="plus">{{ t('admin.new_shipping_method') }}</KtButton></template>
     </PageHeader>
-    <KtCard flush>
-        <div class="kt-table-wrapper overflow-x-auto">
-            <table class="kt-table">
-                <thead>
-                    <tr>
-                        <th>{{ t('admin.name') }}</th>
-                        <th>{{ t('admin.shipping_type') }}</th>
-                        <th>{{ t('admin.shipping_cost') }}</th>
-                        <th>{{ t('admin.free_over') }}</th>
-                        <th>{{ t('admin.min_order_for_method') }}</th>
-                        <th class="text-center">{{ t('admin.orders') }}</th>
-                        <th>{{ t('common.status') }}</th>
-                        <th class="text-end">{{ t('common.actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="m in methods" :key="m.id">
-                        <td><Link :href="route('admin.shipping-methods.edit', m.id)" class="font-medium text-mono hover:text-primary">{{ m.name }}</Link></td>
-                        <td>{{ t(`admin.shipping_type_${m.type}`) }}</td>
-                        <td dir="ltr" class="text-start tabular-nums">{{ m.cost ?? t('cart.free') }}</td>
-                        <td dir="ltr" class="text-start tabular-nums">{{ m.free_over ?? '—' }}</td>
-                        <td dir="ltr" class="text-start tabular-nums">{{ m.min_order ?? '—' }}</td>
-                        <td class="text-center tabular-nums">{{ m.orders_count }}</td>
-                        <td><KtBadge :variant="m.is_active ? 'success' : 'secondary'">{{ m.is_active ? t('admin.active') : t('admin.inactive') }}</KtBadge></td>
-                        <td class="text-end"><DeleteButton :href="route('admin.shipping-methods.destroy', m.id)" /></td>
-                    </tr>
-                    <tr v-if="!methods.length"><td colspan="8" class="py-10 text-center text-muted-foreground">{{ t('admin.no_shipping_methods') }}</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </KtCard>
+
+    <DataTable :page="methods" :state="state" :columns="columns" :filters="filters" :url="route('admin.shipping-methods.index')" storage-key="shipping" :search-placeholder="t('admin.search_shipping')" :title="t('admin.shipping_methods')">
+        <template #cell-name="{ row }">
+            <component :is="row.edit_url ? Link : 'span'" :href="row.edit_url ?? undefined" class="font-medium text-mono hover:text-primary">{{ row.name }}</component>
+        </template>
+        <template #cell-type="{ row }">{{ t(`admin.shipping_type_${row.type}`) }}</template>
+        <template #cell-cost="{ row }"><span class="tabular-nums" dir="ltr">{{ row.cost ?? t('cart.free') }}</span></template>
+        <template #cell-free_over="{ row }"><span class="tabular-nums" dir="ltr">{{ row.free_over ?? '—' }}</span></template>
+        <template #cell-min_order="{ row }"><span class="tabular-nums" dir="ltr">{{ row.min_order ?? '—' }}</span></template>
+        <template #cell-orders_count="{ row }"><span class="tabular-nums">{{ row.orders_count }}</span></template>
+        <template #cell-is_active="{ row }"><KtBadge :variant="row.is_active ? 'success' : 'secondary'">{{ row.is_active ? t('admin.active') : t('admin.inactive') }}</KtBadge></template>
+        <template #actions="{ row }">
+            <RowActions :edit-url="row.edit_url" :delete-url="row.delete_url" :label="row.name" :activity="{ type: 'shipping_method', id: row.id }" />
+        </template>
+    </DataTable>
 </template>

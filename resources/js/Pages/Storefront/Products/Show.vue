@@ -20,6 +20,7 @@ interface Variant {
     price: string;
     regular_price: string | null;
     on_sale: boolean;
+    trade_price?: boolean;
     discount_percent: number | null;
     saving: string | null;
     sale_ends_at: string | null;

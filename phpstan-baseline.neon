@@ -103,42 +103,6 @@ parameters:
 			path: app/Console/Commands/WooVerify.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/AttributeController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/AttributeController.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Controllers/Admin/AttributeController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Attribute\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/Admin/AttributeController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: int\<0, max\>, code\: string, color_hex\: string\|null, translations\: Illuminate\\Support\\Collection\<int\|string, array\{name\: mixed\}\>\}, Closure\(App\\Models\\AttributeTerm\)\: array\{id\: int\<0, max\>, code\: string, color_hex\: string\|null, translations\: Illuminate\\Support\\Collection\<int\|string, array\{name\: mixed\}\>\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Admin/AttributeController.php
-
-		-
-			message: '#^Parameter \#1 \$model of static method App\\Support\\TranslationInput\:\:apply\(\) expects Astrotomic\\Translatable\\Contracts\\Translatable&Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Admin/AttributeController.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -193,32 +157,8 @@ parameters:
 			path: app/Http/Controllers/Admin/OrderController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/ProductController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/ProductController.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Product\>\:\:allowedFilters\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/ProductController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Attribute\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/Admin/ProductController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
 			count: 1
 			path: app/Http/Controllers/Admin/ProductController.php
 
@@ -423,7 +363,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: app/Http/Resources/Storefront/ProductDetailResource.php
 
 		-
@@ -593,12 +533,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Models/User.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Support/Seo/JsonLd.php
 
 		-
 			message: '#^Parameter \#1 \$availability of method Spatie\\SchemaOrg\\Offer\:\:availability\(\) expects array\<Spatie\\SchemaOrg\\Contracts\\ItemAvailabilityContract\>\|Spatie\\SchemaOrg\\Contracts\\ItemAvailabilityContract, string given\.$#'

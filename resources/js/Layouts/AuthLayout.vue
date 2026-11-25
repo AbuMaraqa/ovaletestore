@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
 import FlashToast from '@/Components/Common/FlashToast.vue';
+import PageLoader from '@/Components/Common/PageLoader.vue';
 import type { SharedProps } from '@/types';
 
 const page = usePage<SharedProps>();
 </script>
 
 <template>
-    <div class="grid min-h-screen lg:grid-cols-2">
+    <PageLoader content="#auth-page" />
+    <div id="auth-page" class="grid min-h-screen lg:grid-cols-2">
         <div class="flex items-center justify-center p-6 sm:p-10">
             <div class="w-full max-w-sm">
                 <div class="mb-8 flex items-center gap-2">

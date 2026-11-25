@@ -23,6 +23,21 @@ class GeneralSettings extends Settings
     // list<string>
     public array $enabled_locales;
 
+    /** 'tajawal' (bundled) or 'custom' (uploaded files below). See App\Support\SiteFont. */
+    public string $font_family;
+
+    /** CSS family name of the custom font, e.g. "OT Magnit Arabic". */
+    public ?string $font_name;
+
+    // weight (400/500/700) => public-disk path of the uploaded font file
+    public array $font_files;
+
+    /** 'all' (store + admin) or 'storefront'. */
+    public string $font_scope;
+
+    // list<string>: site languages that use the custom font (others keep Tajawal)
+    public array $font_locales;
+
     public static function group(): string
     {
         return 'general';

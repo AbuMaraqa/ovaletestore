@@ -17,7 +17,7 @@ export interface MenuItem extends Partial<MenuLink> {
     icon: string;
     children?: MenuLink[];
     /** Key of a count in the `admin_badges` shared prop, shown next to the label. */
-    badge?: 'pending_orders';
+    badge?: 'pending_orders' | 'pending_traders';
 }
 
 export interface MenuSection {
@@ -36,13 +36,13 @@ export const adminMenu: MenuSection[] = [
                 label: 'admin.products',
                 icon: 'basket',
                 children: [
-                    { label: 'admin.products', route: 'admin.products.index', match: 'admin.products.index', permission: 'products.view' },
+                    { label: 'admin.all_products', route: 'admin.products.index', match: 'admin.products.index', permission: 'products.view' },
                     { label: 'admin.new_product', route: 'admin.products.create', match: 'admin.products.create', permission: 'products.create' },
                 ],
             },
-            { label: 'admin.categories', icon: 'category', route: 'admin.categories.index', match: 'admin.categories.*', permission: 'categories.manage' },
-            { label: 'admin.attributes', icon: 'setting-4', route: 'admin.attributes.index', match: 'admin.attributes.*', permission: 'attributes.manage' },
-            { label: 'admin.brands', icon: 'award', route: 'admin.brands.index', match: 'admin.brands.*', permission: 'brands.manage' },
+            { label: 'admin.categories', icon: 'category', route: 'admin.categories.index', match: 'admin.categories.*', permission: 'categories.view' },
+            { label: 'admin.attributes', icon: 'setting-4', route: 'admin.attributes.index', match: 'admin.attributes.*', permission: 'attributes.view' },
+            { label: 'admin.brands', icon: 'award', route: 'admin.brands.index', match: 'admin.brands.*', permission: 'brands.view' },
         ],
     },
     {
@@ -50,23 +50,42 @@ export const adminMenu: MenuSection[] = [
         items: [
             { label: 'admin.orders', icon: 'handcart', route: 'admin.orders.index', match: 'admin.orders.*', permission: 'orders.view', badge: 'pending_orders' },
             { label: 'admin.pos', icon: 'tablet', route: 'pos.index', match: 'pos.*', permission: 'pos.access', external: true },
-            { label: 'admin.companies', icon: 'office-bag', route: 'admin.companies.index', match: 'admin.companies.*', permission: 'companies.manage' },
-            { label: 'admin.shipping_methods', icon: 'delivery', route: 'admin.shipping-methods.index', match: 'admin.shipping-methods.*', permission: 'settings.manage' },
+            { label: 'admin.customers', icon: 'profile-circle', route: 'admin.customers.index', match: 'admin.customers.*', permission: 'customers.view' },
+            {
+                label: 'traders.title',
+                icon: 'shop',
+                badge: 'pending_traders',
+                children: [
+                    { label: 'traders.list', route: 'admin.traders.index', match: 'admin.traders.*', permission: 'traders.view' },
+                    { label: 'traders.tiers', route: 'admin.price-tiers.index', match: 'admin.price-tiers.*', permission: 'price_tiers.view' },
+                ],
+            },
+            { label: 'admin.companies', icon: 'office-bag', route: 'admin.companies.index', match: 'admin.companies.*', permission: 'companies.view' },
+            { label: 'admin.shipping_methods', icon: 'delivery', route: 'admin.shipping-methods.index', match: 'admin.shipping-methods.*', permission: 'shipping.view' },
         ],
     },
     {
         heading: 'admin.system',
         items: [
-            { label: 'admin.users', icon: 'people', route: 'admin.users.index', match: 'admin.users.*', permission: 'users.manage' },
+            {
+                label: 'admin.staff',
+                icon: 'people',
+                children: [
+                    { label: 'admin.users', route: 'admin.users.index', match: 'admin.users.*', permission: 'users.view' },
+                    { label: 'admin.roles', route: 'admin.roles.index', match: 'admin.roles.*', permission: 'roles.view' },
+                ],
+            },
+            { label: 'currencies.title', icon: 'dollar', route: 'admin.currencies.index', match: 'admin.currencies.*', permission: 'currencies.view' },
+            { label: 'admin.activity_log', icon: 'time', route: 'admin.activity.index', match: 'admin.activity.*', permission: 'activity.view' },
             {
                 label: 'admin.settings',
                 icon: 'setting-2',
-                children: ['general', 'contact', 'store', 'seo'].map((group) => ({
+                children: ['general', 'contact', 'store', 'seo', 'mail'].map((group) => ({
                     label: `admin.${group}`,
                     route: 'admin.settings.edit',
                     params: { group },
                     match: 'admin.settings.*',
-                    permission: 'settings.manage',
+                    permission: `settings.${group}`,
                 })),
             },
         ],

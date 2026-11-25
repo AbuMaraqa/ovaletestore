@@ -60,8 +60,8 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
             </button>
         </div>
 
-        <div id="sidebar_content" class="kt-sidebar-content flex shrink-0 grow py-5 pe-2">
-            <nav class="kt-scrollable-y-hover flex shrink-0 grow overflow-y-auto ps-2 pe-1 lg:ps-5 lg:pe-3" aria-label="Admin" data-lenis-prevent>
+        <div id="sidebar_content" class="kt-sidebar-content flex min-h-0 flex-1 py-5 pe-2">
+            <nav class="kt-scrollable-y-hover flex min-h-0 flex-1 overflow-y-auto overscroll-contain ps-2 pe-1 lg:ps-5 lg:pe-3" aria-label="Admin" data-lenis-prevent>
                 <div class="kt-menu flex grow flex-col gap-1">
                     <template v-for="(section, s) in sections" :key="s">
                         <div v-if="section.heading" class="kt-menu-item pt-2.25 pb-px">
@@ -79,7 +79,8 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
                                 >
                                     <span class="kt-menu-icon w-[20px] items-start text-muted-foreground"><KtIcon :name="item.icon" class="text-lg" /></span>
                                     <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-here:text-primary kt-menu-link-hover:!text-primary">{{ t(item.label) }}</span>
-                                    <span class="kt-menu-arrow ms-auto w-[20px] shrink-0 justify-end text-muted-foreground">
+                                    <span v-if="badge(item)" class="kt-menu-badge ms-auto"><span class="kt-badge kt-badge-sm kt-badge-warning rounded-full tabular-nums">{{ badge(item) }}</span></span>
+                                    <span :class="['kt-menu-arrow w-[20px] shrink-0 justify-end text-muted-foreground', badge(item) ? '' : 'ms-auto']">
                                         <KtIcon :name="isOpen(item) ? 'minus' : 'plus'" class="text-[11px]" />
                                     </span>
                                 </button>

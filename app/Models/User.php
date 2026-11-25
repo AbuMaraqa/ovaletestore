@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\TraderStatus;
+use App\Models\Concerns\RecordsActivity;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravolt\Avatar\Facade as Avatar;
 use Spatie\MediaLibrary\HasMedia;
@@ -15,15 +20,25 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @property int|null $source_id WooCommerce customer id (migrated accounts)
+ * @property TraderStatus|null $trader_status
+ * @property string|null $business_name
+ * @property Carbon|null $trader_requested_at
+ * @property int|null $price_tier_id
+ */
 #[Fillable(['name', 'email', 'phone', 'password', 'locale', 'is_active'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, InteractsWithMedia, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, InteractsWithMedia, Notifiable, RecordsActivity, TwoFactorAuthenticatable;
 
     /** Mirrors DB defaults so freshly created models are complete (strict missing-attribute mode). */
-    protected $attributes = ['is_active' => true, 'locale' => 'ar'];
+    protected $attributes = [
+        'is_active' => true, 'locale' => 'ar',
+        'source_id' => null, 'trader_status' => null, 'business_name' => null, 'trader_requested_at' => null, 'price_tier_id' => null,
+    ];
 
     protected function casts(): array
     {
@@ -31,10 +46,34 @@ class User extends Authenticatable implements HasMedia
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'trader_status' => TraderStatus::class,
+            'trader_requested_at' => 'datetime',
         ];
     }
 
-    public function orders()
+    /** @return BelongsTo<PriceTier, $this> */
+    public function priceTier(): BelongsTo
+    {
+        return $this->belongsTo(PriceTier::class);
+    }
+
+    /**
+     * The tier this account buys at: an approved, active trader (a customer-only account, so a trader later
+     * given a staff or sales-rep role never prices POS/admin work at trade prices) on an active tier — else null.
+     */
+    public function activePriceTier(): ?PriceTier
+    {
+        if (! $this->is_active || $this->trader_status !== TraderStatus::Approved || $this->price_tier_id === null
+            || ! $this->hasExactRoles('customer')) {
+            return null;
+        }
+        $tier = $this->priceTier;
+
+        return $tier?->is_active ? $tier : null;
+    }
+
+    /** @return HasMany<Order, $this> */
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
@@ -69,5 +108,11 @@ class User extends Authenticatable implements HasMedia
             'initials' => $generator->getInitial(),
             'color' => self::AVATAR_COLORS[crc32((string) $this->name) % count(self::AVATAR_COLORS)],
         ];
+    }
+
+    /** Never the password, tokens or 2FA secrets. */
+    protected function activityAttributes(): array
+    {
+        return ['name', 'email', 'phone', 'locale', 'is_active', 'trader_status', 'business_name', 'price_tier_id'];
     }
 }

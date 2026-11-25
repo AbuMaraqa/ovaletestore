@@ -6,7 +6,7 @@ use App\Http\Resources\ImageResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\ShippingMethod;
-use App\Support\Money;
+use App\Support\CurrencyContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,7 +20,7 @@ class CartResource extends JsonResource
         'items.variant.media',
     ];
 
-    /** @param array{subtotal:int, discount_total:int, shipping_total:int, total:int, item_count:int, meets_minimum:bool, minimum_missing:int, shipping_method:?ShippingMethod} $totals */
+    /** @param array{subtotal:int, discount_total:int, shipping_total:int, total:int, item_count:int, meets_minimum:bool, minimum_missing:int, shipping_method:?ShippingMethod, display:array{subtotal:int, shipping_total:int, total:int}} $totals */
     public function __construct(Cart $cart, private readonly array $totals)
     {
         parent::__construct($cart);
@@ -28,8 +28,11 @@ class CartResource extends JsonResource
 
     public function toArray(Request $request): array
     {
+        $currency = app(CurrencyContext::class);
+        $display = $this->totals['display'];
+
         return [
-            'items' => $this->items->map(function (CartItem $item) {
+            'items' => $this->items->map(function (CartItem $item) use ($currency) {
                 $variant = $item->variant;
                 $product = $variant->product;
                 $media = $variant->getFirstMedia('image') ?? $product->getFirstMedia('gallery');
@@ -42,17 +45,17 @@ class CartResource extends JsonResource
                     'image' => $media ? new ImageResource($media) : null,
                     'quantity' => $item->quantity,
                     'max_quantity' => $variant->availableQuantity(),
-                    'unit_price' => Money::format($variant->effectivePrice()),
-                    'line_total' => Money::format($variant->effectivePrice() * $item->quantity),
+                    'unit_price' => $currency->format($variant->effectivePrice()),
+                    'line_total' => $currency->formatConverted($currency->convert($variant->effectivePrice()) * $item->quantity),
                     'available' => $product->isPublished() && $variant->isPurchasable(),
                 ];
             })->values(),
             'item_count' => $this->totals['item_count'],
-            'subtotal' => Money::format($this->totals['subtotal']),
-            'shipping_total' => $this->totals['shipping_total'] > 0 ? Money::format($this->totals['shipping_total']) : null,
-            'total' => Money::format($this->totals['total']),
+            'subtotal' => $currency->formatConverted($display['subtotal']),
+            'shipping_total' => $display['shipping_total'] > 0 ? $currency->formatConverted($display['shipping_total']) : null,
+            'total' => $currency->formatConverted($display['total']),
             'meets_minimum' => $this->totals['meets_minimum'],
-            'minimum_missing' => $this->totals['minimum_missing'] > 0 ? Money::format($this->totals['minimum_missing']) : null,
+            'minimum_missing' => $this->totals['minimum_missing'] > 0 ? $currency->formatConverted(max(1, $currency->convert($this->totals['minimum_missing']))) : null,
             'free_shipping' => $this->freeShipping(),
         ];
     }
@@ -73,7 +76,7 @@ class CartResource extends JsonResource
         $remaining = max(0, $method->free_over - $subtotal);
 
         return [
-            'remaining' => $remaining > 0 ? Money::format($remaining) : null,
+            'remaining' => $remaining > 0 ? app(CurrencyContext::class)->format($remaining) : null,
             'progress' => (int) min(100, floor($subtotal * 100 / $method->free_over)),
         ];
     }

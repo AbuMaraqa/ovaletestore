@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Pos;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Storefront;
+use App\Http\Middleware\ApplyStorefrontCurrency;
+use App\Support\ActivityLog;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Spatie\Honeypot\ProtectAgainstSpam;
@@ -27,7 +29,7 @@ Route::prefix(LaravelLocalization::setLocale())
         // Fortify (login, logout, password reset, 2FA) inside the locale prefix.
         require __DIR__.'/auth.php';
 
-        Route::name('storefront.')->group(function () {
+        Route::name('storefront.')->middleware(ApplyStorefrontCurrency::class)->group(function () {
             Route::get('/', Storefront\HomeController::class)->name('home');
             Route::get('/shop', [Storefront\CatalogController::class, 'index'])->name('shop');
             Route::get('/categories', [Storefront\CatalogController::class, 'categories'])->name('categories');
@@ -36,6 +38,7 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::get('/brands', [Storefront\CatalogController::class, 'brands'])->name('brands');
             Route::get('/brand/{slug}', [Storefront\CatalogController::class, 'brand'])->name('brand');
             Route::get('/search/suggest', [Storefront\SearchController::class, 'suggest'])->middleware('throttle:60,1')->name('search.suggest');
+            Route::post('/currency', Storefront\CurrencyController::class)->middleware('throttle:30,1')->name('currency');
             Route::get('/contact', [Storefront\PageController::class, 'contact'])->name('contact');
             Route::get('/about', [Storefront\PageController::class, 'about'])->name('about');
 
@@ -55,11 +58,12 @@ Route::prefix(LaravelLocalization::setLocale())
         });
 
         // Customer account (any signed-in user).
-        Route::prefix('account')->name('account.')->middleware('auth')->group(function () {
+        Route::prefix('account')->name('account.')->middleware(['auth', ApplyStorefrontCurrency::class])->group(function () {
             Route::get('/', [Storefront\AccountController::class, 'dashboard'])->name('dashboard');
             Route::get('/orders', [Storefront\AccountController::class, 'orders'])->name('orders');
             Route::get('/orders/{number}', [Storefront\AccountController::class, 'order'])->name('orders.show');
             Route::put('/profile', [Storefront\AccountController::class, 'updateProfile'])->name('profile.update');
+            Route::post('/trader-request', [Storefront\AccountController::class, 'requestTrader'])->middleware('throttle:5,1')->name('trader.request');
         });
 
         // iPad POS for sales reps: orders for companies, on account.
@@ -76,6 +80,7 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::patch('notifications/{id}/read', [Admin\NotificationController::class, 'read'])->name('notifications.read');
             Route::post('notifications/read-all', [Admin\NotificationController::class, 'readAll'])->name('notifications.read-all');
 
+            Route::post('products/bulk', [Admin\ProductController::class, 'bulk'])->name('products.bulk');
             Route::resource('products', Admin\ProductController::class)->except('show');
             Route::post('products/{product}/media', [Admin\ProductMediaController::class, 'store'])->name('products.media.store');
             Route::patch('products/{product}/media/order', [Admin\ProductMediaController::class, 'reorder'])->name('products.media.reorder');
@@ -91,10 +96,23 @@ Route::prefix(LaravelLocalization::setLocale())
 
             Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+            Route::delete('orders/{order}', [Admin\OrderController::class, 'destroy'])->name('orders.destroy');
             Route::patch('orders/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.status');
 
             Route::resource('users', Admin\UserController::class)->except('show');
+            Route::resource('roles', Admin\RoleController::class)->except('show');
+            Route::resource('customers', Admin\CustomerController::class)->except(['create', 'store']);
+            Route::get('traders', [Admin\TraderController::class, 'index'])->name('traders.index');
+            Route::patch('traders/{trader}/review', [Admin\TraderController::class, 'review'])->name('traders.review');
+            Route::resource('price-tiers', Admin\PriceTierController::class)->except('show');
+            Route::resource('currencies', Admin\CurrencyController::class)->except('show');
+            Route::patch('currencies/{currency}/default', [Admin\CurrencyController::class, 'makeDefault'])->name('currencies.default');
 
+            Route::get('activity', [Admin\ActivityController::class, 'index'])->name('activity.index');
+            Route::get('activity/{type}/{id}', [Admin\ActivityController::class, 'record'])
+                ->whereIn('type', array_keys(ActivityLog::SUBJECTS))->whereNumber('id')->name('activity.record');
+
+            Route::post('settings/mail/test', [Admin\SettingsController::class, 'testMail'])->middleware('throttle:5,1')->name('settings.mail.test');
             Route::get('settings/{group}', [Admin\SettingsController::class, 'edit'])
                 ->whereIn('group', Admin\SettingsController::GROUPS)->name('settings.edit');
             Route::put('settings/{group}', [Admin\SettingsController::class, 'update'])

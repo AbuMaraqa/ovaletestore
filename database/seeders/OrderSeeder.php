@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\File;
  *
  * - Idempotent: matched by `source_id`; items and notes are rebuilt, so re-running updates in place.
  * - History only: stock is never touched and no notification/activity event fires.
+ * - Orders placed from a customer account link to it (CustomerSeeder runs first); guest orders stay guest.
  * - Items link to the migrated product (by WooCommerce product id) when it still exists;
  *   the name/SKU/price snapshot is kept either way.
  */
@@ -42,9 +43,10 @@ class OrderSeeder extends Seeder
         $products = Product::withTrashed()->whereIn('source_id', $productSourceIds)
             ->with(['translations', 'defaultVariant'])->get()->keyBy('source_id');
         $shipping = ShippingMethod::query()->whereNotNull('code')->pluck('id', 'code');
-        $emails = collect($orders)->pluck('customer_email')->filter()->unique()->values();
-        $users = User::query()->whereIn(DB::raw('lower(email)'), $emails)->get()
-            ->keyBy(fn (User $user) => strtolower($user->email));
+        // Only orders placed while signed in belong to an account (WooCommerce customer_id); guest
+        // orders stay guest orders even when the email matches an account.
+        $customerIds = collect($orders)->pluck('customer_source_id')->filter()->unique()->values();
+        $users = User::query()->whereIn('source_id', $customerIds)->pluck('id', 'source_id');
 
         $counts = ['orders' => 0, 'items' => 0, 'unlinked_items' => 0];
 
@@ -56,7 +58,7 @@ class OrderSeeder extends Seeder
                     $order->forceFill([
                         'source_id' => $row['source_id'],
                         'number' => $row['number'],
-                        'user_id' => $row['customer_email'] ? $users->get($row['customer_email'])?->id : null,
+                        'user_id' => ($row['customer_source_id'] ?? null) ? $users->get($row['customer_source_id']) : null,
                         'status' => $row['status'],
                         'channel' => $row['channel'],
                         'payment_method' => $row['payment_method'],

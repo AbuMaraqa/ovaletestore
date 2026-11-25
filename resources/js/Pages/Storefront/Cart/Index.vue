@@ -31,7 +31,7 @@ function remove(itemId: number): void {
             <Link :href="route('storefront.shop')" class="btn-primary mt-8">{{ t('cart.continue_shopping') }}</Link>
         </div>
 
-        <div v-else class="mt-8 grid gap-8 lg:grid-cols-12">
+        <div v-else class="mt-8 grid gap-8 lg:grid-cols-12 lg:items-start">
             <ul class="divide-y divide-stone-200 rounded-[2rem] bg-white px-4 ring-1 ring-stone-100 sm:px-6 lg:col-span-8" role="list">
                 <li v-for="item in cart.items" :key="item.id" class="flex gap-4 py-5">
                     <Link :href="item.url" class="size-24 shrink-0 overflow-hidden rounded-2xl bg-stone-50 sm:size-28">
@@ -48,7 +48,7 @@ function remove(itemId: number): void {
                         </div>
                         <div class="mt-auto flex items-center justify-between gap-3">
                             <QuantityInput :model-value="item.quantity" :max="item.max_quantity ?? 999" @commit="(q) => updateQuantity(item.id, q)" />
-                            <button type="button" class="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm text-stone-500 hover:bg-stone-50 hover:text-red-600" @click="remove(item.id)">
+                            <button type="button" class="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-red-600" @click="remove(item.id)">
                                 <Icon name="trash" class="size-4" />
                                 {{ t('cart.remove') }}
                             </button>

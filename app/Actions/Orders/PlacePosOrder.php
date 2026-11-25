@@ -9,7 +9,7 @@ use App\Events\OrderPlaced;
 use App\Models\Company;
 use App\Models\Order;
 use App\Models\User;
-use App\Settings\StoreSettings;
+use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,7 +21,6 @@ class PlacePosOrder
 {
     public function __construct(
         private readonly BuildOrderLines $buildLines,
-        private readonly StoreSettings $settings,
     ) {}
 
     /** @param array<int, int> $quantities variant id => quantity */
@@ -48,7 +47,7 @@ class PlacePosOrder
                 'shipping_city' => $company->city,
                 'shipping_address' => $company->address,
                 'customer_note' => $note,
-                'currency' => $this->settings->currency,
+                'currency' => Money::storeCurrency(), // POS sells in the base currency (company balances are in it)
                 'subtotal' => $subtotal,
                 'discount_total' => 0,
                 'shipping_total' => 0,

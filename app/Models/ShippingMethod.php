@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ShippingMethodType;
 use App\Models\Concerns\HasTranslations;
+use App\Models\Concerns\RecordsActivity;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class ShippingMethod extends Model implements TranslatableContract
 {
-    use HasTranslations;
+    use HasTranslations, RecordsActivity;
 
     /** @var list<string> */
     public array $translatedAttributes = ['name', 'description'];

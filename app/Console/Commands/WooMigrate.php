@@ -25,6 +25,9 @@ class WooMigrate extends Command
 
     public function handle(): int
     {
+        // Bulk import: thousands of rows would bury the human audit trail.
+        activity()->disableLogging();
+
         $dryRun = (bool) $this->option('dry-run');
         $client = StoreApiClient::fromConfig();
         $importer = new WooImporter($dryRun);

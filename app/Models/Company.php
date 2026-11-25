@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Company extends Model
 {
+    use RecordsActivity;
+
     protected $fillable = ['name', 'contact_name', 'phone', 'city', 'address', 'notes', 'is_active'];
 
     protected function casts(): array
@@ -52,7 +55,7 @@ class Company extends Model
         $query
             ->withSum(['orders as debit_total' => fn (Builder $q) => $q
                 ->where('payment_method', PaymentMethod::OnAccount->value)
-                ->where('status', '!=', OrderStatus::Cancelled->value)], 'total')
+                ->where('status', '!=', OrderStatus::Cancelled->value)], 'base_total')
             ->withSum('payments as paid_total', 'amount');
     }
 
@@ -62,7 +65,7 @@ class Company extends Model
         if (! array_key_exists('debit_total', $this->attributes)) {
             $this->loadSum(['orders as debit_total' => fn ($q) => $q
                 ->where('payment_method', PaymentMethod::OnAccount->value)
-                ->where('status', '!=', OrderStatus::Cancelled->value)], 'total');
+                ->where('status', '!=', OrderStatus::Cancelled->value)], 'base_total');
             $this->loadSum('payments as paid_total', 'amount');
         }
 

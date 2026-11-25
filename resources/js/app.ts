@@ -30,6 +30,6 @@ createInertiaApp({
             .use(ZiggyVue)
             .mount(el);
     },
-    progress: { color: '#b4542a', delay: 150, showSpinner: false },
+    progress: false, // GSAP loader in every layout: Components/Common/PageLoader.vue
     nonce,
 });

@@ -5,50 +5,73 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ShippingMethodType;
 use App\Http\Controllers\Controller;
 use App\Models\ShippingMethod;
+use App\Support\DataTable;
 use App\Support\Money;
 use App\Support\TranslationInput;
 use Astrotomic\Translatable\Validation\RuleFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 /** Shipping methods (WooCommerce → Settings → Shipping). Prices are entered in major units, stored in minor units. */
 class ShippingMethodController extends Controller
 {
     private const FIELDS = ['name', 'description'];
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $this->authorize('settings.manage');
+        $this->authorize('shipping.view');
+
+        $methods = QueryBuilder::for(ShippingMethod::query()->with('translations')->withCount('orders'))
+            ->allowedFilters(...[
+                AllowedFilter::callback('search', function (Builder $q, $term) {
+                    $like = DataTable::like($term);
+                    $q->where(fn ($w) => $w->where('code', 'like', $like)->orWhereHas('translations', fn ($t) => $t->where('name', 'like', $like)));
+                }),
+                AllowedFilter::exact('type'),
+                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
+            ])
+            ->allowedSorts(...['sort_order', 'cost', 'orders_count', 'id'])
+            ->defaultSort('sort_order')
+            ->paginate(DataTable::perPage($request))
+            ->withQueryString();
+
+        $user = $request->user();
 
         return Inertia::render('Admin/ShippingMethods/Index', [
-            'methods' => ShippingMethod::query()->with('translations')->withCount('orders')->orderBy('sort_order')->orderBy('id')->get()
-                ->map(fn (ShippingMethod $m) => [
-                    'id' => $m->id,
-                    'name' => $m->name,
-                    'type' => $m->type->value,
-                    'cost' => $m->cost > 0 ? Money::format($m->cost) : null,
-                    'free_over' => $m->free_over !== null ? Money::format($m->free_over) : null,
-                    'min_order' => $m->min_order !== null ? Money::format($m->min_order) : null,
-                    'is_active' => $m->is_active,
-                    'orders_count' => $m->orders_count,
-                ]),
+            'methods' => $methods->through(fn (ShippingMethod $m) => [
+                'id' => $m->id,
+                'name' => $m->name,
+                'type' => $m->type->value,
+                'cost' => $m->cost > 0 ? Money::format($m->cost) : null,
+                'free_over' => $m->free_over !== null ? Money::format($m->free_over) : null,
+                'min_order' => $m->min_order !== null ? Money::format($m->min_order) : null,
+                'is_active' => $m->is_active,
+                'orders_count' => $m->orders_count,
+                'edit_url' => $user->can('shipping.update') ? route('admin.shipping-methods.edit', $m) : null,
+                'delete_url' => $user->can('shipping.delete') ? route('admin.shipping-methods.destroy', $m) : null,
+            ]),
+            'state' => DataTable::state($request),
+            'types' => array_column(ShippingMethodType::cases(), 'value'),
         ]);
     }
 
     public function create(): Response
     {
-        $this->authorize('settings.manage');
+        $this->authorize('shipping.create');
 
         return Inertia::render('Admin/ShippingMethods/Form', ['method' => null]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorize('settings.manage');
+        $this->authorize('shipping.create');
         $this->save($request, new ShippingMethod);
 
         return to_route('admin.shipping-methods.index')->with('success', __('admin.created'));
@@ -56,7 +79,7 @@ class ShippingMethodController extends Controller
 
     public function edit(ShippingMethod $shippingMethod): Response
     {
-        $this->authorize('settings.manage');
+        $this->authorize('shipping.update');
         $shippingMethod->load('translations');
 
         return Inertia::render('Admin/ShippingMethods/Form', ['method' => [
@@ -77,7 +100,7 @@ class ShippingMethodController extends Controller
 
     public function update(Request $request, ShippingMethod $shippingMethod): RedirectResponse
     {
-        $this->authorize('settings.manage');
+        $this->authorize('shipping.update');
         $this->save($request, $shippingMethod);
 
         return to_route('admin.shipping-methods.index')->with('success', __('admin.updated'));
@@ -86,7 +109,7 @@ class ShippingMethodController extends Controller
     /** Past orders keep their snapshot name; the FK is nulled. */
     public function destroy(ShippingMethod $shippingMethod): RedirectResponse
     {
-        $this->authorize('settings.manage');
+        $this->authorize('shipping.delete');
         $shippingMethod->delete();
 
         return to_route('admin.shipping-methods.index')->with('success', __('admin.deleted'));

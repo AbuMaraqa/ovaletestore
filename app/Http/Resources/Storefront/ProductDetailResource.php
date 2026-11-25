@@ -7,7 +7,7 @@ use App\Models\AttributeTerm;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductVariant;
-use App\Support\Money;
+use App\Support\CurrencyContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -52,14 +52,16 @@ class ProductDetailResource extends JsonResource
                     ])->values(),
                 ])->values(),
             'variants' => $this->activeVariants->map(fn (ProductVariant $v) => [
+                // Shown in the visitor's currency (CurrencyContext); stored prices are in the base currency.
                 'id' => $v->id,
                 'term_ids' => $v->terms->pluck('id')->sort()->values(),
                 'sku' => $v->sku,
-                'price' => Money::format($v->effectivePrice()),
-                'regular_price' => $v->isOnSale() ? Money::format($v->regular_price) : null,
+                'price' => app(CurrencyContext::class)->format($v->effectivePrice()),
+                'regular_price' => $v->effectivePrice() < $v->regular_price ? app(CurrencyContext::class)->format($v->regular_price) : null,
+                'trade_price' => $v->hasTradePrice(),
                 'on_sale' => $v->isOnSale(),
                 'discount_percent' => $v->discountPercent(),
-                'saving' => $v->isOnSale() ? Money::format($v->regular_price - $v->effectivePrice()) : null,
+                'saving' => $v->effectivePrice() < $v->regular_price ? app(CurrencyContext::class)->formatConverted(app(CurrencyContext::class)->convert($v->regular_price) - app(CurrencyContext::class)->convert($v->effectivePrice())) : null,
                 // Only short, real deadlines (≤ 14 days) drive the countdown — no fake urgency.
                 'sale_ends_at' => $v->isOnSale() && $v->sale_ends_at && $v->sale_ends_at->lte(now()->addDays(14))
                     ? $v->sale_ends_at->toIso8601String() : null,

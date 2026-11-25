@@ -16,4 +16,13 @@ return [
     'invalid_transition' => 'לא ניתן להעביר הזמנה מ־:from ל־:to.',
     'filter_status' => 'כל הסטטוסים',
     'search' => 'חיפוש לפי מספר, שם או טלפון…',
+    'move_to' => 'העברת ההזמנה אל',
+    'cancel_restocks' => 'הכמויות חוזרות למלאי',
+    'move_to_status' => 'העברה אל: :status',
+    'cancel_order' => 'ביטול ההזמנה',
+    'confirm_cancel' => 'ההזמנה תבוטל והכמויות יחזרו למלאי. לא ניתן לפתוח אותה שוב.',
+    'confirm_skip' => 'אתם מדלגים על שלבים. לא ניתן לחזור לסטטוס קודם.',
+    'step_done' => 'הושלם',
+    'step_current' => 'נוכחי',
+    'step_upcoming' => 'הבא',
 ];

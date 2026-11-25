@@ -47,4 +47,6 @@ return [
     'register_subtitle' => 'Track your orders and check out faster next time.',
     'no_account' => 'Don\'t have an account?',
     'have_account' => 'Already have an account?',
+    'view' => 'View',
+    'delete_named' => 'Delete “:name”?',
 ];

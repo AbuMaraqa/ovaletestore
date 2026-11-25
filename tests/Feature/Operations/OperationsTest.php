@@ -21,15 +21,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 
-function placeWebOrder(int $quantity = 1, string $price = '10.00', array $variant = []): Order
-{
-    $product = makeSimpleProduct(price: $price, variant: $variant);
-    test()->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => $quantity]);
-    test()->post(route('storefront.checkout.store'), checkoutPayload())->assertSessionHasNoErrors();
-
-    return Order::query()->latest('id')->firstOrFail();
-}
-
 /** Fills the honeypot trap field the form actually sent (its name is randomised per page load). */
 function asBot(array $payload): array
 {
@@ -80,10 +71,11 @@ it('lets only order staff change an order status and validates the transition', 
     $order = placeWebOrder();
 
     $this->actingAs(staffUser('product-manager'))->patch(route('admin.orders.status', $order), ['status' => 'confirmed'])->assertForbidden();
-    $this->actingAs(staffUser('order-manager'))->patch(route('admin.orders.status', $order), ['status' => 'completed'])->assertSessionHasErrors('status');
-    $this->actingAs(staffUser('order-manager'))->patch(route('admin.orders.status', $order), ['status' => 'confirmed'])->assertSessionHasNoErrors();
+    $this->actingAs(staffUser('order-manager'))->patch(route('admin.orders.status', $order), ['status' => 'processing'])->assertSessionHasNoErrors();
+    // Forward jumps are allowed; going back never is (stock/balances would be counted twice).
+    $this->actingAs(staffUser('order-manager'))->patch(route('admin.orders.status', $order), ['status' => 'confirmed'])->assertSessionHasErrors('status');
 
-    expect($order->fresh()->status)->toBe(OrderStatus::Confirmed);
+    expect($order->fresh()->status)->toBe(OrderStatus::Processing);
 });
 
 it('shows the admin order list with filters and an order page', function () {
@@ -254,16 +246,15 @@ it('keeps the super-admin role when a super-admin edits a super-admin', function
     expect($other->fresh()->hasRole('super-admin'))->toBeTrue()->and($other->fresh()->hasRole('admin'))->toBeTrue();
 });
 
-it('saves store settings and formats money in the chosen currency', function () {
+it('saves store settings and formats money in the base currency', function () {
     $this->actingAs(staffUser('admin'));
 
-    $this->put(route('admin.settings.update', 'store'), ['currency' => 'EUR', 'products_per_page' => 24, 'min_order_total' => '12.5'])->assertSessionHasErrors('currency');
-    $this->put(route('admin.settings.update', 'store'), ['currency' => 'USD', 'products_per_page' => 24, 'min_order_total' => '12.5', 'guest_checkout' => true])
+    $this->put(route('admin.settings.update', 'store'), ['products_per_page' => 24, 'min_order_total' => '12.5', 'guest_checkout' => true])
         ->assertSessionHasNoErrors();
 
     $settings = app(StoreSettings::class)->refresh();
     expect($settings->min_order_total)->toBe(1250)
-        ->and(Money::storeCurrency())->toBe('USD')
+        ->and(Money::storeCurrency())->toBe('ILS')
         ->and(Money::format(1250))->toContain('12.50');
 });
 

@@ -16,7 +16,7 @@ class CompanyPaymentController extends Controller
 {
     public function store(Request $request, Company $company): RedirectResponse
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.payments.create');
 
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'gt:0', 'max:10000000'],
@@ -37,7 +37,7 @@ class CompanyPaymentController extends Controller
 
     public function destroy(Company $company, CompanyPayment $payment): RedirectResponse
     {
-        $this->authorize('companies.manage');
+        $this->authorize('companies.payments.delete');
         abort_unless($payment->company_id === $company->id, 404);
 
         $payment->delete();

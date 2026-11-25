@@ -2,6 +2,7 @@
 import { router } from '@inertiajs/vue3';
 import { onBeforeUnmount, onMounted } from 'vue';
 import FlashToast from '@/Components/Common/FlashToast.vue';
+import PageLoader from '@/Components/Common/PageLoader.vue';
 import SeoHead from '@/Components/Common/SeoHead.vue';
 import SiteFooter from '@/Components/Storefront/SiteFooter.vue';
 import SiteHeader from '@/Components/Storefront/SiteHeader.vue';
@@ -31,6 +32,7 @@ onBeforeUnmount(() => {
         {{ t('common.skip_to_content') }}
     </a>
     <SeoHead />
+    <PageLoader content="#main" />
     <div class="flex min-h-screen flex-col">
         <SiteHeader />
         <main id="main" class="flex-1">
