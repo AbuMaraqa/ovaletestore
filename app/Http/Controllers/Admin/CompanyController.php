@@ -8,16 +8,13 @@ use App\Http\Requests\CompanyRequest;
 use App\Models\Company;
 use App\Models\Order;
 use App\Queries\CompanyStatement;
-use App\Support\DataTable;
 use App\Support\Money;
 use App\Support\Pdf\OrderDocuments;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\CompaniesTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 /** B2B companies the sales reps order for, with their account statement (orders on account − payments). */
@@ -27,43 +24,8 @@ class CompanyController extends Controller
     {
         $this->authorize('companies.view');
 
-        $companies = QueryBuilder::for(Company::query()->withBalance()->withCount('orders'))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = DataTable::like($term);
-                    $q->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('phone', 'like', $like)
-                        ->orWhere('city', 'like', $like)->orWhere('contact_name', 'like', $like));
-                }),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-                AllowedFilter::exact('city'),
-            ])
-            ->allowedSorts(...['name', 'orders_count', 'created_at', 'id'])
-            ->defaultSort('name')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $outstanding = Company::query()->withBalance()->get()->sum(fn (Company $c) => max(0, $c->balance()));
-        $user = $request->user();
-
-        return Inertia::render('Admin/Companies/Index', [
-            'companies' => $companies->through(fn (Company $c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'contact_name' => $c->contact_name,
-                'phone' => $c->phone,
-                'city' => $c->city,
-                'is_active' => $c->is_active,
-                'orders_count' => $c->orders_count,
-                'balance' => Money::format($c->balance()),
-                'has_debt' => $c->balance() > 0,
-                'show_url' => route('admin.companies.show', $c),
-                'edit_url' => $user->can('companies.update') ? route('admin.companies.edit', $c) : null,
-                'delete_url' => $user->can('companies.delete') ? route('admin.companies.destroy', $c) : null,
-            ]),
-            'state' => DataTable::state($request),
-            'outstanding' => Money::format($outstanding),
-            'cities' => Company::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city')
-                ->map(fn (string $city) => ['value' => $city, 'label' => $city]),
+        return Inertia::render('Admin/Companies/Index', (new CompaniesTable($request))->props('companies') + [
+            'outstanding' => Money::format(Company::query()->withBalance()->get()->sum(fn (Company $c) => max(0, $c->balance()))),
         ]);
     }
 

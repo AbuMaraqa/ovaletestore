@@ -6,63 +6,21 @@ use App\Actions\Currencies\SetBaseCurrency;
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Support\CurrencyContext;
-use App\Support\DataTable;
-use App\Support\Money;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\CurrenciesTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 /** Currencies the storefront sells in, their exchange rates, and the base (default) currency. */
 class CurrencyController extends Controller
 {
-    /** Sample price (in base minor units) shown converted in the list, so a wrong rate is obvious. */
-    private const SAMPLE = 10000;
-
-    public function index(Request $request, CurrencyContext $currencies): Response
+    public function index(Request $request): Response
     {
         $this->authorize('currencies.view');
 
-        $rows = QueryBuilder::for(Currency::query())
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', fn (Builder $q, $term) => $q->where(fn (Builder $w) => $w
-                    ->where('code', 'like', DataTable::like($term))->orWhere('name', 'like', DataTable::like($term)))),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-            ])
-            ->allowedSorts(...['code', 'rate', 'sort_order'])
-            ->defaultSort('-is_default', 'sort_order', 'code')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $user = $request->user();
-        $base = $currencies->base();
-
-        return Inertia::render('Admin/Currencies/Index', [
-            'currencies' => $rows->through(fn (Currency $c) => [
-                'id' => $c->id,
-                'code' => $c->code,
-                'name' => $c->label(),
-                'symbol' => $c->symbol(),
-                'rate' => (float) $c->rate,
-                'value' => $this->unitValue($c, $base->code),
-                'sample' => Money::format($c->fromBase(self::SAMPLE), $c->code),
-                'example' => __('currencies.make_default_example', [
-                    'from' => Money::format(self::SAMPLE, $base->code),
-                    'to' => Money::format($c->fromBase(self::SAMPLE), $c->code),
-                ]),
-                'is_default' => $c->is_default,
-                'is_active' => $c->is_active,
-                'edit_url' => $user->can('currencies.update') ? route('admin.currencies.edit', $c) : null,
-                'delete_url' => ! $c->is_default && $user->can('currencies.delete') ? route('admin.currencies.destroy', $c) : null,
-                'default_url' => ! $c->is_default && $c->is_active && $user->can('currencies.set_default') ? route('admin.currencies.default', $c) : null,
-            ]),
-            'base' => ['code' => $base->code, 'sample' => Money::format(self::SAMPLE, $base->code)],
-            'state' => DataTable::state($request),
-        ]);
+        return Inertia::render('Admin/Currencies/Index', (new CurrenciesTable($request))->props('currencies'));
     }
 
     public function create(CurrencyContext $currencies): Response
@@ -131,12 +89,6 @@ class CurrencyController extends Controller
         $action->handle($currency);
 
         return back()->with('success', __('currencies.default_changed', ['code' => $currency->code]));
-    }
-
-    /** "1 USD = ₪3.70": what one unit of this currency is worth in the base currency. */
-    private function unitValue(Currency $currency, string $baseCode): string
-    {
-        return '1 '.$currency->code.' = '.Money::format((int) round(100 / max((float) $currency->rate, 1e-8)), $baseCode);
     }
 
     private function validated(Request $request, ?Currency $currency = null): array

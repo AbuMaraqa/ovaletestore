@@ -25,7 +25,22 @@ final class Translations
             ->all();
 
         return app()->isProduction()
-            ? Cache::rememberForever("ui-translations.{$area}.{$locale}", $loader)
+            ? Cache::rememberForever("ui-translations.{$area}.{$locale}.".self::version($locale, $area), $loader)
             : $loader();
+    }
+
+    /**
+     * Changes whenever one of the area's language files changes (deploys, new keys). It is part of the cache key
+     * and of the Inertia once-prop key, so neither the server cache nor an open browser keeps old strings.
+     */
+    public static function version(string $locale, string $area): string
+    {
+        $stamp = '';
+        foreach (self::GROUPS[$area] as $group) {
+            $file = lang_path("{$locale}/{$group}.php");
+            $stamp .= $group.(is_file($file) ? (string) filemtime($file) : '0');
+        }
+
+        return substr(md5($stamp), 0, 10);
     }
 }

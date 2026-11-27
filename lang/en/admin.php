@@ -303,4 +303,5 @@ return [
     'smtp_password_keep' => 'A password is saved. Leave empty to keep it.',
     'smtp_password_clear' => 'Remove the saved password',
     'smtp_security_note' => 'The password is stored encrypted and never shown again. After saving, use "Send test email" to check.',
+    'terms_count' => 'Values',
 ];

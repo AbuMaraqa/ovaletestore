@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 import { adminMenu, type MenuItem, type MenuLink } from '@/Components/Navigation/adminMenu';
+import KtCollapse from '@/Components/UI/KtCollapse.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
 import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
@@ -81,10 +82,14 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
                                     <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-here:text-primary kt-menu-link-hover:!text-primary">{{ t(item.label) }}</span>
                                     <span v-if="badge(item)" class="kt-menu-badge ms-auto"><span class="kt-badge kt-badge-sm kt-badge-warning rounded-full tabular-nums">{{ badge(item) }}</span></span>
                                     <span :class="['kt-menu-arrow w-[20px] shrink-0 justify-end text-muted-foreground', badge(item) ? '' : 'ms-auto']">
-                                        <KtIcon :name="isOpen(item) ? 'minus' : 'plus'" class="text-[11px]" />
+                                        <!-- Animated plus → minus: the vertical bar folds away (no icon swap jump). -->
+                                        <span class="relative block size-[10px]" aria-hidden="true">
+                                            <span class="absolute inset-0 m-auto h-[1.5px] w-full rounded-full bg-current" />
+                                            <span :class="['absolute inset-0 m-auto h-full w-[1.5px] rounded-full bg-current transition-transform duration-300 ease-out', isOpen(item) ? 'scale-y-0 rotate-90' : 'scale-y-100']" />
+                                        </span>
                                     </span>
                                 </button>
-                                <div class="kt-menu-accordion relative gap-1 ps-[10px] before:absolute before:start-[20px] before:top-0 before:bottom-0 before:border-s before:border-border">
+                                <KtCollapse :open="isOpen(item)" data-collapse class="kt-menu-accordion relative gap-1 ps-[10px] before:absolute before:start-[20px] before:top-0 before:bottom-0 before:border-s before:border-border">
                                     <div v-for="child in item.children" :key="child.label + JSON.stringify(child.params ?? {})" :class="['kt-menu-item', { active: isLinkActive(child) }]">
                                         <Link
                                             :href="route(child.route, child.params ?? {})"
@@ -96,7 +101,7 @@ const toggle = (item: MenuItem) => (open[item.label] = !isOpen(item));
                                             <span class="kt-menu-title text-2sm font-normal text-foreground kt-menu-item-active:font-semibold kt-menu-item-active:text-primary kt-menu-link-hover:!text-primary">{{ t(child.label) }}</span>
                                         </Link>
                                     </div>
-                                </div>
+                                </KtCollapse>
                             </div>
 
                             <!-- Single link -->

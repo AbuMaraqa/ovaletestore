@@ -114,8 +114,8 @@ it('applies product bulk actions only with the right permission', function () {
     $a = makeSimpleProduct('أ');
     $b = makeSimpleProduct('ب');
 
-    $this->actingAs(staffUser('content-manager'))->post(route('admin.products.bulk'), ['action' => 'delete', 'ids' => [$a->id]])->assertForbidden();
-    $this->actingAs(staffUser('product-manager'))->post(route('admin.products.bulk'), ['action' => 'draft', 'ids' => [$a->id, $b->id]])->assertSessionHasNoErrors();
+    $this->actingAs(staffUser('content-manager'))->post(route('admin.tables.bulk', 'products'), ['action' => 'delete', 'ids' => [$a->id]])->assertForbidden();
+    $this->actingAs(staffUser('product-manager'))->post(route('admin.tables.bulk', 'products'), ['action' => 'draft', 'ids' => [$a->id, $b->id]])->assertSessionHasNoErrors();
 
     expect($a->fresh()->status->value)->toBe('draft')->and($b->fresh()->status->value)->toBe('draft');
 });

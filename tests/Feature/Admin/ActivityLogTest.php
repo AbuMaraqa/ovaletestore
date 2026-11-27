@@ -75,7 +75,7 @@ it('shows each viewer only the log channels they may see', function () {
     makeSimpleProduct('ظاهر');
 
     $this->actingAs($viewer)->get(route('admin.activity.index'))->assertOk()
-        ->assertInertia(fn ($page) => $page->where('logs', ['catalog'])
+        ->assertInertia(fn ($page) => $page->where('table.filters', fn ($filters) => collect(collect($filters)->firstWhere('key', 'log')['options'])->pluck('value')->all() === ['catalog'])
             ->where('activities.data', fn ($rows) => collect($rows)->every(fn ($row) => $row['log'] === 'catalog')));
     $this->actingAs($viewer)->getJson(route('admin.activity.record', ['type' => 'order', 'id' => $order->id]))->assertForbidden();
 });

@@ -118,6 +118,18 @@
         animation: pop-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
         transform-origin: top;
     }
+
+    /* Closing fades out too: `display` flips only after the fade (allow-discrete); older browsers just hide. */
+    .kt-dropdown-menu {
+        transition:
+            opacity 140ms ease-in,
+            translate 140ms ease-in,
+            display 140ms allow-discrete;
+    }
+    .kt-dropdown-menu:not(.open) {
+        opacity: 0;
+        translate: 0 -4px;
+    }
 }
 
 /* Thin indeterminate bar on top of a table while it reloads (DataTable.vue). */
@@ -128,4 +140,10 @@
     to {
         transform: translateX(300%);
     }
+}
+
+/* Sidebar sub-menus open with a height animation (KtCollapse) instead of Metronic's JS: keep the accordion
+   laid out (flex) and let v-show / the transition decide visibility. */
+.kt-menu-accordion[data-collapse] {
+    display: flex;
 }

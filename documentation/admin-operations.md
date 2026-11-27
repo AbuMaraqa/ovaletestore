@@ -37,7 +37,7 @@ Written 2026-11-24. This covers the admin features added in that milestone: what
 - **Bulk imports don't log:** `woo:migrate`, `CatalogSeeder`, `OrderSeeder` and `CustomerSeeder`.
 - **Retention:** `activitylog:clean` is scheduled daily and deletes entries older than 365 days.
 
-## List screens (Filament-style DataTable)
+## List screens (server-defined tables + DataTable)
 - **Server:** `App\Support\DataTable` defines one URL contract shared by every screen:
   - `filter[search]` and `filter[<name>]`
   - `filter[from]` / `filter[until]` for date ranges
@@ -45,7 +45,13 @@ Written 2026-11-24. This covers the admin features added in that milestone: what
   - `per_page` (10, 25, 50 or 100)
   
   spatie/laravel-query-builder whitelists the allowed filters and sorts per screen.
-- **Client:** `Components/DataTable/*` provides debounced search, a filter panel with removable chips, sortable headers, a column chooser (remembered per browser), pagination, row selection with bulk actions (products), and row actions.
+- **Client:** `Components/DataTable/*` provides debounced search, a filter panel with removable chips, sortable headers, a column chooser (remembered per browser), pagination, row selection and row actions.
+- **Server-defined tables (`app/Tables`)** — every admin list is one class (the project's own "Inertia Table"):
+  - `App\Tables\Table` subclasses in `app/Tables/Admin` declare `query`, `columns` (`Column::text|badge|boolean|money|number|date` with `link`, `sub`, `avatar`, `image`, `chips`…), `filters` (`Filter::select`, `Filter::dateRange`), `search`, `defaultSort`, row `actions` (incl. `extra` buttons) and `bulkActions`.
+  - Controller: `Inertia::render('Admin/X/Index', (new XTable($request))->props('rows'))` → the page gets `rows`, `state` and `table` and renders `<ResourceTable :table :page="rows" :state />`. A page may override a cell with `#cell-<key>` or add row buttons with `#row-actions`.
+  - **Bulk on every table:** `POST admin/tables/{key}/bulk {action, ids}` (max 500). `BulkAction::make|toggle|download`; each action has its own permission, and runs row by row with the same rules as the single-row action (policies, "not the default currency", "not yourself"…). Rows it may not touch are skipped and listed in the flash message.
+  - **Export on every table:** `GET admin/tables/{key}/export` streams a UTF-8 CSV (BOM, formula-safe) of the filtered rows, or only the selection (`filter[ids]=1,2`). Same permission as the list.
+  - Register a new table in `App\Tables\Tables::ALL`. Tests: `tests/Feature/Admin/TablesTest.php`.
 - **Row actions:** the main action (edit, else view) is shown inline. Activity log and delete sit in an "⋯" menu, and delete asks for confirmation. The server sends an action's URL only when the user holds that permission.
 - **Dialogs** (`ConfirmHost`, `KtModal`, the activity side panel and the popovers) trap focus, close on Esc, and return focus to the button that opened them.
 

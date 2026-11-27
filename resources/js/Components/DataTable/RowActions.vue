@@ -96,19 +96,21 @@ const hasMenu = () => Boolean(props.deleteUrl || (props.activity && panel.allowe
             <KtIcon name="dots-vertical" class="text-base" />
         </button>
 
-        <div v-if="open" ref="menu" role="menu" class="animate-pop-in absolute end-0 top-full z-30 mt-1 w-48 rounded-xl border border-border bg-popover p-1.5 shadow-lg" @keydown="onMenuKey">
-            <Link v-if="editUrl && viewUrl" :href="viewUrl" role="menuitem" class="kt-dropdown-menu-link w-full" @click="open = false">
-                <KtIcon name="eye" /> {{ t('common.view') }}
-            </Link>
-            <button v-if="activity && panel.allowed()" type="button" role="menuitem" class="kt-dropdown-menu-link w-full" @click="showHistory">
-                <KtIcon name="time" /> {{ t('activity.title') }}
-            </button>
-            <template v-if="deleteUrl">
-                <div class="my-1 border-t border-border" role="separator" />
-                <button type="button" role="menuitem" class="kt-dropdown-menu-link w-full text-destructive hover:bg-destructive/10" @click="destroy">
-                    <KtIcon name="trash" /> {{ t('common.delete') }}
+        <Transition leave-active-class="transition duration-100 ease-in" leave-to-class="opacity-0 -translate-y-1">
+            <div v-if="open" ref="menu" role="menu" class="animate-pop-in absolute end-0 top-full z-30 mt-1 w-48 rounded-xl border border-border bg-popover p-1.5 shadow-lg" @keydown="onMenuKey">
+                <Link v-if="editUrl && viewUrl" :href="viewUrl" role="menuitem" class="kt-dropdown-menu-link w-full" @click="open = false">
+                    <KtIcon name="eye" /> {{ t('common.view') }}
+                </Link>
+                <button v-if="activity && panel.allowed()" type="button" role="menuitem" class="kt-dropdown-menu-link w-full" @click="showHistory">
+                    <KtIcon name="time" /> {{ t('activity.title') }}
                 </button>
-            </template>
-        </div>
+                <template v-if="deleteUrl">
+                    <div class="my-1 border-t border-border" role="separator" />
+                    <button type="button" role="menuitem" class="kt-dropdown-menu-link w-full text-destructive hover:bg-destructive/10" @click="destroy">
+                        <KtIcon name="trash" /> {{ t('common.delete') }}
+                    </button>
+                </template>
+            </div>
+        </Transition>
     </div>
 </template>

@@ -4,18 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
-use App\Support\DataTable;
 use App\Support\TranslationInput;
+use App\Tables\Admin\BrandsTable;
 use Astrotomic\Translatable\Validation\RuleFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 class BrandController extends Controller
 {
@@ -25,32 +22,7 @@ class BrandController extends Controller
     {
         $this->authorize('brands.view');
 
-        $brands = QueryBuilder::for(Brand::query()->with(['translations', 'media'])->withCount('products'))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', fn (Builder $q, $term) => $q->whereHas('translations', fn ($t) => $t->where('name', 'like', DataTable::like($term)))),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-                AllowedFilter::callback('featured', fn (Builder $q, $v) => $q->where('is_featured', $v === 'yes')),
-            ])
-            ->allowedSorts(...['sort_order', 'products_count', 'created_at', 'id'])
-            ->defaultSort('sort_order')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $user = $request->user();
-
-        return Inertia::render('Admin/Brands/Index', [
-            'brands' => $brands->through(fn (Brand $b) => [
-                'id' => $b->id,
-                'name' => $b->name,
-                'is_active' => $b->is_active,
-                'is_featured' => $b->is_featured,
-                'products_count' => $b->products_count,
-                'logo' => $b->getFirstMediaUrl('logo', 'thumb') ?: $b->getFirstMediaUrl('logo') ?: null,
-                'edit_url' => $user->can('brands.update') ? route('admin.brands.edit', $b) : null,
-                'delete_url' => $user->can('brands.delete') ? route('admin.brands.destroy', $b) : null,
-            ]),
-            'state' => DataTable::state($request),
-        ]);
+        return Inertia::render('Admin/Brands/Index', (new BrandsTable($request))->props('brands'));
     }
 
     public function create(): Response

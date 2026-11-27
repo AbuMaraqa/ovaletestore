@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import VariantFields from '@/Components/Admin/Products/VariantFields.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
+import KtCollapse from '@/Components/UI/KtCollapse.vue';
 import { useTrans } from '@/Composables/useTrans';
 import { emptyVariant, type AttributeOption, type ProductAttributeForm, type VariantForm } from '@/types/admin';
 
@@ -106,9 +107,9 @@ function setDefault(index: number): void {
                     <button type="button" class="kt-btn kt-btn-sm kt-btn-ghost text-destructive" @click="variants.splice(i, 1)">{{ t('common.delete') }}</button>
                 </div>
                 <p v-if="errors[`variants.${i}.term_ids`]" class="mt-2 text-sm text-destructive">{{ errors[`variants.${i}.term_ids`] }}</p>
-                <div v-show="expanded === i" class="mt-4">
+                <KtCollapse :open="expanded === i" class="mt-4">
                     <VariantFields v-model="variants[i]" :errors="errors" :prefix="`variants.${i}`" compact />
-                </div>
+                </KtCollapse>
             </div>
         </div>
     </KtCard>

@@ -63,4 +63,5 @@ return [
     'accountant_signature' => 'Accountant signature',
     'customer_signature' => 'Customer signature / stamp',
     'print_statement' => 'Print statement',
+    'print_labels' => 'Print shipping labels',
 ];

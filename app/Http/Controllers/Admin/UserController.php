@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\DataTable;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\UsersTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,8 +13,6 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends Controller
 {
@@ -24,43 +21,7 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $staff = User::query()->with(['roles', 'media'])
-            ->where(fn (Builder $q) => $q->whereHas('roles', fn (Builder $r) => $r->where('name', '!=', 'customer'))->orWhereDoesntHave('roles'));
-
-        $users = QueryBuilder::for($staff)
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = DataTable::like($term);
-                    $q->where(fn (Builder $w) => $w->where('name', 'like', $like)->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like));
-                }),
-                AllowedFilter::callback('role', fn (Builder $q, $role) => $q->whereHas('roles', fn (Builder $r) => $r->where('name', (string) $role))),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-                AllowedFilter::callback('two_factor', fn (Builder $q, $v) => $v === 'on' ? $q->whereNotNull('two_factor_confirmed_at') : $q->whereNull('two_factor_confirmed_at')),
-            ])
-            ->allowedSorts(...['name', 'email', 'created_at'])
-            ->defaultSort('-created_at')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $actor = $request->user();
-
-        return Inertia::render('Admin/Users/Index', [
-            'users' => $users->through(fn (User $u) => [
-                'id' => $u->id,
-                'name' => $u->name,
-                'email' => $u->email,
-                'avatar' => $u->avatar(),
-                'is_active' => $u->is_active,
-                'roles' => $u->roles->pluck('name'),
-                'two_factor' => $u->two_factor_confirmed_at !== null,
-                'created_at' => $u->created_at?->format('Y-m-d'),
-                'edit_url' => $actor->can('update', $u) ? route('admin.users.edit', $u) : null,
-                'delete_url' => $actor->can('delete', $u) ? route('admin.users.destroy', $u) : null,
-            ]),
-            'state' => DataTable::state($request),
-            'roles' => Role::query()->where('name', '!=', 'customer')->orderBy('name')->pluck('name')
-                ->map(fn (string $name) => ['value' => $name, 'label' => __("permissions.roles.{$name}") === "permissions.roles.{$name}" ? $name : __("permissions.roles.{$name}")]),
-        ]);
+        return Inertia::render('Admin/Users/Index', (new UsersTable($request))->props('users'));
     }
 
     public function create(): Response

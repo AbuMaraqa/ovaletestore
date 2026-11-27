@@ -46,6 +46,17 @@ class OrderDocumentController extends Controller
         return $this->pdf(OrderDocuments::invoice($order)->output(), $order->invoice->number, download: true);
     }
 
+    /** Bulk print from the orders list: one label page per selected order (?ids=1,2,3). */
+    public function shippingLabels(Request $request): Response
+    {
+        $this->authorize('viewAny', Order::class);
+        $ids = array_slice(array_filter(array_map('intval', explode(',', (string) $request->query('ids')))), 0, 200);
+        $orders = Order::query()->whereKey($ids)->orderBy('placed_at')->get();
+        abort_if($orders->isEmpty(), 404);
+
+        return $this->pdf(OrderDocuments::shippingLabels($orders)->output(), 'labels-'.now()->format('Ymd-His'));
+    }
+
     /** Whether an order of this status already has (or is due) an invoice. */
     public static function issued(Order $order): bool
     {

@@ -8,17 +8,13 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\ShippingMethod;
-use App\Support\DataTable;
 use App\Support\Money;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\OrdersTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 class OrderController extends Controller
 {
@@ -26,59 +22,7 @@ class OrderController extends Controller
     {
         $this->authorize('viewAny', Order::class);
 
-        $orders = QueryBuilder::for(Order::query()->with('user:id,name'))
-            ->withCount('items')
-            ->allowedFilters(...[
-                AllowedFilter::exact('status'),
-                AllowedFilter::exact('channel'),
-                AllowedFilter::exact('payment', 'payment_method'),
-                AllowedFilter::exact('shipping', 'shipping_method_id'),
-                AllowedFilter::exact('company_id'),
-                AllowedFilter::exact('customer', 'user_id'),
-                AllowedFilter::callback('account', fn (Builder $q, $v) => $v === 'registered' ? $q->whereNotNull('user_id') : $q->whereNull('user_id')),
-                AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = DataTable::like($term);
-                    $q->where(fn ($w) => $w->where('number', 'like', $like)
-                        ->orWhere('customer_name', 'like', $like)
-                        ->orWhere('customer_phone', 'like', $like)
-                        ->orWhere('customer_email', 'like', $like)
-                        ->orWhere('shipping_city', 'like', $like));
-                }),
-                ...DataTable::dateRange('placed_at'),
-            ])
-            ->allowedSorts(...['placed_at', 'total', 'number', 'customer_name', 'status', 'items_count'])
-            ->defaultSort('-placed_at')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $canDelete = $request->user()->can('orders.delete');
-        $canSeeCustomers = $request->user()->can('customers.view');
-
-        return Inertia::render('Admin/Orders/Index', [
-            'orders' => $orders->through(fn (Order $o) => [
-                'id' => $o->id,
-                'number' => $o->number,
-                'customer' => $o->customer_name,
-                'customer_url' => $o->user && $canSeeCustomers ? route('admin.customers.show', $o->user) : null,
-                'phone' => $o->customer_phone,
-                'email' => $o->customer_email,
-                'city' => $o->shipping_city,
-                'shipping' => $o->shipping_method_name,
-                'payment' => $o->payment_method->value,
-                'status' => $o->status->value,
-                'channel' => $o->channel->value,
-                'items_count' => $o->items_count,
-                'total' => Money::format($o->total, $o->currency),
-                'date' => $o->placed_at->format('Y-m-d H:i'),
-                'ago' => $o->placed_at->diffForHumans(),
-                'show_url' => route('admin.orders.show', $o),
-                'delete_url' => $canDelete ? route('admin.orders.destroy', $o) : null,
-            ]),
-            'state' => DataTable::state($request),
-            'statuses' => array_column(OrderStatus::cases(), 'value'),
-            'shipping_methods' => ShippingMethod::query()->with('translations')->orderBy('sort_order')->get()
-                ->map(fn (ShippingMethod $m) => ['value' => $m->id, 'label' => $m->name]),
-        ]);
+        return Inertia::render('Admin/Orders/Index', (new OrdersTable($request))->props('orders'));
     }
 
     /**

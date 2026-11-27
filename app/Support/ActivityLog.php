@@ -6,6 +6,7 @@ use App\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 
@@ -73,7 +74,14 @@ final class ActivityLog
         return self::SUBJECTS[$key]['model'] ?? null;
     }
 
-    /** A record's own entries plus those of its children (variants, translations, notes…). */
+    /**
+     * A record's own entries plus those of its children (variants, translations, notes…).
+     *
+     * @template TActivity of Model
+     *
+     * @param  Builder<TActivity>  $query
+     * @return Builder<TActivity>
+     */
     public static function forRecord(Builder $query, string $class, int|string $id): Builder
     {
         return $query->where(fn (Builder $q) => $q
@@ -136,5 +144,25 @@ final class ActivityLog
             ->withChanges(['attributes' => $new, 'old' => $old])
             ->withProperties(['label' => __("admin.{$group}"), 'settings_group' => $group])
             ->log('settings_updated');
+    }
+
+    /** Link each entry to its record's admin page (one existence query per subject type, not per row). */
+    /** @param Collection<int, Activity> $activities */
+    public static function attachUrls(Collection $activities): void
+    {
+        $refs = $activities->map(fn (Activity $a) => [
+            'class' => $a->getAttribute('parent_type') ?? $a->subject_type,
+            'id' => $a->getAttribute('parent_id') ?? $a->subject_id,
+        ]);
+
+        $existing = $refs->filter(fn ($r) => $r['class'] && $r['id'] && isset(self::SUBJECTS[self::keyFor($r['class']) ?? '']['route']))
+            ->groupBy('class')
+            ->map(fn (Collection $group, string $class) => $class::query()->whereKey($group->pluck('id')->unique())->pluck((new $class)->getKeyName())->flip());
+
+        $activities->each(function (Activity $activity, int $i) use ($refs, $existing) {
+            ['class' => $class, 'id' => $id] = $refs[$i];
+            $route = self::SUBJECTS[self::keyFor($class) ?? '']['route'] ?? null;
+            $activity->setAttribute('url', $route && isset($existing[$class][$id]) ? route($route, $id) : null);
+        });
     }
 }

@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Support\DataTable;
 use App\Support\TranslationInput;
+use App\Tables\Admin\CategoriesTable;
 use Astrotomic\Translatable\Validation\RuleFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +14,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 class CategoryController extends Controller
 {
@@ -26,37 +23,7 @@ class CategoryController extends Controller
     {
         $this->authorize('categories.view');
 
-        $categories = QueryBuilder::for(Category::query()->with(['translations', 'media', 'parent.translations'])->withCount('products'))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', fn (Builder $q, $term) => $q->whereHas('translations', fn ($t) => $t->where('name', 'like', DataTable::like($term)))),
-                AllowedFilter::callback('level', fn (Builder $q, $v) => $v === 'top' ? $q->whereNull('parent_id') : $q->whereNotNull('parent_id')),
-                AllowedFilter::exact('parent', 'parent_id'),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-            ])
-            ->allowedSorts(...['sort_order', 'products_count', 'created_at', 'id'])
-            ->defaultSort('sort_order')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $user = $request->user();
-
-        return Inertia::render('Admin/Categories/Index', [
-            'categories' => $categories->through(fn (Category $c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'parent' => $c->parent?->name,
-                'is_active' => $c->is_active,
-                'sort_order' => $c->sort_order,
-                'products_count' => $c->products_count,
-                'image' => $c->getFirstMediaUrl('image', 'thumb') ?: $c->getFirstMediaUrl('image') ?: null,
-                'edit_url' => $user->can('categories.update') ? route('admin.categories.edit', $c) : null,
-                'delete_url' => $user->can('categories.delete') ? route('admin.categories.destroy', $c) : null,
-                'view_url' => $c->is_active ? route('storefront.category', ['slug' => $c->slug]) : null,
-            ]),
-            'state' => DataTable::state($request),
-            'parents' => Category::query()->whereNull('parent_id')->with('translations')->ordered()->get()
-                ->map(fn (Category $c) => ['value' => $c->id, 'label' => $c->name]),
-        ]);
+        return Inertia::render('Admin/Categories/Index', (new CategoriesTable($request))->props('categories'));
     }
 
     public function create(): Response

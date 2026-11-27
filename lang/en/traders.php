@@ -41,4 +41,6 @@ return [
     'mail_tier' => 'Your price tier:',
     'mail_hint' => 'Sign in and trader prices appear across the store automatically.',
     'mail_cta' => 'Start shopping',
+    'bulk_approve' => 'Approve as :tier',
+    'not_customer_account' => 'Not a customer-only account',
 ];

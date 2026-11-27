@@ -1,4 +1,4 @@
-{{-- 10×15 cm thermal shipping label (mPDF). Big, high-contrast: recipient, phone, city, amount to collect, barcode. --}}
+{{-- 10×15 cm thermal shipping labels (mPDF), one page per order ($labels). Big, high-contrast: recipient, phone, city, amount to collect, barcode. --}}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -12,6 +12,8 @@
 </style>
 </head>
 <body>
+@foreach ($labels as $i => ['order' => $order, 'pieces' => $pieces, 'collect' => $collect])
+@if ($i > 0)<pagebreak />@endif
 
 {{-- Sender --}}
 <table class="box">
@@ -68,5 +70,6 @@
     <div class="box" style="margin-top: 2mm; font-size: 8pt;"><b>{{ __('invoices.note') }}:</b> {{ \Illuminate\Support\Str::limit($order->customer_note, 160) }}</div>
 @endif
 
+@endforeach
 </body>
 </html>

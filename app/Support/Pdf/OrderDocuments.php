@@ -89,18 +89,27 @@ final class OrderDocuments
 
     public static function shippingLabel(Order $order): LaravelMpdf
     {
-        $order->loadMissing('items');
-        $cod = $order->payment_method === PaymentMethod::CashOnDelivery;
+        return self::shippingLabels([$order]);
+    }
 
-        return self::render('pdf.shipping-label', 'ar', [
-            'order' => $order,
-            'pieces' => (int) $order->items->sum('quantity'),
-            'collect' => $cod ? Money::format($order->total, $order->currency, 'ar') : null,
-        ], [
+    /** One 10×15 label page per order (bulk printing from the orders list). @param iterable<Order> $orders */
+    public static function shippingLabels(iterable $orders): LaravelMpdf
+    {
+        $labels = [];
+        foreach ($orders as $order) {
+            $order->loadMissing('items');
+            $labels[] = [
+                'order' => $order,
+                'pieces' => (int) $order->items->sum('quantity'),
+                'collect' => $order->payment_method === PaymentMethod::CashOnDelivery ? Money::format($order->total, $order->currency, 'ar') : null,
+            ];
+        }
+
+        return self::render('pdf.shipping-label', 'ar', ['labels' => $labels], [
             'format' => [100, 150],
             'margin_left' => 4, 'margin_right' => 4, 'margin_top' => 4, 'margin_bottom' => 4, 'margin_footer' => 0,
             'default_font_size' => '9',
-            'title' => $order->number,
+            'title' => count($labels) === 1 ? $labels[0]['order']->number : 'labels',
         ]);
     }
 

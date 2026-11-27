@@ -4,15 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PriceTier;
-use App\Support\DataTable;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\PriceTiersTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 /** Trader price lists: name, automatic % off, active flag. Exact prices are set per product variant. */
 class PriceTierController extends Controller
@@ -21,33 +18,7 @@ class PriceTierController extends Controller
     {
         $this->authorize('price_tiers.view');
 
-        $tiers = QueryBuilder::for(PriceTier::query()->withCount(['traders', 'prices']))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', fn (Builder $q, $term) => $q->where(fn (Builder $w) => $w
-                    ->where('code', 'like', DataTable::like($term))->orWhere('name', 'like', DataTable::like($term)))),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-            ])
-            ->allowedSorts(...['sort_order', 'discount_percent', 'traders_count', 'prices_count'])
-            ->defaultSort('sort_order')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $user = $request->user();
-
-        return Inertia::render('Admin/PriceTiers/Index', [
-            'tiers' => $tiers->through(fn (PriceTier $tier) => [
-                'id' => $tier->id,
-                'code' => $tier->code,
-                'name' => $tier->label(),
-                'discount_percent' => (float) $tier->discount_percent,
-                'is_active' => $tier->is_active,
-                'traders_count' => (int) $tier->getAttribute('traders_count'),
-                'prices_count' => (int) $tier->getAttribute('prices_count'),
-                'edit_url' => $user->can('price_tiers.update') ? route('admin.price-tiers.edit', $tier) : null,
-                'delete_url' => $user->can('price_tiers.delete') ? route('admin.price-tiers.destroy', $tier) : null,
-            ]),
-            'state' => DataTable::state($request),
-        ]);
+        return Inertia::render('Admin/PriceTiers/Index', (new PriceTiersTable($request))->props('tiers'));
     }
 
     public function create(): Response

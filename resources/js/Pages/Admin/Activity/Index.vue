@@ -3,8 +3,9 @@ import { Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ActivityTimeline from '@/Components/Activity/ActivityTimeline.vue';
 import UserAvatar from '@/Components/Common/UserAvatar.vue';
-import DataTable from '@/Components/DataTable/DataTable.vue';
-import type { Column, Filter, FilterOption, TablePage, TableState } from '@/Components/DataTable/types';
+import type { TablePage, TableState } from '@/Components/DataTable/types';
+import ResourceTable from '@/Components/Table/ResourceTable.vue';
+import type { TableDef } from '@/Components/Table/types';
 import KtIcon from '@/Components/UI/KtIcon.vue';
 import KtModal from '@/Components/UI/KtModal.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
@@ -12,35 +13,14 @@ import type { ActivityEntry } from '@/Composables/useActivityPanel';
 import { useActivityLabels } from '@/Composables/useActivityLabels';
 import { useTrans } from '@/Composables/useTrans';
 
-const props = defineProps<{
-    activities: TablePage<ActivityEntry>;
-    state: TableState;
-    logs: string[];
-    events: string[];
-    subjects: string[];
-    causers: FilterOption[];
-}>();
+/**
+ * The audit trail (App\Tables\Admin\ActivityTable): every channel the viewer may read, incl. sign-ins and
+ * sign-outs. Read-only; export of the filtered entries. Rich cells stay here (icons, avatar, changes modal).
+ */
+defineProps<{ activities: TablePage<ActivityEntry>; state: TableState; table: TableDef }>();
 
 const { t } = useTrans();
 const { eventLabel, eventTone, subjectLabel, logLabel } = useActivityLabels();
-
-const columns = computed<Column[]>(() => [
-    { key: 'event', label: t('activity.event'), fixed: true },
-    { key: 'record', label: t('activity.record') },
-    { key: 'causer', label: t('activity.user') },
-    { key: 'changes', label: t('activity.changes') },
-    { key: 'log', label: t('activity.log'), hidden: true },
-    { key: 'ip', label: t('activity.ip'), hidden: true },
-    { key: 'created_at', label: t('activity.date'), sortable: true, align: 'end' },
-]);
-
-const filters = computed<Filter[]>(() => [
-    { key: 'log', label: t('activity.log'), type: 'select', options: props.logs.map((l) => ({ value: l, label: logLabel(l) })) },
-    { key: 'event', label: t('activity.event'), type: 'select', options: props.events.map((e) => ({ value: e, label: eventLabel(e) })) },
-    { key: 'subject', label: t('activity.record'), type: 'select', options: props.subjects.filter((s) => !s.endsWith('_translation')).map((s) => ({ value: s, label: subjectLabel(s) })) },
-    { key: 'causer', label: t('activity.user'), type: 'select', options: props.causers },
-    { key: 'date', label: t('activity.date'), type: 'date_range' },
-]);
 
 const detail = ref<ActivityEntry | null>(null);
 const detailOpen = computed({ get: () => detail.value !== null, set: (v: boolean) => !v && (detail.value = null) });
@@ -49,7 +29,7 @@ const detailOpen = computed({ get: () => detail.value !== null, set: (v: boolean
 <template>
     <PageHeader :title="t('activity.title')" :description="t('activity.subtitle')" />
 
-    <DataTable :page="activities" :state="state" :columns="columns" :filters="filters" :url="route('admin.activity.index')" storage-key="activity" :title="t('activity.title')">
+    <ResourceTable :table="table" :page="activities" :state="state">
         <template #cell-event="{ row }">
             <div class="flex items-center gap-2.5">
                 <span :class="['flex size-8 shrink-0 items-center justify-center rounded-full border', eventTone(row.event).badge]"><KtIcon :name="eventTone(row.event).icon" /></span>
@@ -79,16 +59,15 @@ const detailOpen = computed({ get: () => detail.value !== null, set: (v: boolean
             <span v-else class="text-muted-foreground">—</span>
         </template>
         <template #cell-log="{ row }"><span class="kt-badge kt-badge-sm kt-badge-outline">{{ logLabel(row.log ?? 'default') }}</span></template>
-        <template #cell-ip="{ row }"><span class="font-mono text-xs" dir="ltr">{{ row.ip ?? '—' }}</span></template>
         <template #cell-created_at="{ row }">
             <time :datetime="row.created_at" :title="row.date" class="whitespace-nowrap text-sm text-secondary-foreground">{{ row.ago }}</time>
         </template>
-        <template #actions="{ row }">
+        <template #row-actions="{ row }">
             <button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" :title="t('activity.details')" :aria-label="t('activity.details')" @click="detail = row">
                 <KtIcon name="eye" />
             </button>
         </template>
-    </DataTable>
+    </ResourceTable>
 
     <KtModal v-model:open="detailOpen" :title="t('activity.details')" width="max-w-2xl">
         <ActivityTimeline v-if="detail" :entries="[detail]" show-subject />

@@ -7,17 +7,12 @@ use App\Enums\TraderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\PriceTier;
 use App\Models\User;
-use App\Support\DataTable;
-use App\Support\Money;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\TradersTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\AllowedSort;
-use Spatie\QueryBuilder\QueryBuilder;
 
 /** Trader accounts: requests waiting for approval, approved traders and their price tier. */
 class TraderController extends Controller
@@ -26,42 +21,7 @@ class TraderController extends Controller
     {
         $this->authorize('traders.view');
 
-        $traders = QueryBuilder::for(User::query()->whereNotNull('trader_status')->with(['media', 'priceTier'])
-            ->withCount('orders')->withSum('orders as spent', 'base_total'))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = DataTable::like($term);
-                    $q->where(fn (Builder $w) => $w->where('name', 'like', $like)->orWhere('business_name', 'like', $like)
-                        ->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like));
-                }),
-                AllowedFilter::exact('status', 'trader_status'),
-                AllowedFilter::exact('tier', 'price_tier_id'),
-            ])
-            ->allowedSorts(...['name', 'business_name', 'trader_requested_at', 'orders_count', AllowedSort::field('spent')])
-            ->defaultSort('-trader_requested_at')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $canApprove = $request->user()->can('traders.approve');
-
-        return Inertia::render('Admin/Traders/Index', [
-            'traders' => $traders->through(fn (User $u) => [
-                'id' => $u->id,
-                'name' => $u->name,
-                'business_name' => $u->business_name,
-                'email' => $u->email,
-                'phone' => $u->phone,
-                'avatar' => $u->avatar(),
-                'status' => $u->trader_status?->value,
-                'tier_id' => $u->price_tier_id,
-                'tier' => $u->priceTier?->label(),
-                'orders_count' => (int) $u->getAttribute('orders_count'),
-                'spent' => Money::format((int) $u->getAttribute('spent')),
-                'requested' => $u->trader_requested_at?->diffForHumans(),
-                'show_url' => $request->user()->can('customers.view') ? route('admin.customers.show', $u) : null,
-                'can_review' => $canApprove,
-            ]),
-            'state' => DataTable::state($request),
+        return Inertia::render('Admin/Traders/Index', (new TradersTable($request))->props('traders') + [
             'tiers' => $this->tierOptions(),
             'pending' => User::query()->where('trader_status', TraderStatus::Pending)->count(),
         ]);

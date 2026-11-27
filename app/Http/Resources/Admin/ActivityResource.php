@@ -33,7 +33,8 @@ class ActivityResource extends JsonResource
             'subject' => ActivityLog::keyFor($this->resource->getAttribute('parent_type') ?? $this->subject_type),
             'child' => $this->resource->getAttribute('parent_type') ? ActivityLog::keyFor($this->subject_type) : null,
             'label' => $this->getProperty('label'),
-            'locale' => $this->getProperty('locale'),
+            // The language only matters for a translation change, not for sign-ins or records without translations.
+            'locale' => str_ends_with((string) ActivityLog::keyFor($this->subject_type), '_translation') ? $this->getProperty('locale') : null,
             'url' => $this->resource->getAttributes()['url'] ?? null, // set by ActivityController::attachUrls()
             'causer' => $this->causer ? [
                 'id' => $this->causer->getKey(),

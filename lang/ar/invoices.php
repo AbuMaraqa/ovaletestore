@@ -63,4 +63,5 @@ return [
     'accountant_signature' => 'توقيع المحاسب',
     'customer_signature' => 'توقيع العميل / الختم',
     'print_statement' => 'طباعة كشف الحساب',
+    'print_labels' => 'طباعة البوالص',
 ];

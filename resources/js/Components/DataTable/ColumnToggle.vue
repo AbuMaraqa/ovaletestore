@@ -35,16 +35,18 @@ function onPanelKey(event: KeyboardEvent): void {
         <button type="button" class="kt-btn kt-btn-outline kt-btn-icon" :title="t('table.columns')" :aria-label="t('table.columns')" :aria-expanded="open" aria-haspopup="true" :aria-controls="panelId" @click="toggle">
             <KtIcon name="setting-4" />
         </button>
-        <div v-if="open" :id="panelId" class="animate-pop-in absolute end-0 top-full z-30 mt-2 w-56 rounded-xl border border-border bg-popover p-2 shadow-lg" @keydown="onPanelKey">
-            <p class="px-2 pt-1 pb-2 text-xs font-semibold text-mono">{{ t('table.columns') }}</p>
-            <label
-                v-for="column in columns.filter((c) => !c.fixed && c.label)"
-                :key="column.key"
-                class="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-accent/60"
-            >
-                <input type="checkbox" class="kt-checkbox kt-checkbox-sm" :checked="!hidden.includes(column.key)" @change="emit('toggle', column.key)" />
-                {{ column.label }}
-            </label>
-        </div>
+        <Transition leave-active-class="transition duration-100 ease-in" leave-to-class="opacity-0 -translate-y-1">
+            <div v-if="open" :id="panelId" class="animate-pop-in absolute end-0 top-full z-30 mt-2 w-56 rounded-xl border border-border bg-popover p-2 shadow-lg" @keydown="onPanelKey">
+                <p class="px-2 pt-1 pb-2 text-xs font-semibold text-mono">{{ t('table.columns') }}</p>
+                <label
+                    v-for="column in columns.filter((c) => !c.fixed && c.label)"
+                    :key="column.key"
+                    class="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-accent/60"
+                >
+                    <input type="checkbox" class="kt-checkbox kt-checkbox-sm" :checked="!hidden.includes(column.key)" @change="emit('toggle', column.key)" />
+                    {{ column.label }}
+                </label>
+            </div>
+        </Transition>
     </div>
 </template>

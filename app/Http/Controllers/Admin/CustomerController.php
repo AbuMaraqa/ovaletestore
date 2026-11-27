@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PriceTier;
 use App\Models\User;
-use App\Support\DataTable;
 use App\Support\Money;
+use App\Tables\Admin\CustomersTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,9 +19,6 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\AllowedSort;
-use Spatie\QueryBuilder\QueryBuilder;
 
 /**
  * Store customers (storefront accounts, incl. those migrated from WooCommerce): their orders and spend.
@@ -33,46 +30,8 @@ class CustomerController extends Controller
     {
         $this->authorize('customers.view');
 
-        $customers = QueryBuilder::for($this->customers()
-            ->with('media')
-            ->withCount('orders')
-            ->withSum(['orders as spent' => fn (Builder $q) => $q->where('status', '!=', OrderStatus::Cancelled)], 'base_total')
-            ->withMax('orders as last_order_at', 'placed_at'))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = DataTable::like($term);
-                    $q->where(fn (Builder $w) => $w->where('name', 'like', $like)->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like));
-                }),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-                AllowedFilter::callback('orders', fn (Builder $q, $v) => $v === 'with' ? $q->has('orders') : $q->doesntHave('orders')),
-                AllowedFilter::callback('source', fn (Builder $q, $v) => $v === 'woocommerce' ? $q->whereNotNull('source_id') : $q->whereNull('source_id')),
-                ...DataTable::dateRange('created_at'),
-            ])
-            ->allowedSorts(...['name', 'created_at', 'orders_count', AllowedSort::field('spent'), AllowedSort::field('last_order_at')])
-            ->defaultSort('-created_at')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $user = $request->user();
-
         return Inertia::render('Admin/Customers/Index', [
-            'customers' => $customers->through(fn (User $c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'email' => $c->email,
-                'phone' => $c->phone,
-                'avatar' => $c->avatar(),
-                'is_active' => $c->is_active,
-                'from_woocommerce' => $c->source_id !== null,
-                'orders_count' => (int) $c->getAttribute('orders_count'),
-                'spent' => Money::format((int) $c->getAttribute('spent')),
-                'last_order' => $c->getAttribute('last_order_at') ? now()->parse($c->getAttribute('last_order_at'))->diffForHumans() : null,
-                'registered' => $c->created_at?->format('Y-m-d'),
-                'show_url' => route('admin.customers.show', $c),
-                'edit_url' => $user->can('customers.update') ? route('admin.customers.edit', $c) : null,
-                'delete_url' => $user->can('customers.delete') ? route('admin.customers.destroy', $c) : null,
-            ]),
-            'state' => DataTable::state($request),
+            ...(new CustomersTable($request))->props('customers'),
             'stats' => [
                 'total' => $this->customers()->count(),
                 'with_orders' => $this->customers()->has('orders')->count(),

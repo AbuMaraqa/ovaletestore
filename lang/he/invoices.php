@@ -63,4 +63,5 @@ return [
     'accountant_signature' => 'חתימת מנהל החשבונות',
     'customer_signature' => 'חתימת הלקוח / חותמת',
     'print_statement' => 'הדפסת כרטסת',
+    'print_labels' => 'הדפסת תוויות משלוח',
 ];

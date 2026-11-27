@@ -92,7 +92,6 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::patch('notifications/{id}/read', [Admin\NotificationController::class, 'read'])->name('notifications.read');
             Route::post('notifications/read-all', [Admin\NotificationController::class, 'readAll'])->name('notifications.read-all');
 
-            Route::post('products/bulk', [Admin\ProductController::class, 'bulk'])->name('products.bulk');
             Route::resource('products', Admin\ProductController::class)->except('show');
             Route::post('products/{product}/media', [Admin\ProductMediaController::class, 'store'])->name('products.media.store');
             Route::patch('products/{product}/media/order', [Admin\ProductMediaController::class, 'reorder'])->name('products.media.reorder');
@@ -108,6 +107,7 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::delete('companies/{company}/payments/{payment}', [Admin\CompanyPaymentController::class, 'destroy'])->name('companies.payments.destroy');
 
             Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
+            Route::get('orders/labels', [OrderDocumentController::class, 'shippingLabels'])->middleware('throttle:20,1')->name('orders.labels');
             Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
             Route::get('orders/{order}/invoice', [OrderDocumentController::class, 'invoice'])->name('orders.invoice');
             Route::get('orders/{order}/shipping-label', [OrderDocumentController::class, 'shippingLabel'])->name('orders.label');
@@ -123,6 +123,10 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::resource('price-tiers', Admin\PriceTierController::class)->except('show');
             Route::resource('currencies', Admin\CurrencyController::class)->except('show');
             Route::patch('currencies/{currency}/default', [Admin\CurrencyController::class, 'makeDefault'])->name('currencies.default');
+
+            // Shared table endpoints (App\Tables): CSV export and bulk actions for every list.
+            Route::get('tables/{table}/export', Admin\TableExportController::class)->middleware('throttle:20,1')->name('tables.export');
+            Route::post('tables/{table}/bulk', Admin\TableBulkController::class)->middleware('throttle:30,1')->name('tables.bulk');
 
             Route::get('activity', [Admin\ActivityController::class, 'index'])->name('activity.index');
             Route::get('activity/{type}/{id}', [Admin\ActivityController::class, 'record'])

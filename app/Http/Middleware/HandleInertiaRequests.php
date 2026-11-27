@@ -131,7 +131,7 @@ class HandleInertiaRequests extends Middleware
                 : [],
 
             // UI strings for the current locale, sent once and cached client-side.
-            'translations' => Inertia::once(fn () => Translations::forFrontend($locale, $area))->as("translations.{$area}.{$locale}"),
+            'translations' => Inertia::once(fn () => Translations::forFrontend($locale, $area))->as("translations.{$area}.{$locale}.".Translations::version($locale, $area)),
         ];
     }
 }

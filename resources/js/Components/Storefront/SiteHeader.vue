@@ -55,31 +55,35 @@ const logout = () => router.post(route('logout'));
                             {{ available.find((l) => l.code === current)?.native }}
                             <Icon name="chevron" class="size-3 rotate-90" />
                         </button>
-                        <ul v-if="openMenu === 'lang'" class="absolute end-0 top-full z-50 mt-2 w-40 rounded-xl bg-white p-1.5 text-cocoa shadow-lift ring-1 ring-stone-100">
-                            <li v-for="l in available" :key="l.code">
-                                <a :href="l.url" :lang="l.code" :class="['flex items-center justify-between rounded-lg px-3 py-2 hover:bg-stone-50', l.code === current && 'font-bold text-brand-700']">
-                                    {{ l.native }} <Icon v-if="l.code === current" name="check" class="size-4" />
-                                </a>
-                            </li>
-                        </ul>
+                        <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1 scale-[0.98]" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-1">
+                            <ul v-if="openMenu === 'lang'" class="absolute end-0 top-full z-50 mt-2 w-40 origin-top rounded-xl bg-white p-1.5 text-cocoa shadow-lift ring-1 ring-stone-100">
+                                <li v-for="l in available" :key="l.code">
+                                    <a :href="l.url" :lang="l.code" :class="['flex items-center justify-between rounded-lg px-3 py-2 hover:bg-stone-50', l.code === current && 'font-bold text-brand-700']">
+                                        {{ l.native }} <Icon v-if="l.code === current" name="check" class="size-4" />
+                                    </a>
+                                </li>
+                            </ul>
+                        </Transition>
                     </div>
                     <div v-if="currency.options.value.length" class="relative">
                         <button type="button" class="inline-flex items-center gap-1.5 hover:text-white" :aria-expanded="openMenu === 'currency'" @click="toggle('currency')">
                             {{ t('storefront.currency') }} <b class="font-bold text-white" dir="ltr">{{ site.currency }}</b>
                             <Icon name="chevron" class="size-3 rotate-90" />
                         </button>
-                        <ul v-if="openMenu === 'currency'" class="absolute end-0 top-full z-50 mt-2 w-52 rounded-xl bg-white p-1.5 text-cocoa shadow-lift ring-1 ring-stone-100">
-                            <li v-for="c in currency.options.value" :key="c.code">
-                                <button
-                                    type="button"
-                                    :class="['flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-start hover:bg-stone-50', c.code === site.currency && 'font-bold text-brand-700']"
-                                    @click="currency.choose(c.code); openMenu = null"
-                                >
-                                    <span>{{ c.label }}</span>
-                                    <span class="inline-flex items-center gap-1.5 text-xs text-stone-500" dir="ltr">{{ c.symbol }} {{ c.code }}<Icon v-if="c.code === site.currency" name="check" class="size-4 text-brand-700" /></span>
-                                </button>
-                            </li>
-                        </ul>
+                        <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1 scale-[0.98]" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-1">
+                            <ul v-if="openMenu === 'currency'" class="absolute end-0 top-full z-50 mt-2 w-52 rounded-xl bg-white p-1.5 text-cocoa shadow-lift ring-1 ring-stone-100">
+                                <li v-for="c in currency.options.value" :key="c.code">
+                                    <button
+                                        type="button"
+                                        :class="['flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-start hover:bg-stone-50', c.code === site.currency && 'font-bold text-brand-700']"
+                                        @click="currency.choose(c.code); openMenu = null"
+                                    >
+                                        <span>{{ c.label }}</span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs text-stone-500" dir="ltr">{{ c.symbol }} {{ c.code }}<Icon v-if="c.code === site.currency" name="check" class="size-4 text-brand-700" /></span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </Transition>
                     </div>
                     <span v-else class="inline-flex items-center gap-1.5">{{ t('storefront.currency') }} <b class="font-bold text-white" dir="ltr">{{ site.currency }}</b></span>
                     <span v-if="socials.length || site.phone" class="h-4 w-px bg-white/20" aria-hidden="true" />
@@ -151,11 +155,13 @@ const logout = () => router.post(route('logout'));
                         <button type="button" class="inline-flex items-center gap-1 py-2 transition hover:text-brand-700" :aria-expanded="openMenu === 'about'" @click="toggle('about')">
                             {{ t('storefront.about_us') }} <Icon name="chevron" class="size-3.5 rotate-90" />
                         </button>
-                        <ul v-if="openMenu === 'about'" class="absolute start-0 top-full z-50 mt-3 w-52 rounded-2xl bg-white p-1.5 text-sm shadow-lift ring-1 ring-stone-100">
-                            <li><Link :href="route('storefront.about')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.our_story') }}</Link></li>
-                            <li><Link :href="route('storefront.brands')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.brands') }}</Link></li>
-                            <li><Link :href="route('storefront.contact')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.contact_us') }}</Link></li>
-                        </ul>
+                        <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1 scale-[0.98]" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-1">
+                            <ul v-if="openMenu === 'about'" class="absolute start-0 top-full z-50 mt-3 w-52 rounded-2xl bg-white p-1.5 text-sm shadow-lift ring-1 ring-stone-100">
+                                <li><Link :href="route('storefront.about')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.our_story') }}</Link></li>
+                                <li><Link :href="route('storefront.brands')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.brands') }}</Link></li>
+                                <li><Link :href="route('storefront.contact')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('storefront.contact_us') }}</Link></li>
+                            </ul>
+                        </Transition>
                     </div>
                 </nav>
 
@@ -182,14 +188,16 @@ const logout = () => router.post(route('logout'));
                             <button type="button" class="block rounded-full" :aria-expanded="openMenu === 'account'" :aria-label="user.name" @click="toggle('account')">
                                 <UserAvatar :avatar="user.avatar" :name="user.name" size="size-11" :ring="false" />
                             </button>
-                            <div v-if="openMenu === 'account'" class="absolute end-0 top-full z-50 mt-3 w-60 rounded-2xl bg-white p-2 text-sm shadow-lift ring-1 ring-stone-100">
-                                <p class="truncate px-3 pb-2 pt-1 font-bold text-cocoa">{{ user.name }}</p>
-                                <Link :href="route('account.dashboard')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_account') }}</Link>
-                                <Link :href="route('account.orders')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_orders') }}</Link>
-                                <Link v-if="user.pos_url" :href="user.pos_url" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50" @click="openMenu = null">{{ t('pos.title') }}</Link>
-                                <a v-if="user.admin_url" :href="user.admin_url" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
-                                <button type="button" class="mt-1 block w-full rounded-xl px-3 py-2.5 text-start text-red-600 hover:bg-red-50" @click="logout">{{ t('common.logout') }}</button>
-                            </div>
+                            <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1 scale-[0.98]" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-1">
+                                <div v-if="openMenu === 'account'" class="absolute end-0 top-full z-50 mt-3 w-60 rounded-2xl bg-white p-2 text-sm shadow-lift ring-1 ring-stone-100">
+                                    <p class="truncate px-3 pb-2 pt-1 font-bold text-cocoa">{{ user.name }}</p>
+                                    <Link :href="route('account.dashboard')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_account') }}</Link>
+                                    <Link :href="route('account.orders')" class="block rounded-xl px-3 py-2.5 hover:bg-brand-50" @click="openMenu = null">{{ t('account.my_orders') }}</Link>
+                                    <Link v-if="user.pos_url" :href="user.pos_url" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50" @click="openMenu = null">{{ t('pos.title') }}</Link>
+                                    <a v-if="user.admin_url" :href="user.admin_url" class="block rounded-xl px-3 py-2.5 font-semibold text-brand-700 hover:bg-brand-50">{{ t('account.control_panel') }}</a>
+                                    <button type="button" class="mt-1 block w-full rounded-xl px-3 py-2.5 text-start text-red-600 hover:bg-red-50" @click="logout">{{ t('common.logout') }}</button>
+                                </div>
+                            </Transition>
                         </template>
                     </div>
 

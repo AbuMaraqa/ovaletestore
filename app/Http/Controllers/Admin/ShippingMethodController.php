@@ -5,19 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ShippingMethodType;
 use App\Http\Controllers\Controller;
 use App\Models\ShippingMethod;
-use App\Support\DataTable;
 use App\Support\Money;
 use App\Support\TranslationInput;
+use App\Tables\Admin\ShippingMethodsTable;
 use Astrotomic\Translatable\Validation\RuleFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 /** Shipping methods (WooCommerce → Settings → Shipping). Prices are entered in major units, stored in minor units. */
 class ShippingMethodController extends Controller
@@ -28,38 +25,7 @@ class ShippingMethodController extends Controller
     {
         $this->authorize('shipping.view');
 
-        $methods = QueryBuilder::for(ShippingMethod::query()->with('translations')->withCount('orders'))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', function (Builder $q, $term) {
-                    $like = DataTable::like($term);
-                    $q->where(fn ($w) => $w->where('code', 'like', $like)->orWhereHas('translations', fn ($t) => $t->where('name', 'like', $like)));
-                }),
-                AllowedFilter::exact('type'),
-                AllowedFilter::callback('status', fn (Builder $q, $v) => $q->where('is_active', $v === 'active')),
-            ])
-            ->allowedSorts(...['sort_order', 'cost', 'orders_count', 'id'])
-            ->defaultSort('sort_order')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString();
-
-        $user = $request->user();
-
-        return Inertia::render('Admin/ShippingMethods/Index', [
-            'methods' => $methods->through(fn (ShippingMethod $m) => [
-                'id' => $m->id,
-                'name' => $m->name,
-                'type' => $m->type->value,
-                'cost' => $m->cost > 0 ? Money::format($m->cost) : null,
-                'free_over' => $m->free_over !== null ? Money::format($m->free_over) : null,
-                'min_order' => $m->min_order !== null ? Money::format($m->min_order) : null,
-                'is_active' => $m->is_active,
-                'orders_count' => $m->orders_count,
-                'edit_url' => $user->can('shipping.update') ? route('admin.shipping-methods.edit', $m) : null,
-                'delete_url' => $user->can('shipping.delete') ? route('admin.shipping-methods.destroy', $m) : null,
-            ]),
-            'state' => DataTable::state($request),
-            'types' => array_column(ShippingMethodType::cases(), 'value'),
-        ]);
+        return Inertia::render('Admin/ShippingMethods/Index', (new ShippingMethodsTable($request))->props('methods'));
     }
 
     public function create(): Response

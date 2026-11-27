@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Support\DataTable;
 use App\Support\Permissions;
-use Illuminate\Database\Eloquent\Builder;
+use App\Tables\Admin\RolesTable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,8 +13,6 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
 
 /**
  * Roles = named sets of permissions (one per button). super-admin bypasses every check and is locked;
@@ -27,31 +24,7 @@ class RoleController extends Controller
     {
         $this->authorize('roles.view');
 
-        $roles = QueryBuilder::for(Role::query()->where('guard_name', 'web')->withCount(['users', 'permissions']))
-            ->allowedFilters(...[
-                AllowedFilter::callback('search', fn (Builder $q, $term) => $q->where('name', 'like', DataTable::like($term))),
-                AllowedFilter::callback('type', fn (Builder $q, $type) => $type === 'built_in'
-                    ? $q->whereIn('name', array_keys(Permissions::defaultRoles()))
-                    : $q->whereNotIn('name', array_keys(Permissions::defaultRoles()))),
-            ])
-            ->allowedSorts(...['name', 'users_count', 'permissions_count', 'created_at'])
-            ->defaultSort('name')
-            ->paginate(DataTable::perPage($request))
-            ->withQueryString()
-            ->through(fn (Role $role) => [
-                'id' => $role->id,
-                'name' => $role->name,
-                'label' => $this->label($role->name),
-                'users_count' => $role->users_count,
-                'permissions_count' => $role->name === Permissions::SUPER_ADMIN ? count(Permissions::all()) : $role->permissions_count,
-                'built_in' => Permissions::isBuiltIn($role->name),
-                'locked' => $role->name === Permissions::SUPER_ADMIN,
-                'created_at' => $role->created_at?->translatedFormat('Y-m-d'),
-            ]);
-
-        return Inertia::render('Admin/Roles/Index', [
-            'roles' => $roles,
-            'state' => DataTable::state($request),
+        return Inertia::render('Admin/Roles/Index', (new RolesTable($request))->props('roles') + [
             'total_permissions' => count(Permissions::all()),
         ]);
     }
