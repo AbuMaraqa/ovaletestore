@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import Icon from '@/Components/Storefront/Icon.vue';
+import SectionHeading from '@/Components/Storefront/SectionHeading.vue';
 import { useGsap } from '@/Composables/useMotion';
 import { useLocale } from '@/Composables/useLocale';
 import { useTrans } from '@/Composables/useTrans';
@@ -46,25 +47,28 @@ useGsap(root, ({ gsap }) => {
 </script>
 
 <template>
-    <section v-if="brands.length" ref="root" class="mt-24">
-        <div class="container-store text-center">
-            <h2 data-reveal class="text-3xl font-extrabold tracking-tight text-cocoa sm:text-4xl">{{ t('storefront.brands_title') }}</h2>
-            <p data-reveal class="mx-auto mt-3 max-w-xl text-stone-500">{{ t('storefront.brands_subtitle') }}</p>
-        </div>
+    <section v-if="brands.length" ref="root" class="mt-20 lg:mt-24">
+        <SectionHeading
+            data-reveal
+            center
+            class="container-store"
+            :title="t('storefront.brands_title')"
+            :subtitle="t('storefront.brands_subtitle')"
+        />
 
         <div class="mt-8 space-y-1 [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
             <div
                 v-for="(row, r) in rows"
                 :key="r"
                 data-marquee-row
-                class="overflow-hidden py-3 motion-reduce:overflow-x-auto"
+                class="overflow-hidden py-2 motion-reduce:overflow-x-auto"
             >
                 <div data-marquee-track class="flex w-max gap-4 px-2 will-change-transform">
                     <Link
                         v-for="(brand, i) in [...row, ...row]"
                         :key="`${r}-${i}`"
                         :href="brand.url"
-                        class="group flex h-24 w-40 shrink-0 items-center justify-center rounded-2xl bg-white px-5 py-3 ring-1 ring-stone-200/80 transition duration-300 hover:-translate-y-0.5 hover:shadow-lift hover:ring-brand-300 focus-visible:ring-2 focus-visible:ring-brand-500 sm:h-28 sm:w-48"
+                        class="group flex h-24 w-40 shrink-0 items-center justify-center rounded-2xl bg-white px-6 py-3 ring-1 ring-hairline transition duration-300 hover:ring-sand-deep focus-visible:ring-2 focus-visible:ring-brand-500 sm:h-28 sm:w-48"
                         :aria-hidden="i >= row.length"
                         :tabindex="i >= row.length ? -1 : undefined"
                         :aria-label="brand.name"
@@ -86,7 +90,7 @@ useGsap(root, ({ gsap }) => {
         </div>
 
         <div class="mt-8 text-center">
-            <Link :href="route('storefront.brands')" class="btn-ghost group h-11 gap-2 px-6 text-sm font-bold">
+            <Link :href="route('storefront.brands')" class="btn-ghost group h-11 gap-2 px-6 text-sm">
                 {{ t('storefront.all_brands') }}
                 <Icon name="arrow" class="size-4 transition group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" />
             </Link>

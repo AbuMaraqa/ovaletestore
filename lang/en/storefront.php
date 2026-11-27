@@ -135,4 +135,7 @@ return [
     'ask_on_whatsapp' => 'Ask us on WhatsApp',
     'maybe_looking_for' => 'Maybe you are looking for:',
     'error_text' => 'Something went wrong. Please try again shortly, or go back to the home page.',
+    'hero_stat_brands' => '{1} 1 brand|[2,*] :count brands',
+    'hero_stat_categories' => '{1} 1 category|[2,*] :count categories',
+    'page_of' => 'Page :current of :last',
 ];

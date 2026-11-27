@@ -8,12 +8,13 @@ import ProductRailSection from '@/Components/Storefront/Home/ProductRailSection.
 import SpotlightSection from '@/Components/Storefront/Home/SpotlightSection.vue';
 import UspStrip from '@/Components/Storefront/Home/UspStrip.vue';
 import ProductGrid from '@/Components/Storefront/ProductGrid.vue';
+import ScrollVelocity from '@/Components/Storefront/ScrollVelocity.vue';
 import SectionHeading from '@/Components/Storefront/SectionHeading.vue';
 import { revealOnScroll, useGsap } from '@/Composables/useMotion';
 import { useTrans } from '@/Composables/useTrans';
 import type { CategoryCard, ProductCard } from '@/types';
 
-/** Same sections as the original store, in the same order — redesigned. */
+/** Same sections as the original store, in the same order — editorial "soft pâtisserie" design (documentation/ui-ux-system.md). */
 defineProps<{
     hero: { title: string; subtitle: string; image: { src: string; srcset: string } | null };
     brands: { id: number; name: string; url: string; logo: string | null }[];
@@ -31,15 +32,22 @@ useGsap(root, ({ root: el }) => revealOnScroll(el));
 
 <template>
     <div ref="root">
-        <HeroSection v-bind="hero" />
+        <HeroSection v-bind="hero" :brands-count="brands.length" :categories-count="categories.length" />
         <UspStrip />
         <BrandMarquee :brands="brands" />
         <CategoryRail :categories="categories" />
 
-        <section class="container-store mt-24">
-            <SectionHeading data-reveal :title="t('storefront.featured')" :link="route('storefront.shop')" :link-label="t('storefront.view_all')" />
-            <ProductGrid :products="featured" reveal class="mt-8" />
+        <section class="container-store mt-20 lg:mt-24">
+            <SectionHeading
+                data-reveal
+                :title="t('storefront.featured')"
+                :link="route('storefront.shop')"
+                :link-label="t('storefront.view_all')"
+            />
+            <ProductGrid :products="featured" reveal wide class="mt-8" />
         </section>
+
+        <ScrollVelocity :items="categories.slice(0, 10).map((c) => c.name)" class="mt-20 lg:mt-24" />
 
         <SpotlightSection v-if="spotlight" :spotlight="spotlight" />
 

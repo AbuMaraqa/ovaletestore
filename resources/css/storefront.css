@@ -12,10 +12,20 @@
 @source '../js/Components/Common/**/*.vue';
 @source '../views/**/*.blade.php';
 
+/*
+ * Editorial "soft pâtisserie" direction: warm cream page, sand surfaces, hairline warm borders instead of grey
+ * rings and shadows, one radius family (2xl for cards and photos, 3xl for bands, pills for buttons) and no
+ * decorative effects (blurred blobs, glass badges, sparkles): the photography and the type carry the page.
+ */
 @theme {
-    --radius-card: 1.25rem;
-    --shadow-card: 0 1px 2px oklch(0.24 0.03 40 / 0.04), 0 8px 24px -12px oklch(0.24 0.03 40 / 0.12);
-    --shadow-lift: 0 2px 4px oklch(0.24 0.03 40 / 0.05), 0 18px 40px -16px oklch(0.24 0.03 40 / 0.22);
+    --color-sand: oklch(0.955 0.018 75);
+    --color-sand-deep: oklch(0.925 0.028 72);
+    --color-hairline: oklch(0.91 0.018 72);
+    --color-gold: oklch(0.72 0.11 80);
+
+    --radius-card: 1.5rem;
+    --shadow-card: 0 1px 2px oklch(0.3 0.05 40 / 0.04), 0 10px 30px -18px oklch(0.3 0.05 40 / 0.16);
+    --shadow-lift: 0 2px 6px oklch(0.3 0.05 40 / 0.04), 0 28px 56px -28px oklch(0.3 0.05 40 / 0.3);
 }
 
 @layer base {
@@ -51,13 +61,13 @@
     @apply btn bg-brand-600 text-white hover:bg-brand-700;
 }
 @utility btn-ghost {
-    @apply btn bg-white text-cocoa ring-1 ring-stone-200 hover:ring-stone-300;
+    @apply btn bg-white text-cocoa ring-1 ring-hairline hover:bg-sand hover:ring-sand-deep;
 }
 @utility field {
     @apply block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-cocoa ring-1 ring-stone-200 placeholder:text-stone-500 focus:ring-2 focus:ring-brand-500 focus:outline-none;
 }
 @utility chip {
-    @apply inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-medium ring-1 ring-stone-200 transition hover:ring-stone-300;
+    @apply inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-medium ring-1 ring-hairline transition hover:bg-sand hover:ring-sand-deep;
 }
 
 @layer components {

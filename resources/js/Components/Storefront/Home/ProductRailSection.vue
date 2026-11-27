@@ -8,7 +8,7 @@ defineProps<{ title: string; products: ProductCardType[]; link?: string; linkLab
 </script>
 
 <template>
-    <section v-if="products.length" class="container-store mt-24">
+    <section v-if="products.length" class="container-store mt-24 lg:mt-28">
         <SectionHeading data-reveal :title="title" :link="link" :link-label="linkLabel" />
         <ScrollRail :label="title" class="mt-8">
             <div v-for="product in products" :key="product.id" data-reveal class="flex w-[46%] shrink-0 snap-start sm:w-[31%] md:w-[23.5%] lg:w-[18.9%]">

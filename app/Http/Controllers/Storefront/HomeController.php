@@ -63,7 +63,7 @@ class HomeController extends Controller
                 'url' => route('storefront.category', ['slug' => $spotlight->slug]),
                 'images' => array_map(fn (string $path) => asset('storage/'.$path), $home->spotlight_images),
                 'products' => ProductCardResource::collection(
-                    $this->published()->whereHas('categories', fn ($q) => $q->whereKey($spotlight->id))->latest('id')->limit(4)->get(),
+                    $this->published()->whereHas('categories', fn ($q) => $q->whereKey($spotlight->id))->latest('id')->limit(6)->get(),
                 ),
             ] : null,
             'bestSellers' => [

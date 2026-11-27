@@ -40,7 +40,8 @@ const editor = useEditor({
     editorProps: {
         attributes: {
             id: props.id,
-            dir: 'auto',
+            // No dir="auto": an empty editor would resolve to LTR. The direction is inherited from the language tab
+            // (<LocaleTabs> panel: rtl for ar/he, ltr for en) or the page.
             role: 'textbox',
             'aria-multiline': 'true',
             ...(props.describedby ? { 'aria-describedby': props.describedby } : {}),

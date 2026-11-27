@@ -39,7 +39,7 @@ function scroll(direction: 1 | -1): void {
                 :aria-label="dir === -1 ? t('storefront.scroll_prev') : t('storefront.scroll_next')"
                 :class="[
                     'inline-flex size-11 items-center justify-center rounded-full ring-1 transition',
-                    tone === 'dark' ? 'text-white ring-white/25 hover:bg-white/10' : 'bg-white text-cocoa ring-stone-200 hover:ring-stone-400',
+                    tone === 'dark' ? 'text-white ring-white/25 hover:bg-white/10' : 'bg-white text-cocoa ring-hairline hover:bg-sand',
                 ]"
                 @click="scroll(dir)"
             >

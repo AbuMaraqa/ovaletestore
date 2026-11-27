@@ -99,7 +99,7 @@ const logout = () => router.post(route('logout'));
         </div>
 
         <!-- Main bar -->
-        <div class="border-b border-stone-200/70 bg-white/95 backdrop-blur-md">
+        <div class="border-b border-hairline/70 bg-cream/90 backdrop-blur-md">
             <div class="container-store flex h-[4.5rem] items-center gap-4 lg:h-[5.25rem] lg:gap-10">
                 <button type="button" class="-ms-2 inline-flex size-11 items-center justify-center rounded-full hover:bg-stone-100 lg:hidden" :aria-label="t('common.menu')" @click="mobileOpen = true">
                     <Icon name="menu" class="size-6" />
@@ -169,19 +169,19 @@ const logout = () => router.post(route('logout'));
                     <!-- Search pill (opens the full-screen search) -->
                     <button
                         type="button"
-                        class="hidden h-11 w-56 items-center gap-2.5 rounded-full bg-[#f7efe2] px-4 text-sm text-stone-600 ring-1 ring-[#eadfcb] transition hover:ring-[#c9a24d] md:inline-flex xl:w-64"
+                        class="hidden h-11 w-56 items-center gap-2.5 rounded-full bg-sand px-4 text-sm text-stone-600 ring-1 ring-hairline transition hover:ring-gold md:inline-flex xl:w-64"
                         @click="searchOpen = true"
                     >
                         <Icon name="search" class="size-5 text-cocoa" />
                         {{ t('storefront.search_product') }}
                     </button>
-                    <button type="button" class="inline-flex size-11 items-center justify-center rounded-full bg-[#f7efe2] text-cocoa md:hidden" :aria-label="t('common.search')" @click="searchOpen = true">
+                    <button type="button" class="inline-flex size-11 items-center justify-center rounded-full bg-sand text-cocoa md:hidden" :aria-label="t('common.search')" @click="searchOpen = true">
                         <Icon name="search" class="size-5" />
                     </button>
 
                     <!-- Account -->
                     <div class="relative">
-                        <Link v-if="!user" :href="route('login')" class="inline-flex size-11 items-center justify-center rounded-full bg-[#f7efe2] text-cocoa ring-1 ring-[#eadfcb] hover:text-brand-700" :aria-label="t('common.login')">
+                        <Link v-if="!user" :href="route('login')" class="inline-flex size-11 items-center justify-center rounded-full bg-sand text-cocoa ring-1 ring-hairline hover:text-brand-700" :aria-label="t('common.login')">
                             <svg viewBox="0 0 24 24" class="size-6" fill="currentColor" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z" /></svg>
                         </Link>
                         <template v-else>

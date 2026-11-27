@@ -19,8 +19,8 @@ const year = new Date().getFullYear();
 </script>
 
 <template>
-    <footer class="mt-24 bg-cocoa text-stone-300">
-        <div class="container-store grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-12">
+    <footer class="mt-24 bg-cocoa text-stone-300 lg:mt-28">
+        <div class="container-store grid gap-10 pt-16 pb-14 sm:grid-cols-2 lg:grid-cols-12 lg:pt-20">
             <div class="lg:col-span-3">
                 <p class="text-xl font-bold text-white">{{ site.name }}</p>
                 <p class="mt-3 max-w-xs text-sm leading-relaxed text-stone-300">{{ t('storefront.footer_about') }}</p>

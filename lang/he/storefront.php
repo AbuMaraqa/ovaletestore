@@ -135,4 +135,7 @@ return [
     'ask_on_whatsapp' => 'שאלו אותנו בוואטסאפ',
     'maybe_looking_for' => 'אולי חיפשתם:',
     'error_text' => 'משהו השתבש. נסו שוב בעוד רגע, או חזרו לדף הבית.',
+    'hero_stat_brands' => '{1} מותג אחד|[2,*] :count מותגים',
+    'hero_stat_categories' => '{1} קטגוריה אחת|[2,*] :count קטגוריות',
+    'page_of' => 'עמוד :current מתוך :last',
 ];

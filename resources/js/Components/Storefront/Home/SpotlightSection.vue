@@ -28,9 +28,8 @@ useGsap(root, ({ gsap }) => {
 </script>
 
 <template>
-    <section ref="root" class="relative mt-28 overflow-hidden bg-cocoa py-20 text-white lg:py-28">
-        <div class="absolute -top-40 start-1/3 size-[36rem] rounded-full bg-brand-600/25 blur-3xl" aria-hidden="true" />
-        <div class="container-store relative grid items-center gap-14 lg:grid-cols-2">
+    <section ref="root" class="container-store mt-24 lg:mt-28">
+        <div class="grid items-center gap-14 overflow-hidden rounded-3xl bg-cocoa px-5 py-14 text-white sm:px-10 lg:grid-cols-2 lg:px-16 lg:py-20">
             <div class="grid grid-cols-2 gap-4">
                 <img
                     v-for="(src, i) in spotlight.images.slice(0, 4)"
@@ -40,19 +39,19 @@ useGsap(root, ({ gsap }) => {
                     loading="lazy"
                     decoding="async"
                     :data-parallax="[8, 14, 12, 6][i]"
-                    :class="['aspect-[3/4] w-full rounded-[1.75rem] object-cover shadow-2xl ring-1 ring-white/10', i % 2 ? 'mt-12' : '']"
+                    :class="['aspect-[3/4] w-full rounded-2xl object-cover', i % 2 ? 'mt-12' : '']"
                 />
             </div>
             <div data-spot-text>
-                <span class="inline-flex items-center gap-2 text-sm font-semibold text-brand-300"><span class="h-px w-8 bg-brand-300" />{{ t('storefront.spotlight_eyebrow') }}</span>
+                <p class="text-sm font-semibold text-brand-300">{{ t('storefront.spotlight_eyebrow') }}</p>
                 <h2 class="mt-4 text-4xl font-extrabold leading-snug sm:text-5xl">{{ spotlight.title }}</h2>
                 <p v-if="spotlight.text" class="mt-5 max-w-lg text-lg leading-relaxed text-white/70">{{ spotlight.text }}</p>
-                <Link :href="spotlight.url" class="btn mt-8 h-13 bg-white px-8 text-base text-cocoa hover:bg-brand-100">
+                <Link :href="spotlight.url" class="btn mt-8 h-13 bg-white px-8 text-base text-cocoa hover:bg-sand">
                     {{ t('storefront.shop_now') }}
                     <Icon name="arrow" class="size-5 rtl:-scale-x-100" />
                 </Link>
-                <div v-if="spotlight.products.length" class="mt-10 grid grid-cols-2 gap-3 text-cocoa">
-                    <ProductCard v-for="product in spotlight.products.slice(0, 2)" :key="product.id" :product="product" />
+                <div v-if="spotlight.products.length" class="mt-10 grid grid-cols-2 gap-2.5 text-cocoa sm:grid-cols-3">
+                    <ProductCard v-for="product in spotlight.products.slice(0, 6)" :key="product.id" :product="product" compact />
                 </div>
             </div>
         </div>

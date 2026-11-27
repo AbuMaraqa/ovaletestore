@@ -63,3 +63,22 @@ Prices and numbers use Western digits (0-9) in every language (owner's choice). 
 
 ## Status colours
 `--color-success / --color-warning / --color-info` (theme.css) give `bg-success`, `text-warning`, `border-info`… the same hues as KTUI's badges.
+
+## Editorial "soft pâtisserie" storefront (2026-11-28)
+Owner's brief: soft, professional, world-class — and **it must not look AI-generated**. Rules that follow from it:
+- **No decorative tropes**: no blurred colour blobs, glass/floating badges, sparkle icons, eyebrow labels with a rule
+  above every heading, gradient text, or a card + shadow on everything. Photography and type carry the page.
+- **Tokens** (`resources/css/storefront.css`): `sand` / `sand-deep` surfaces, `hairline` warm borders (instead of grey
+  rings and shadows), `gold` accent dots. One radius family: `2xl` cards/photos, `3xl` bands, pills for buttons.
+- **Hero**: editorial split — text on the cream page, the photo running to the page edge with one rounded inner
+  corner; a quiet line with real catalogue numbers (`hero_stat_brands` / `hero_stat_categories`, pluralised).
+- **Sections**: plain title + underlined "view all" text link (`SectionHeading`); USPs as one line between hairlines;
+  categories as photos with captions (no boxes); product cards flat (hairline, sand photo well); `ProductCard compact`
+  for dense rows (the coffee spotlight shows 6). Featured grid = 4 per row (8 products → two full rows).
+- **Scroll Velocity** (`Components/Storefront/ScrollVelocity.vue`, after React Bits, rebuilt in Vue + GSAP): a
+  full-width sand band between hairlines; row 1 large category names, row 2 small framed names; drifts at rest,
+  speeds up with scroll speed (×6 max) and reverses when scrolling up. Rows are laid out LTR on purpose (an RTL row
+  anchors the track to the right edge and a short row wraps out of view). Re-measures after `document.fonts.ready`.
+  Decorative (`aria-hidden`), runs only on screen, static with reduced motion.
+- **Pagination** (`Components/Storefront/Pagination.vue`): previous/next with arrows and a short window
+  (1 … 4 5 6 … 22); phones show "Page 5 of 22". Page URLs keep every other query parameter.
