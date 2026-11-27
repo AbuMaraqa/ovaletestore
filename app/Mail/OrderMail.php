@@ -4,13 +4,17 @@ namespace App\Mail;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\MailSettings;
 use App\Support\Money;
+use App\Support\Pdf\OrderDocuments;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -55,8 +59,9 @@ class OrderMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
-        $this->order->loadMissing('items');
+        $this->order->loadMissing('items.product.media');
         $general = app(GeneralSettings::class);
+        $contact = app(ContactSettings::class);
         $money = fn (int $minor) => Money::format($minor, $this->order->currency, $this->mailLocale);
 
         return new Content(view: 'mail.order', with: [
@@ -72,7 +77,31 @@ class OrderMail extends Mailable implements ShouldQueue
             // Queue workers have no request locale, so build /{locale}/… links explicitly.
             'adminUrl' => $this->localized('ar', route('admin.orders.show', $this->order, false)),
             'accountUrl' => $this->order->user_id ? $this->localized($this->mailLocale, route('account.orders.show', ['number' => $this->order->number], false)) : null,
+            'shopUrl' => $this->localized($this->mailLocale, '/'),
+            // Small product photos beside each line (absolute URLs; the thumb conversion when generated).
+            'images' => $this->order->items->mapWithKeys(function (OrderItem $item) {
+                $media = $item->product?->mainImage();
+
+                return [$item->id => $media ? ($media->hasGeneratedConversion('thumb') ? $media->getFullUrl('thumb') : $media->getFullUrl()) : null];
+            })->all(),
+            'whatsapp' => $contact->whatsapp,
+            'phone' => $contact->phone,
+            'contactEmail' => $contact->email,
+            'invoiceAttached' => $this->attachments() !== [],
+            'flow' => [OrderStatus::Confirmed, OrderStatus::Processing, OrderStatus::Shipped, OrderStatus::Completed],
         ]);
+    }
+
+    /** @return list<Attachment> the invoice PDF, on the status email whose change issued it */
+    public function attachments(): array
+    {
+        $invoice = $this->order->invoice()->first();
+        if ($this->kind !== 'status' || $invoice === null || $invoice->issued_on_status !== $this->status?->value) {
+            return [];
+        }
+        $order = $this->order;
+
+        return [Attachment::fromData(fn () => OrderDocuments::invoice($order)->output(), $invoice->number.'.pdf')->withMime('application/pdf')];
     }
 
     private function localized(string $locale, string $path): string

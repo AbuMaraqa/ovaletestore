@@ -84,6 +84,7 @@ return [
         'shipping_update' => 'Edit',
         'shipping_delete' => 'Delete',
         'customers_view' => 'View customers and their orders',
+        'customers_create' => 'Add a customer',
         'customers_update' => 'Edit a customer',
         'customers_delete' => 'Delete a customer account',
         'users_view' => 'View',
@@ -99,7 +100,10 @@ return [
         'settings_store' => 'Store settings',
         'settings_seo' => 'SEO',
         'settings_mail' => 'Email',
+        'settings_invoice' => 'Invoice settings',
         'pos_access' => 'Use the point of sale',
+        'pos_companies_create' => 'Add a company from the POS',
+        'pos_companies_update' => 'Edit company details from the POS',
     ],
     'roles' => [
         'super-admin' => 'Super admin',

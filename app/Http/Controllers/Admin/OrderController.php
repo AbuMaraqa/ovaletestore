@@ -109,6 +109,9 @@ class OrderController extends Controller
                 'customer_account' => $order->user && $user->can('customers.view')
                     ? ['name' => $order->user->name, 'url' => route('admin.customers.show', $order->user)] : null,
                 'delete_url' => $user->can('delete', $order) ? route('admin.orders.destroy', $order) : null,
+                'invoice' => $order->invoice ? ['number' => $order->invoice->number, 'url' => route('admin.orders.invoice', $order)] : null,
+                'label_url' => route('admin.orders.label', $order),
+                'sales_order_url' => $order->company_id ? route('admin.orders.sales-order', $order) : null,
                 'status_flow' => array_map(fn (OrderStatus $s) => $s->value, OrderStatus::FLOW),
                 'customer_name' => $order->customer_name,
                 'customer_phone' => $order->customer_phone,

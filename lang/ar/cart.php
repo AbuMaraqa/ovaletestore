@@ -38,4 +38,8 @@ return [
     'free_shipping_remaining' => 'أضف :amount للحصول على توصيل مجاني',
     'free_shipping_unlocked' => 'رائع! طلبك مؤهل للتوصيل المجاني',
     'minimum_missing' => 'أضف :amount لتصل إلى الحد الأدنى للطلب',
+    'shipping_at_checkout' => 'يُحدد عند إتمام الطلب',
+    'total_before_shipping' => 'الإجمالي (بدون التوصيل)',
+    'choose_region_hint' => 'اختر منطقتك لمعرفة سعر التوصيل.',
+    'delivery_price' => 'سعر التوصيل',
 ];

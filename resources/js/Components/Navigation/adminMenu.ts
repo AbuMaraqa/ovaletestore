@@ -80,7 +80,7 @@ export const adminMenu: MenuSection[] = [
             {
                 label: 'admin.settings',
                 icon: 'setting-2',
-                children: ['general', 'contact', 'store', 'seo', 'mail'].map((group) => ({
+                children: ['general', 'contact', 'store', 'seo', 'mail', 'invoice'].map((group) => ({
                     label: `admin.${group}`,
                     route: 'admin.settings.edit',
                     params: { group },

@@ -26,4 +26,13 @@ return [
     'guest' => 'Guest',
     'registered_account' => 'Customer account',
     'woo_password_note' => 'Customers from the old store sign in through "forgot password" to set a new password.',
+    'new' => 'Add customer',
+    'new_help' => 'A new store customer account (phone or in-store orders).',
+    'create' => 'Create account',
+    'created' => 'Customer account created.',
+    'language' => 'Customer language',
+    'language_help' => 'The language of the emails they receive.',
+    'password_optional' => 'Password (optional)',
+    'password_help' => 'Leave empty if the customer will choose their own.',
+    'send_password_link' => 'Email the customer a link to choose a password',
 ];

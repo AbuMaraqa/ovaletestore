@@ -5,16 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
+use App\Settings\InvoiceSettings;
 use App\Settings\MailSettings;
 use App\Settings\SeoSettings;
 use App\Settings\StoreSettings;
 use App\Support\ActivityLog;
+use App\Support\MailServer;
 use App\Support\Money;
 use App\Support\SiteFont;
+use App\Support\SiteIcons;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -28,7 +32,7 @@ use Throwable;
 /** One controller, five typed settings groups. Secrets never live here (they stay in .env). */
 class SettingsController extends Controller
 {
-    public const GROUPS = ['general', 'contact', 'store', 'seo', 'mail'];
+    public const GROUPS = ['general', 'contact', 'store', 'seo', 'mail', 'invoice'];
 
     /** @var array<string, class-string<Settings>> */
     public const SETTINGS = [
@@ -37,6 +41,7 @@ class SettingsController extends Controller
         'store' => StoreSettings::class,
         'seo' => SeoSettings::class,
         'mail' => MailSettings::class,
+        'invoice' => InvoiceSettings::class,
     ];
 
     public const SOCIAL_NETWORKS = ['facebook', 'instagram', 'snapchat', 'tiktok', 'telegram'];
@@ -66,6 +71,7 @@ class SettingsController extends Controller
             'store' => $this->updateStore($request, $settings),
             'seo' => $this->updateSeo($request, $settings),
             'mail' => $this->updateMail($request, $settings),
+            'invoice' => $this->updateInvoice($request, $settings),
         };
 
         ActivityLog::settingsChanged($group, $before, $settings->toArray());
@@ -102,6 +108,7 @@ class SettingsController extends Controller
                 'og_image' => $url($s->og_image_path), 'allow_indexing' => $s->allow_indexing,
             ] : [],
             'mail' => $this->mailValues(app(MailSettings::class)),
+            'invoice' => $this->invoiceValues(app(InvoiceSettings::class)),
         };
     }
 
@@ -114,6 +121,13 @@ class SettingsController extends Controller
             'notify_new_order' => ['boolean'],
             'customer_confirmation' => ['boolean'],
             'customer_status_updates' => ['boolean'],
+            'smtp_enabled' => ['boolean'],
+            'smtp_host' => ['nullable', 'required_if_accepted:smtp_enabled', 'string', 'max:190', 'regex:/^[A-Za-z0-9.\-]+$/'],
+            'smtp_port' => ['nullable', 'required_if_accepted:smtp_enabled', 'integer', 'between:1,65535'],
+            'smtp_encryption' => ['nullable', 'in:tls,ssl,none'],
+            'smtp_username' => ['nullable', 'string', 'max:190'],
+            'smtp_password' => ['nullable', 'string', 'max:190'],
+            'smtp_password_clear' => ['boolean'],
         ]);
 
         // One address per line (commas and semicolons accepted too); every one must be valid.
@@ -130,7 +144,26 @@ class SettingsController extends Controller
         $settings->notify_new_order = (bool) ($data['notify_new_order'] ?? false);
         $settings->customer_confirmation = (bool) ($data['customer_confirmation'] ?? false);
         $settings->customer_status_updates = (bool) ($data['customer_status_updates'] ?? false);
+
+        $smtpBefore = [$settings->smtp_enabled, $settings->smtp_host, $settings->smtp_port, $settings->smtp_encryption, $settings->smtp_username, $settings->smtp_password];
+        $settings->smtp_enabled = (bool) ($data['smtp_enabled'] ?? false);
+        $settings->smtp_host = ($data['smtp_host'] ?? null) ?: null;
+        $settings->smtp_port = (int) ($data['smtp_port'] ?? null ?: 587);
+        $settings->smtp_encryption = $data['smtp_encryption'] ?? 'tls';
+        $settings->smtp_username = ($data['smtp_username'] ?? null) ?: null;
+        // An empty password field keeps the saved one (it is never sent to the browser).
+        if ($data['smtp_password_clear'] ?? false) {
+            $settings->smtp_password = null;
+        } elseif (filled($data['smtp_password'] ?? null)) {
+            $settings->smtp_password = $data['smtp_password'];
+        }
         $settings->save();
+
+        // Long-running queue workers resolved the old mailer: ask them to restart and pick up the new server.
+        $smtpAfter = [$settings->smtp_enabled, $settings->smtp_host, $settings->smtp_port, $settings->smtp_encryption, $settings->smtp_username, $settings->smtp_password];
+        if ($smtpBefore !== $smtpAfter) {
+            Artisan::call('queue:restart');
+        }
     }
 
     /** Sends a test message right away (not queued) so a wrong server setting shows up immediately. */
@@ -156,12 +189,17 @@ class SettingsController extends Controller
 
     private function mailValues(MailSettings $s): array
     {
+        MailServer::apply(); // show where mail really goes (admin SMTP over .env)
+
         return [
+            'smtp_enabled' => $s->smtp_enabled, 'smtp_host' => $s->smtp_host, 'smtp_port' => $s->smtp_port,
+            'smtp_encryption' => $s->smtp_encryption, 'smtp_username' => $s->smtp_username,
+            'smtp_password_set' => filled($s->smtp_password), // never the password itself
             'from_name' => $s->from_name, 'from_address' => $s->from_address,
             'order_recipients' => implode("\n", $s->order_recipients),
             'notify_new_order' => $s->notify_new_order, 'customer_confirmation' => $s->customer_confirmation,
             'customer_status_updates' => $s->customer_status_updates,
-            // Read-only: where mail actually goes out (server settings live in .env, never the password).
+            // Read-only: where mail actually goes out (never the password).
             'transport' => [
                 'mailer' => (string) config('mail.default'),
                 'host' => config('mail.mailers.'.config('mail.default').'.host'),
@@ -213,12 +251,17 @@ class SettingsController extends Controller
         $settings->tagline = array_map('strval', array_filter($data['tagline'] ?? []));
         $settings->logo_path = $this->storeAsset($request->file('logo'), 'branding', $settings->logo_path);
         $settings->favicon_path = $this->storeAsset($request->file('favicon'), 'branding', $settings->favicon_path);
+        $iconsChanged = $request->hasFile('logo') || $request->hasFile('favicon');
         $settings->font_family = $data['font_family'];
         $settings->font_name = $data['font_name'] ?? $settings->font_name;
         $settings->font_scope = $data['font_scope'];
         $settings->font_locales = array_values(array_unique($data['font_locales'] ?? $settings->font_locales));
         $settings->font_files = $files;
         $settings->save();
+
+        if ($iconsChanged) {
+            SiteIcons::generate(); // favicon + home-screen icons follow the new logo/favicon
+        }
     }
 
     private function updateContact(Request $request, ContactSettings $settings): void
@@ -293,6 +336,32 @@ class SettingsController extends Controller
         $settings->show_out_of_stock = (bool) ($data['show_out_of_stock'] ?? false);
         $settings->guest_checkout = (bool) ($data['guest_checkout'] ?? true);
         $settings->min_order_total = (int) Money::toMinor($data['min_order_total'] ?? 0);
+        $settings->save();
+    }
+
+    private function invoiceValues(InvoiceSettings $s): array
+    {
+        return [
+            'business_name' => $s->business_name, 'registration_number' => $s->registration_number,
+            'address' => $s->address, 'phone' => $s->phone, 'footer_note' => $s->footer_note,
+        ];
+    }
+
+    private function updateInvoice(Request $request, InvoiceSettings $settings): void
+    {
+        $data = $request->validate([
+            'business_name' => ['nullable', 'string', 'max:120'],
+            'registration_number' => ['nullable', 'string', 'max:40'],
+            'address' => ['nullable', 'string', 'max:200'],
+            'phone' => ['nullable', 'string', 'max:32'],
+            ...$this->localeRules('footer_note', 'string|max:300', requireArabic: false),
+        ]);
+
+        $settings->business_name = $data['business_name'] ?? null;
+        $settings->registration_number = $data['registration_number'] ?? null;
+        $settings->address = $data['address'] ?? null;
+        $settings->phone = $data['phone'] ?? null;
+        $settings->footer_note = array_map('strval', array_filter($data['footer_note'] ?? []));
         $settings->save();
     }
 

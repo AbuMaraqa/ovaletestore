@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import AccountShell from '@/Components/Storefront/AccountShell.vue';
+import Icon from '@/Components/Storefront/Icon.vue';
 import OrderStatusPill from '@/Components/Storefront/OrderStatusPill.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 defineProps<{
     order: {
         number: string; status: string; total: string; date: string; subtotal: string; shipping_total: string;
-        shipping_city: string | null; shipping_address: string | null; shipping_method: string | null; customer_note: string | null;
+        shipping_city: string | null; shipping_address: string | null; shipping_method: string | null; customer_note: string | null; invoice_url: string | null;
         items: { id: number; name: string; variant_label: string | null; quantity: number; unit_price: string; line_total: string }[];
     };
 }>();
@@ -18,7 +19,10 @@ const { t } = useTrans();
     <AccountShell :title="t('account.order', { number: order.number })">
         <div class="mb-5 flex flex-wrap items-center gap-3 text-sm text-stone-500">
             <OrderStatusPill :status="order.status" /> <span>{{ order.date }}</span>
-            <Link :href="route('account.orders')" class="ms-auto font-semibold text-brand-700 hover:underline">{{ t('common.back') }}</Link>
+            <a v-if="order.invoice_url" :href="order.invoice_url" class="btn-ghost ms-auto h-10 gap-2 px-4 text-sm font-bold" download>
+                <Icon name="arrow" class="size-4 rotate-90" />{{ t('invoices.download') }}
+            </a>
+            <Link :href="route('account.orders')" :class="['font-semibold text-brand-700 hover:underline', !order.invoice_url && 'ms-auto']">{{ t('common.back') }}</Link>
         </div>
         <div class="grid gap-6 lg:grid-cols-3">
             <ul class="divide-y divide-stone-100 rounded-3xl bg-white px-5 ring-1 ring-stone-200/70 lg:col-span-2">

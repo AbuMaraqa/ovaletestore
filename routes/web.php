@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\OrderDocumentController;
 use App\Http\Controllers\Pos;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Storefront;
 use App\Http\Middleware\ApplyStorefrontCurrency;
+use App\Settings\GeneralSettings;
 use App\Support\ActivityLog;
+use App\Support\SiteIcons;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Spatie\Honeypot\ProtectAgainstSpam;
@@ -14,6 +17,9 @@ use Spatie\Honeypot\ProtectAgainstSpam;
 | Non-localized technical routes.
 */
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+Route::get('/site.webmanifest', fn () => response()->json(
+    SiteIcons::manifest(app(GeneralSettings::class)->siteName('ar')), 200, ['Content-Type' => 'application/manifest+json'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
+))->name('manifest');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemaps/{locale}-{type}.xml', [SitemapController::class, 'show'])
     ->whereIn('locale', ['ar', 'en', 'he'])->whereIn('type', ['pages', 'categories', 'products'])
@@ -62,6 +68,7 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::get('/', [Storefront\AccountController::class, 'dashboard'])->name('dashboard');
             Route::get('/orders', [Storefront\AccountController::class, 'orders'])->name('orders');
             Route::get('/orders/{number}', [Storefront\AccountController::class, 'order'])->name('orders.show');
+            Route::get('/orders/{number}/invoice', [OrderDocumentController::class, 'customerInvoice'])->middleware('throttle:30,1')->name('orders.invoice');
             Route::put('/profile', [Storefront\AccountController::class, 'updateProfile'])->name('profile.update');
             Route::post('/trader-request', [Storefront\AccountController::class, 'requestTrader'])->middleware('throttle:5,1')->name('trader.request');
         });
@@ -69,10 +76,15 @@ Route::prefix(LaravelLocalization::setLocale())
         // iPad POS for sales reps: orders for companies, on account.
         Route::prefix('pos')->name('pos.')->middleware(['auth', 'can:access-pos'])->group(function () {
             Route::get('/', [Pos\PosController::class, 'index'])->name('index');
+            Route::get('/companies/new', [Pos\PosCompanyController::class, 'create'])->name('companies.create');
+            Route::post('/companies', [Pos\PosCompanyController::class, 'store'])->middleware('throttle:20,1')->name('companies.store');
+            Route::get('/companies/{company}/edit', [Pos\PosCompanyController::class, 'edit'])->name('companies.edit');
+            Route::put('/companies/{company}', [Pos\PosCompanyController::class, 'update'])->middleware('throttle:30,1')->name('companies.update');
             Route::get('/company/{company}', [Pos\PosController::class, 'create'])->name('create');
             Route::post('/orders', [Pos\PosController::class, 'store'])->middleware('throttle:30,1')->name('orders.store');
             Route::get('/orders', [Pos\PosController::class, 'orders'])->name('orders');
             Route::get('/orders/{order}', [Pos\PosController::class, 'show'])->name('orders.show');
+            Route::get('/orders/{order}/pdf', [Pos\PosController::class, 'pdf'])->middleware('throttle:30,1')->name('orders.pdf');
         });
 
         Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])->group(function () {
@@ -90,18 +102,22 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::resource('attributes', Admin\AttributeController::class)->except('show');
             Route::resource('brands', Admin\BrandController::class)->except('show');
             Route::resource('shipping-methods', Admin\ShippingMethodController::class)->except('show');
+            Route::get('companies/{company}/statement', [Admin\CompanyController::class, 'statementPdf'])->name('companies.statement');
             Route::resource('companies', Admin\CompanyController::class);
             Route::post('companies/{company}/payments', [Admin\CompanyPaymentController::class, 'store'])->name('companies.payments.store');
             Route::delete('companies/{company}/payments/{payment}', [Admin\CompanyPaymentController::class, 'destroy'])->name('companies.payments.destroy');
 
             Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+            Route::get('orders/{order}/invoice', [OrderDocumentController::class, 'invoice'])->name('orders.invoice');
+            Route::get('orders/{order}/shipping-label', [OrderDocumentController::class, 'shippingLabel'])->name('orders.label');
+            Route::get('orders/{order}/sales-order', [OrderDocumentController::class, 'salesOrder'])->name('orders.sales-order');
             Route::delete('orders/{order}', [Admin\OrderController::class, 'destroy'])->name('orders.destroy');
             Route::patch('orders/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.status');
 
             Route::resource('users', Admin\UserController::class)->except('show');
             Route::resource('roles', Admin\RoleController::class)->except('show');
-            Route::resource('customers', Admin\CustomerController::class)->except(['create', 'store']);
+            Route::resource('customers', Admin\CustomerController::class);
             Route::get('traders', [Admin\TraderController::class, 'index'])->name('traders.index');
             Route::patch('traders/{trader}/review', [Admin\TraderController::class, 'review'])->name('traders.review');
             Route::resource('price-tiers', Admin\PriceTierController::class)->except('show');

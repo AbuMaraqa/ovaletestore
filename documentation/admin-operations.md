@@ -125,3 +125,35 @@ Admin → Currencies, built on `App\Models\Currency` and `App\Support\CurrencyCo
 - It can be cancelled until it has shipped. Cancelling returns its items to stock.
 - It can never move backwards.
 - Deleting an order (`orders.delete`) re-reads it under a row lock and returns stock if the goods never left (`DeleteOrder`).
+
+## Printing (laravel-mpdf)
+Every printed document is a PDF built by `App\Support\Pdf\OrderDocuments`. They share one letterhead (`resources/views/pdf/layout.blade.php`), and the details come from Settings → Invoices.
+
+- **Invoice** (`pdf/invoice`):
+  - A4, in the order's language.
+  - Issued automatically when an order is confirmed, or at whatever later status it jumps to first. Code: `IssueInvoiceOnConfirmation` and `IssueInvoice`.
+  - Numbers run per year: INV-YYYY-00001.
+  - Staff open it from the order page; customers download it from their account.
+  - The email of the status change that issued it carries the PDF.
+  - Older confirmed orders get invoices with `php artisan invoices:backfill`.
+- **Sales order** (`OrderDocuments::salesOrder`):
+  - For company orders, with signature and stamp boxes.
+  - The rep prints it from the POS receipt (`pos.orders.pdf`); staff print it from the order page.
+- **Account statement** (`pdf/statement`): a company's on-account orders and payments with the running balance (`App\Queries\CompanyStatement`). Printed from the company page.
+- **Shipping label** (`pdf/shipping-label`): 10×15 cm thermal label with recipient, phone, amount to collect, and a Code128 barcode of the order number.
+- **Fonts:**
+  - XB Riyaz is used for Arabic and DejaVu for numbers and ₪.
+  - When the site font (Settings → General) is a TTF/OTF and applies to the language, the documents use it.
+
+## Email
+- **Order emails** (`mail/order.blade.php`): preheader, status tracker, product photos, totals, and WhatsApp/phone help. They are email-client safe: tables and inline styles only.
+- **SMTP server:** Settings → Email (`App\Support\MailServer`).
+  - The password is stored encrypted and never sent back to the browser.
+  - Changing the server restarts the queue workers.
+
+## POS companies
+Sales reps can add a company and correct its contact details from the POS (`pos.companies.create` / `pos.companies.update`). Notes, the active flag, balances and payments stay admin-only. The same rules apply in both places (`CompanyRequest`).
+
+## Site icons
+`php artisan branding:icons` (also runs after a logo or favicon upload) generates `favicon.ico`, the PNG favicons, home-screen icons and `/site.webmanifest`. Small sizes use a brand monogram; large sizes use the trimmed logo.
+

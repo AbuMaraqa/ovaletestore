@@ -130,4 +130,9 @@ return [
     'increase_quantity' => 'Increase quantity',
     'more_categories' => '+:count more categories',
     'all_brands' => 'View all brands',
+    'search_placeholder' => 'Search for a product…',
+    'search' => 'Search',
+    'ask_on_whatsapp' => 'Ask us on WhatsApp',
+    'maybe_looking_for' => 'Maybe you are looking for:',
+    'error_text' => 'Something went wrong. Please try again shortly, or go back to the home page.',
 ];

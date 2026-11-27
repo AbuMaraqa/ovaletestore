@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Prices are always recalculated from current variant data — the cart never stores prices.
- * Shipping uses the chosen method (or the first one available for this subtotal).
+ * Shipping is counted only once the customer has chosen a delivery method/region (at checkout); until then
+ * the cart shows the total without delivery instead of silently assuming a region.
  *
  * Amounts are in the base currency; `display` holds the same figures in the visitor's currency, converted
  * per unit price exactly as PlaceOrder will charge them.
@@ -32,7 +33,7 @@ class CalculateCartTotals
         $subtotal = $cart->items->sum(fn (CartItem $item) => $item->variant->effectivePrice() * $item->quantity);
         $itemCount = (int) $cart->items->sum('quantity');
 
-        $method = $itemCount > 0 ? $this->chooseMethod($subtotal, $shippingMethodId) : null;
+        $method = $itemCount > 0 && $shippingMethodId !== null ? $this->availableMethods($subtotal)->firstWhere('id', $shippingMethodId) : null;
         $shipping = $method?->costFor($subtotal) ?? 0;
         $displaySubtotal = $cart->items->sum(fn (CartItem $item) => $this->currency->convert($item->variant->effectivePrice()) * $item->quantity);
         $displayShipping = $this->currency->convert($shipping);
@@ -56,12 +57,5 @@ class CalculateCartTotals
         return ShippingMethod::query()->active()->with('translations')->get()
             ->filter(fn (ShippingMethod $m) => $m->isAvailableFor($subtotal))
             ->values();
-    }
-
-    private function chooseMethod(int $subtotal, ?int $id): ?ShippingMethod
-    {
-        $methods = $this->availableMethods($subtotal);
-
-        return ($id ? $methods->firstWhere('id', $id) : null) ?? $methods->first();
     }
 }

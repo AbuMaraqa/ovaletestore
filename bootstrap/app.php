@@ -5,11 +5,11 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLegacyRedirects;
 use App\Http\Middleware\RedirectToLocalePrefix;
 use App\Http\Middleware\SecurityHeaders;
+use App\Support\ErrorPage;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRoutes;
 use Spatie\Csp\AddCspHeaders;
@@ -46,12 +46,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->can('access-admin') ? route('admin.dashboard') : route('account.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Branded, localized error pages for storefront visitors in production.
+        // Branded, localized error pages in the store layout. 403/404 everywhere (they are not bugs);
+        // 500/503 only in production, so local development keeps Laravel's debug page.
         $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
-            if (! app()->environment(['local', 'testing']) && in_array($response->getStatusCode(), [403, 404, 500, 503], true)) {
-                return Inertia::render('Storefront/Error', ['status' => $response->getStatusCode()])
-                    ->toResponse($request)
-                    ->setStatusCode($response->getStatusCode());
+            $status = $response->getStatusCode();
+            $branded = in_array($status, [403, 404], true)
+                || (! app()->environment(['local', 'testing']) && in_array($status, [500, 503], true));
+            if ($branded && ! $request->expectsJson()) {
+                return ErrorPage::render($request, $status);
             }
 
             if ($response->getStatusCode() === 419) {

@@ -18,6 +18,8 @@ export interface CartPayload {
     item_count: number;
     subtotal: string;
     shipping_total: string | null;
+    /** false until a delivery method/region is chosen at checkout (shipping not yet counted). */
+    shipping_selected: boolean;
     total: string;
     meets_minimum: boolean;
     minimum_missing: string | null;

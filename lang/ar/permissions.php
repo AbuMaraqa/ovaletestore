@@ -84,6 +84,7 @@ return [
         'shipping_update' => 'تعديل',
         'shipping_delete' => 'حذف',
         'customers_view' => 'عرض العملاء وطلباتهم',
+        'customers_create' => 'إضافة عميل جديد',
         'customers_update' => 'تعديل بيانات عميل',
         'customers_delete' => 'حذف حساب عميل',
         'users_view' => 'عرض',
@@ -99,7 +100,10 @@ return [
         'settings_store' => 'إعدادات المتجر',
         'settings_seo' => 'محركات البحث',
         'settings_mail' => 'البريد الإلكتروني',
+        'settings_invoice' => 'إعدادات الفواتير',
         'pos_access' => 'استخدام نقطة البيع',
+        'pos_companies_create' => 'إضافة شركة من نقطة البيع',
+        'pos_companies_update' => 'تعديل بيانات شركة من نقطة البيع',
     ],
     'roles' => [
         'super-admin' => 'المدير العام',

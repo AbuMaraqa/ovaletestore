@@ -57,7 +57,7 @@ class CheckoutController extends Controller
             'honeypot' => app(Honeypot::class)->toArray(),
             // Cash on delivery in a foreign currency: say plainly what will be collected.
             'currency_note' => $currency->isBase() ? null : __('currencies.pay_in', ['currency' => $currency->current()->label(), 'code' => $currency->current()->code]),
-            'prefill' => $request->user() ? ['customer_name' => $request->user()->name, 'customer_email' => $request->user()->email, 'customer_phone' => $request->user()->phone] : null,
+            'prefill' => $this->prefill($request),
             'seo' => SeoData::make(__('cart.checkout_title'))->noindex(),
         ]);
     }
@@ -89,5 +89,27 @@ class CheckoutController extends Controller
             ],
             'seo' => SeoData::make(__('cart.thank_you'))->noindex(),
         ]);
+    }
+
+    /**
+     * Signed-in customers start from their account and their last delivery address (all fields stay editable).
+     *
+     * @return array<string, string|null>|null
+     */
+    private function prefill(Request $request): ?array
+    {
+        $user = $request->user();
+        if ($user === null) {
+            return null;
+        }
+        $last = $user->orders()->whereNotNull('shipping_city')->latest('placed_at')->first(['customer_phone', 'shipping_city', 'shipping_address']);
+
+        return [
+            'customer_name' => $user->name,
+            'customer_email' => $user->email,
+            'customer_phone' => $user->phone ?: $last?->customer_phone,
+            'shipping_city' => $last?->shipping_city,
+            'shipping_address' => $last?->shipping_address,
+        ];
     }
 }

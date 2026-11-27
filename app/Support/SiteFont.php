@@ -78,6 +78,39 @@ final class SiteFont
         return $path ? asset('storage/'.$path) : null;
     }
 
+    /**
+     * The custom font for mPDF documents in a language: mPDF embeds TTF/OTF only (not WOFF/WOFF2), with
+     * OpenType shaping for Arabic. The key changes with the files, so mPDF's font cache never goes stale.
+     *
+     * @return array{key: string, dir: string, files: array{R: string, B: string, useOTL: int, useKashida: int}}|null
+     */
+    public static function pdfFont(string $locale): ?array
+    {
+        try {
+            $settings = app(GeneralSettings::class);
+        } catch (Throwable) {
+            return null;
+        }
+        if ($settings->font_family !== 'custom' || ! in_array($locale, $settings->font_locales, true)) {
+            return null;
+        }
+
+        $usable = fn ($path) => is_string($path) && in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), ['ttf', 'otf'], true)
+            && is_file(storage_path('app/public/'.$path));
+        $regular = $settings->font_files[400] ?? null;
+        if (! $usable($regular)) {
+            return null;
+        }
+        $bold = $settings->font_files[700] ?? null;
+        $bold = $usable($bold) ? $bold : $regular;
+
+        return [
+            'key' => 'sitefont'.substr(md5($regular.'|'.$bold), 0, 8),
+            'dir' => storage_path('app/public/fonts'),
+            'files' => ['R' => basename((string) $regular), 'B' => basename((string) $bold), 'useOTL' => 0xFF, 'useKashida' => 75],
+        ];
+    }
+
     /** @return array{name: string, files: array<int, string>}|null */
     private static function active(bool $admin): ?array
     {

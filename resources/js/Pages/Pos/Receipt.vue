@@ -5,9 +5,8 @@ import { useTrans } from '@/Composables/useTrans';
 import type { PosOrderSummary } from '@/types/pos';
 
 type Line = { name: string; variant: string | null; sku: string | null; quantity: number; unit_price: string; line_total: string };
-defineProps<{ order: PosOrderSummary & { note: string | null; items: Line[] } }>();
+defineProps<{ order: PosOrderSummary & { note: string | null; items: Line[] }; pdf_url: string }>();
 const { t } = useTrans();
-const print = () => window.print();
 </script>
 
 <template>
@@ -15,7 +14,8 @@ const print = () => window.print();
         <div class="flex flex-wrap gap-3 print:hidden">
             <Link :href="route('pos.index')" class="btn-accent h-12">{{ t('pos.new_order') }}</Link>
             <Link :href="route('pos.orders')" class="btn-ghost h-12">{{ t('pos.my_orders') }}</Link>
-            <button type="button" class="btn-ghost ms-auto h-12" @click="print">{{ t('pos.print') }}</button>
+            <!-- Printing is a PDF (mPDF): same professional layout on every device and printer. -->
+            <a :href="pdf_url" target="_blank" rel="noopener" class="btn-primary ms-auto h-12 gap-2 px-5">{{ t('pos.print_sales_order') }}</a>
         </div>
 
         <article class="mt-5 rounded-2xl bg-white p-6 ring-1 ring-stone-200 print:mt-0 print:ring-0">

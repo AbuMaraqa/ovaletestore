@@ -9,7 +9,7 @@ Multilingual: **ar (default, RTL)**, en (LTR), he (RTL). Currency: ILS (stored i
 - `npm run build` · `npx vue-tsc --noEmit` (type check)
 - `php artisan woo:inspect | woo:migrate [--images] [--dry-run] | woo:verify`
 - `php artisan woo:export-orders` → `db:seed --class=OrderSeeder` → `woo:verify-orders` (orders file holds customer data: git-ignored)
-- `php artisan sitemap:generate`
+- `php artisan sitemap:generate` · `php artisan branding:icons` · `php artisan invoices:backfill`
 - `php artisan woo:export-customers` → `db:seed --class=CustomerSeeder` (before OrderSeeder; personal data: git-ignored)
 - Deploy: `migrate --force` → `permissions:sync` → `config:cache` + `route:trans:cache` + `view:cache` + `event:cache` (never plain `route:cache`/`optimize`: mcamara needs per-locale routes) — see documentation/deployment-guide.md; + a queue worker and cron `schedule:run`
 - Admin features (permissions, activity log, DataTable, customers, traders, currencies, email): documentation/admin-operations.md
@@ -19,7 +19,7 @@ Multilingual: **ar (default, RTL)**, en (LTR), he (RTL). Currency: ILS (stored i
 - `app/Http/Controllers/{Admin,Storefront}` — thin: authorize → validate (FormRequest) → call Action → return Inertia/redirect.
 - `app/Http/Resources` — the ONLY way models reach Inertia props. Never pass raw models/arrays of internal columns.
 - `app/Policies` — every admin operation authorized server-side (`$this->authorize` / `can` middleware). Hiding buttons is UX, not security.
-- `app/Settings` — spatie/laravel-settings. Secrets live in `.env`, never in settings.
+- `app/Settings` — spatie/laravel-settings. Secrets live in `.env`, never in settings. Single exception (owner's request): the SMTP password in `MailSettings`, stored encrypted (`encrypted()`), never sent to the browser, applied by `App\Support\MailServer`.
 - `app/Support` — small framework-agnostic helpers (Money, Seo, Locales).
 - No empty interfaces/repositories. Use Eloquent directly inside Actions/Queries.
 

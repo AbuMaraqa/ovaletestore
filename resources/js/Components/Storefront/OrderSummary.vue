@@ -30,10 +30,11 @@ const { t } = useTrans();
             </div>
             <div class="flex justify-between">
                 <dt class="text-stone-600">{{ t('cart.shipping') }}</dt>
-                <dd class="font-medium" dir="ltr">{{ cart.shipping_total ?? t('cart.free') }}</dd>
+                <dd v-if="cart.shipping_selected" class="font-medium" :class="!cart.shipping_total && 'text-emerald-700'" dir="ltr">{{ cart.shipping_total ?? t('cart.free') }}</dd>
+                <dd v-else class="text-sm text-stone-500">{{ t('cart.shipping_at_checkout') }}</dd>
             </div>
             <div class="flex justify-between border-t border-stone-200 pt-4 text-base">
-                <dt class="font-bold text-cocoa">{{ t('cart.total') }}</dt>
+                <dt class="font-bold text-cocoa">{{ cart.shipping_selected ? t('cart.total') : t('cart.total_before_shipping') }}</dt>
                 <dd class="text-xl font-extrabold text-cocoa" dir="ltr">{{ cart.total }}</dd>
             </div>
         </dl>

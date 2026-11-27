@@ -95,7 +95,7 @@ final class ActivityLog
             'companies' => ['companies.view'],
             'users' => ['users.view'], // also holds customer account changes (personal data)
             'auth' => ['users.view'],
-            'settings' => ['settings.general', 'settings.contact', 'settings.store', 'settings.seo', 'settings.mail', 'shipping.view', 'currencies.view'],
+            'settings' => ['settings.general', 'settings.contact', 'settings.store', 'settings.seo', 'settings.mail', 'settings.invoice', 'shipping.view', 'currencies.view'],
         ];
 
         return array_keys(array_filter($rules, fn (array $any) => collect($any)->contains(fn (string $p) => $user->can($p))));

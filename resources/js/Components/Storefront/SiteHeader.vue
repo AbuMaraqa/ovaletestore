@@ -102,7 +102,10 @@ const logout = () => router.post(route('logout'));
                 </button>
 
                 <Link :href="route('storefront.home')" class="shrink-0" :aria-label="site.name">
-                    <img v-if="site.logo" :src="site.logo" :alt="site.name" class="h-12 w-auto lg:h-14" width="56" height="56" />
+                    <!-- The logo file has wide empty margins: a clipped, slightly zoomed box shows the mark at full size. -->
+                    <span v-if="site.logo" class="block size-16 overflow-hidden lg:size-20">
+                        <img :src="site.logo" :alt="site.name" class="size-full scale-[1.2] object-contain" width="80" height="80" fetchpriority="high" />
+                    </span>
                     <span v-else class="text-xl font-extrabold">{{ site.name }}</span>
                 </Link>
 

@@ -84,6 +84,7 @@ return [
         'shipping_update' => 'עריכה',
         'shipping_delete' => 'מחיקה',
         'customers_view' => 'צפייה בלקוחות',
+        'customers_create' => 'הוספת לקוח',
         'customers_update' => 'עריכת לקוח',
         'customers_delete' => 'מחיקת חשבון לקוח',
         'users_view' => 'צפייה',
@@ -99,7 +100,10 @@ return [
         'settings_store' => 'הגדרות חנות',
         'settings_seo' => 'קידום אתרים',
         'settings_mail' => 'אימייל',
+        'settings_invoice' => 'הגדרות חשבוניות',
         'pos_access' => 'שימוש בקופה',
+        'pos_companies_create' => 'הוספת חברה מהקופה',
+        'pos_companies_update' => 'עריכת פרטי חברה מהקופה',
     ],
     'roles' => [
         'super-admin' => 'מנהל-על',

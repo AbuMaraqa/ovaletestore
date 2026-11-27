@@ -38,4 +38,8 @@ return [
     'free_shipping_remaining' => 'Add :amount more for free delivery',
     'free_shipping_unlocked' => 'Great! Your order qualifies for free delivery',
     'minimum_missing' => 'Add :amount more to reach the minimum order',
+    'shipping_at_checkout' => 'Calculated at checkout',
+    'total_before_shipping' => 'Total (before delivery)',
+    'choose_region_hint' => 'Choose your area to see the delivery price.',
+    'delivery_price' => 'Delivery',
 ];

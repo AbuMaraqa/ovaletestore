@@ -12,7 +12,11 @@ use App\Support\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password as PasswordBroker;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -118,6 +122,54 @@ class CustomerController extends Controller
                 'show_url' => route('admin.orders.show', $o),
             ]),
         ]);
+    }
+
+    public function create(): Response
+    {
+        $this->authorize('customers.create');
+
+        return Inertia::render('Admin/Customers/Form', ['customer' => null]);
+    }
+
+    /**
+     * A customer account created by staff (phone/shop orders). Without a typed password the account gets
+     * a random one and, if asked, the customer is emailed a link to choose their own.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $this->authorize('customers.create');
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email:rfc', 'max:190', Rule::unique('users', 'email')],
+            'phone' => ['nullable', 'string', 'max:32'],
+            'locale' => ['required', Rule::in(config('translatable.locales'))],
+            'is_active' => ['boolean'],
+            'password' => ['nullable', 'string', Password::defaults()],
+            'send_password_link' => ['boolean'],
+        ]);
+
+        $customer = DB::transaction(function () use ($data): User {
+            $user = new User([
+                'name' => $data['name'],
+                'email' => strtolower($data['email']),
+                'phone' => $data['phone'] ?? null,
+                'locale' => $data['locale'],
+                'is_active' => $data['is_active'] ?? true,
+                'password' => filled($data['password'] ?? null) ? $data['password'] : Str::password(32),
+            ]);
+            $user->email_verified_at = now(); // added by staff: the address was given by the customer
+            $user->save();
+            $user->assignRole('customer');
+
+            return $user;
+        });
+
+        if (blank($data['password'] ?? null) && ($data['send_password_link'] ?? false)) {
+            PasswordBroker::sendResetLink(['email' => $customer->email]);
+        }
+
+        return to_route('admin.customers.show', $customer)->with('success', __('customers.created'));
     }
 
     public function edit(User $customer): Response

@@ -63,7 +63,7 @@ const year = new Date().getFullYear();
                         </a>
                     </li>
                     <li v-if="site.whatsapp">
-                        <a :href="`https://wa.me/${site.whatsapp}`" target="_blank" rel="noopener" class="flex h-full items-center gap-3 rounded-2xl bg-[#128C7E] p-3 font-bold text-white transition hover:bg-[#0f7a6e]">
+                        <a :href="`https://wa.me/${site.whatsapp}`" target="_blank" rel="noopener" class="flex h-full items-center gap-3 rounded-2xl bg-whatsapp p-3 font-bold text-white transition hover:bg-whatsapp-dark">
                             <SocialIcon name="whatsapp" class="size-5 shrink-0" />
                             {{ t('common.whatsapp_us') }}
                         </a>

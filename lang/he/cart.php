@@ -38,4 +38,8 @@ return [
     'free_shipping_remaining' => 'הוסיפו עוד :amount למשלוח חינם',
     'free_shipping_unlocked' => 'מעולה! ההזמנה שלכם זכאית למשלוח חינם',
     'minimum_missing' => 'הוסיפו עוד :amount כדי להגיע למינימום ההזמנה',
+    'shipping_at_checkout' => 'מחושב בתשלום',
+    'total_before_shipping' => 'סה״כ (ללא משלוח)',
+    'choose_region_hint' => 'בחרו אזור כדי לראות את מחיר המשלוח.',
+    'delivery_price' => 'משלוח',
 ];

@@ -62,7 +62,7 @@ class AccountController extends Controller
     public function order(Request $request, string $number): Response
     {
         // Scoped lookup: another customer's order number simply 404s (no enumeration).
-        $order = $request->user()->orders()->where('number', $number)->with('items')->firstOrFail();
+        $order = $request->user()->orders()->where('number', $number)->with(['items', 'invoice'])->firstOrFail();
 
         return Inertia::render('Storefront/Account/OrderShow', [
             'order' => [
@@ -71,6 +71,7 @@ class AccountController extends Controller
                 'shipping_address' => $order->shipping_address,
                 'shipping_method' => $order->shipping_method_name,
                 'customer_note' => $order->customer_note,
+                'invoice_url' => $order->invoice ? route('account.orders.invoice', ['number' => $order->number]) : null,
                 'subtotal' => Money::format($order->subtotal, $order->currency),
                 'shipping_total' => Money::format($order->shipping_total, $order->currency),
                 'items' => $order->items->map(fn (OrderItem $i) => [

@@ -18,6 +18,6 @@ return [
     'localesOrder' => ['ar', 'en', 'he'],
     'localesMapping' => [],
     'utf8suffix' => env('LARAVELLOCALIZATION_UTF8SUFFIX', '.UTF-8'),
-    'urlsIgnored' => ['/up', '/sitemap*', '/sitemaps/*', '/robots.txt', '/media/*', '/storage/*', '/build/*', '/favicon.ico'],
+    'urlsIgnored' => ['/up', '/sitemap*', '/sitemaps/*', '/robots.txt', '/media/*', '/storage/*', '/build/*', '/favicon.ico', '/site.webmanifest'],
     'httpMethodsIgnored' => ['POST', 'PUT', 'PATCH', 'DELETE'],
 ];

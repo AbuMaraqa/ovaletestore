@@ -6,6 +6,7 @@ import LocationsEditor from '@/Components/Admin/Settings/LocationsEditor.vue';
 import MailSettingsFields from '@/Components/Admin/Settings/MailSettingsFields.vue';
 import MailTestCard from '@/Components/Admin/Settings/MailTestCard.vue';
 import PhoneLinesEditor from '@/Components/Admin/Settings/PhoneLinesEditor.vue';
+import SmtpSettingsFields from '@/Components/Admin/Settings/SmtpSettingsFields.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
@@ -14,7 +15,7 @@ import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
 
 type Localized = Record<string, string>;
-const props = defineProps<{ group: 'general' | 'contact' | 'store' | 'seo' | 'mail'; groups: string[]; values: Record<string, any>; locales: string[] }>();
+const props = defineProps<{ group: 'general' | 'contact' | 'store' | 'seo' | 'mail' | 'invoice'; groups: string[]; values: Record<string, any>; locales: string[] }>();
 const { t } = useTrans();
 
 /** File inputs are separate keys (logo/favicon/og_image); existing URLs are display-only. */
@@ -44,6 +45,13 @@ const initial: Record<string, any> = {
     },
     store: { ...props.values },
     seo: { home_title: localized('home_title'), home_description: localized('home_description'), og_image: null, allow_indexing: props.values.allow_indexing },
+    invoice: {
+        business_name: props.values.business_name ?? '',
+        registration_number: props.values.registration_number ?? '',
+        address: props.values.address ?? '',
+        phone: props.values.phone ?? '',
+        footer_note: localized('footer_note'),
+    },
     mail: {
         from_name: props.values.from_name ?? '',
         from_address: props.values.from_address ?? '',
@@ -51,6 +59,13 @@ const initial: Record<string, any> = {
         notify_new_order: props.values.notify_new_order,
         customer_confirmation: props.values.customer_confirmation,
         customer_status_updates: props.values.customer_status_updates,
+        smtp_enabled: props.values.smtp_enabled ?? false,
+        smtp_host: props.values.smtp_host ?? '',
+        smtp_port: props.values.smtp_port ?? 587,
+        smtp_encryption: props.values.smtp_encryption ?? 'tls',
+        smtp_username: props.values.smtp_username ?? '',
+        smtp_password: '',
+        smtp_password_clear: false,
     },
 }[props.group];
 const siteName = usePage<SharedProps>().props.site.name;
@@ -102,6 +117,29 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                     <FontSettingsFields :model-value="form as any" :uploaded="values.font_files ?? {}" :locales="locales" :errors="errors" />
                 </template>
 
+                <template v-else-if="group === 'invoice'">
+                    <p class="text-sm text-muted-foreground">{{ t('invoices.settings_help') }}</p>
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <FormField id="business_name" :label="t('invoices.business_name')" :error="errors.business_name">
+                            <input id="business_name" v-model="form.business_name" class="kt-input" maxlength="120" :placeholder="siteName" />
+                        </FormField>
+                        <FormField id="registration_number" :label="t('invoices.registration_number')" :error="errors.registration_number">
+                            <input id="registration_number" v-model="form.registration_number" class="kt-input" dir="ltr" maxlength="40" />
+                        </FormField>
+                        <FormField id="inv_address" :label="t('invoices.address')" :error="errors.address">
+                            <input id="inv_address" v-model="form.address" class="kt-input" maxlength="200" />
+                        </FormField>
+                        <FormField id="inv_phone" :label="t('invoices.phone')" :error="errors.phone">
+                            <input id="inv_phone" v-model="form.phone" type="tel" class="kt-input" dir="ltr" maxlength="32" />
+                        </FormField>
+                    </div>
+                    <div class="grid gap-5 md:grid-cols-3">
+                        <FormField v-for="l in locales" :id="`fn-${l}`" :key="l" :label="`${t('invoices.footer_note')} (${l})`" :error="errors[`footer_note.${l}`]">
+                            <textarea :id="`fn-${l}`" v-model="form.footer_note[l]" rows="2" class="kt-textarea" :dir="dirFor(l)" maxlength="300" />
+                        </FormField>
+                    </div>
+                </template>
+
                 <template v-else-if="group === 'contact'">
                     <div class="grid gap-5 md:grid-cols-3">
                         <FormField id="phone" :label="t('admin.phone')" :error="errors.phone"><input id="phone" v-model="form.phone" class="kt-input" dir="ltr" /></FormField>
@@ -130,7 +168,10 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                     <label class="flex items-center gap-3 text-sm"><input v-model="form.guest_checkout" type="checkbox" class="kt-switch" /> {{ t('admin.guest_checkout') }}</label>
                 </template>
 
-                <MailSettingsFields v-else-if="group === 'mail'" v-model="form" :errors="errors" :site-name="siteName" :default-from="values.transport.default_from" />
+                <template v-else-if="group === 'mail'">
+                    <MailSettingsFields v-model="form" :errors="errors" :site-name="siteName" :default-from="values.transport.default_from" />
+                    <SmtpSettingsFields v-model="form" :errors="errors" :password-set="values.smtp_password_set" />
+                </template>
 
                 <template v-else>
                     <FormField v-for="l in locales" :id="`ht-${l}`" :key="l" :label="`${t('admin.home_title')} (${l})`" :error="errors[`home_title.${l}`]" :required="l === 'ar'">

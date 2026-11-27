@@ -10,6 +10,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Observers\CatalogCacheObserver;
 use App\Support\CurrencyContext;
+use App\Support\MailServer;
 use App\Support\PriceContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
         // One pricing context per request / queue job (trader tier of the signed-in user).
         $this->app->scoped(PriceContext::class);
         $this->app->scoped(CurrencyContext::class);
+        // SMTP server saved in Admin → Settings → Email (encrypted password) overrides .env when enabled.
+        $this->app->afterResolving('mail.manager', fn () => MailServer::apply());
     }
 
     public function boot(): void

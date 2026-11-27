@@ -17,7 +17,7 @@ const number = computed(() => page.props.site.whatsapp);
         target="_blank"
         rel="noopener"
         :aria-label="t('common.whatsapp_us')"
-        class="fixed end-5 z-30 inline-flex size-14 items-center justify-center rounded-full bg-[#128C7E] text-white shadow-lift ring-2 ring-white transition-all hover:scale-105"
+        class="fixed end-5 z-30 inline-flex size-14 items-center justify-center rounded-full bg-whatsapp text-white shadow-lift ring-2 ring-white transition-all hover:scale-105"
         :class="stickyBarVisible ? 'bottom-24' : 'bottom-5'"
     >
         <svg viewBox="0 0 24 24" class="size-7" fill="currentColor" aria-hidden="true">

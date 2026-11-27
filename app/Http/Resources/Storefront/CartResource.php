@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Storefront;
 
+use App\Actions\Cart\CalculateCartTotals;
 use App\Http\Resources\ImageResource;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -52,6 +53,8 @@ class CartResource extends JsonResource
             })->values(),
             'item_count' => $this->totals['item_count'],
             'subtotal' => $currency->formatConverted($display['subtotal']),
+            // Delivery is chosen at checkout: until then the cart shows the total without it.
+            'shipping_selected' => $this->totals['shipping_method'] !== null,
             'shipping_total' => $display['shipping_total'] > 0 ? $currency->formatConverted($display['shipping_total']) : null,
             'total' => $currency->formatConverted($display['total']),
             'meets_minimum' => $this->totals['meets_minimum'],
@@ -67,7 +70,10 @@ class CartResource extends JsonResource
      */
     private function freeShipping(): ?array
     {
-        $method = $this->totals['shipping_method'];
+        // The chosen method; before one is chosen (cart page), the first delivery method with a free-delivery offer.
+        $method = $this->totals['shipping_method']
+            ?? app(CalculateCartTotals::class)->availableMethods($this->totals['subtotal'])
+                ->first(fn (ShippingMethod $m) => $m->free_over !== null && $m->free_over > 0 && $m->cost > 0);
         if ($method === null || $method->free_over === null || $method->free_over <= 0 || $method->cost === 0) {
             return null;
         }

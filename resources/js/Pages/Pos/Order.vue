@@ -8,7 +8,7 @@ import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
 import type { PosCatalog, PosCompany } from '@/types/pos';
 
-const props = defineProps<{ company: PosCompany; catalog: PosCatalog }>();
+const props = defineProps<{ company: PosCompany; catalog: PosCatalog; can_edit_company: boolean }>();
 const page = usePage<SharedProps>();
 const { t } = useTrans();
 
@@ -122,6 +122,7 @@ async function focusCart(): Promise<void> {
                 <div class="border-b border-stone-100 p-5">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-500">{{ t('pos.company') }}</p>
                     <h1 class="mt-1 text-xl font-bold leading-snug">{{ company.name }}</h1>
+                    <Link v-if="can_edit_company" :href="route('pos.companies.edit', company.id)" class="mt-1 inline-block text-sm font-semibold text-brand-700 hover:underline">{{ t('pos.edit_company') }}</Link>
                     <p class="mt-1 text-sm text-stone-500">
                         <span v-if="company.city">{{ company.city }}</span>
                         <span v-if="company.phone" dir="ltr"> · {{ company.phone }}</span>

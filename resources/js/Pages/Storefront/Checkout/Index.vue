@@ -12,7 +12,7 @@ type ShippingOption = { id: number; name: string; description: string | null; re
 const props = defineProps<{
     cart: CartPayload;
     shipping_options: ShippingOption[];
-    prefill: { customer_name: string; customer_email: string | null; customer_phone: string | null } | null;
+    prefill: { customer_name: string; customer_email: string | null; customer_phone: string | null; shipping_city: string | null; shipping_address: string | null } | null;
     currency_note: string | null;
 }>();
 
@@ -24,9 +24,11 @@ const form = useForm({
     customer_name: props.prefill?.customer_name ?? '',
     customer_phone: props.prefill?.customer_phone ?? '',
     customer_email: props.prefill?.customer_email ?? '',
-    shipping_method_id: props.shipping_options[0]?.id ?? null,
-    shipping_city: '',
-    shipping_address: '',
+    // The customer picks their region (and sees its price); preselected only when there is a single option.
+    shipping_method_id: props.shipping_options.length === 1 ? props.shipping_options[0].id : (null as number | null),
+    // Signed-in customers: their last delivery address, editable.
+    shipping_city: props.prefill?.shipping_city ?? '',
+    shipping_address: props.prefill?.shipping_address ?? '',
     customer_note: '',
     currency: page.props.site.currency, // refused server-side if it changed since this page was shown
     ...(honeypot?.enabled ? { [honeypot.nameFieldName]: '', [honeypot.validFromFieldName]: honeypot.encryptedValidFrom } : {}),
@@ -36,7 +38,7 @@ const selected = computed(() => props.shipping_options.find((o) => o.id === form
 const needsAddress = computed(() => selected.value?.requires_address ?? true);
 // Summary reflects the chosen method (costs are computed server-side per option).
 const summary = computed<CartPayload>(() =>
-    selected.value ? { ...props.cart, shipping_total: selected.value.cost, total: selected.value.total } : props.cart,
+    selected.value ? { ...props.cart, shipping_selected: true, shipping_total: selected.value.cost, total: selected.value.total } : props.cart,
 );
 
 const cartError = computed(() => (form.errors as Record<string, string>).cart);
@@ -73,9 +75,12 @@ function submit(): void {
                     </div>
                 </fieldset>
 
+                <!-- Delivery, right after the contact details: region (with its price) → address → note. -->
                 <fieldset class="rounded-[2rem] bg-white p-6 ring-1 ring-stone-100 sm:p-8">
-                    <legend class="text-lg font-semibold text-cocoa">{{ t('cart.shipping_method') }}</legend>
-                    <div class="mt-5 grid gap-3" role="radiogroup">
+                    <legend class="sr-only">{{ t('cart.delivery_details') }}</legend>
+                    <h2 class="text-lg font-semibold text-cocoa">{{ t('cart.delivery_details') }}</h2>
+                    <p class="mt-1 text-sm text-stone-500">{{ t('cart.choose_region_hint') }}</p>
+                    <div class="mt-5 grid gap-3" role="radiogroup" :aria-label="t('cart.shipping_method')">
                         <label
                             v-for="option in shipping_options"
                             :key="option.id"
@@ -88,23 +93,24 @@ function submit(): void {
                                 <span v-if="option.description" class="mt-0.5 block text-sm text-stone-500">{{ option.description }}</span>
                                 <span v-if="option.free_over" class="mt-1 block text-xs font-medium text-brand-700">{{ t('cart.free_over_hint', { amount: option.free_over }) }}</span>
                             </span>
-                            <span class="shrink-0 text-sm font-bold" :class="option.cost ? 'text-cocoa' : 'text-emerald-700'" dir="ltr">{{ option.cost ?? t('cart.free') }}</span>
+                            <span class="shrink-0 text-end">
+                                <span class="block text-[11px] font-medium text-stone-500">{{ t('cart.delivery_price') }}</span>
+                                <span class="block text-base font-extrabold" :class="option.cost ? 'text-cocoa' : 'text-emerald-700'" dir="ltr">{{ option.cost ?? t('cart.free') }}</span>
+                            </span>
                         </label>
                     </div>
                     <p v-if="form.errors.shipping_method_id" class="mt-3 text-sm text-red-600" role="alert">{{ form.errors.shipping_method_id }}</p>
-                </fieldset>
 
-                <fieldset class="rounded-[2rem] bg-white p-6 ring-1 ring-stone-100 sm:p-8">
-                    <legend class="sr-only">{{ t('cart.delivery_details') }}</legend>
-                    <h2 class="text-lg font-semibold text-cocoa">{{ t('cart.delivery_details') }}</h2>
-                    <div class="mt-5 grid gap-5">
+                    <div v-if="selected" class="mt-6 grid gap-5 border-t border-stone-100 pt-6">
                         <template v-if="needsAddress">
-                            <StoreField id="shipping_city" v-model="form.shipping_city" :label="t('cart.city')" :error="form.errors.shipping_city" autocomplete="address-level2" required />
-                            <StoreField id="shipping_address" v-model="form.shipping_address" :label="t('cart.address')" :error="form.errors.shipping_address" autocomplete="street-address" required />
+                            <div class="grid gap-5 sm:grid-cols-2">
+                                <StoreField id="shipping_city" v-model="form.shipping_city" :label="t('cart.city')" :error="form.errors.shipping_city" autocomplete="address-level2" required />
+                                <StoreField id="shipping_address" v-model="form.shipping_address" :label="t('cart.address')" :error="form.errors.shipping_address" autocomplete="street-address" required />
+                            </div>
                         </template>
                         <p v-else class="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">{{ t('cart.pickup_note') }}</p>
-                        <StoreField id="customer_note" v-model="form.customer_note" :label="t('cart.note')" :error="form.errors.customer_note" textarea />
                     </div>
+                    <StoreField id="customer_note" v-model="form.customer_note" class="mt-5" :label="t('cart.note')" :error="form.errors.customer_note" textarea />
                 </fieldset>
 
                 <!-- Honeypot (spatie/laravel-honeypot): hidden from humans, filled by bots. -->

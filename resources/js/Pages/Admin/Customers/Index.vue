@@ -6,7 +6,9 @@ import DataTable from '@/Components/DataTable/DataTable.vue';
 import RowActions from '@/Components/DataTable/RowActions.vue';
 import type { Column, Filter, TablePage, TableState } from '@/Components/DataTable/types';
 import KtIcon from '@/Components/UI/KtIcon.vue';
+import KtButton from '@/Components/UI/KtButton.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
+import { useCan } from '@/Composables/useCan';
 import { useTrans } from '@/Composables/useTrans';
 import type { Avatar } from '@/types';
 
@@ -29,6 +31,7 @@ interface Row {
 
 defineProps<{ customers: TablePage<Row>; state: TableState; stats: { total: number; with_orders: number; new_this_month: number } }>();
 const { t } = useTrans();
+const { can } = useCan();
 
 const columns = computed<Column[]>(() => [
     { key: 'name', label: t('customers.customer'), sortable: true, fixed: true },
@@ -54,7 +57,11 @@ const cards = computed(() => [
 </script>
 
 <template>
-    <PageHeader :title="t('customers.title')" :description="t('customers.subtitle')" />
+    <PageHeader :title="t('customers.title')" :description="t('customers.subtitle')">
+        <template #actions>
+            <KtButton v-if="can('customers.create')" :href="route('admin.customers.create')" icon="plus">{{ t('customers.new') }}</KtButton>
+        </template>
+    </PageHeader>
 
     <div class="mb-6 grid gap-5 sm:grid-cols-3">
         <div v-for="card in cards" :key="card.key" class="kt-card flex-row items-center gap-4 p-5">

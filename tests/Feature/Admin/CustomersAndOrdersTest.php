@@ -7,8 +7,10 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Settings\MailSettings;
 use Database\Seeders\CustomerSeeder;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 function placeAdminTestOrder(array $payload = []): Order
 {
@@ -116,4 +118,39 @@ it('applies product bulk actions only with the right permission', function () {
     $this->actingAs(staffUser('product-manager'))->post(route('admin.products.bulk'), ['action' => 'draft', 'ids' => [$a->id, $b->id]])->assertSessionHasNoErrors();
 
     expect($a->fresh()->status->value)->toBe('draft')->and($b->fresh()->status->value)->toBe('draft');
+});
+
+it('lets staff with customers.create add a customer account, optionally emailing a set-password link', function () {
+    Notification::fake();
+    $this->actingAs(staffUser('order-manager'))->get(route('admin.customers.create'))->assertForbidden();
+
+    $this->actingAs(staffUser('admin'));
+    $this->get(route('admin.customers.create'))->assertOk();
+    $this->post(route('admin.customers.store'), [
+        'name' => 'سارة أحمد', 'email' => 'Sara.Shop@example.com', 'phone' => '0599111222', 'locale' => 'ar',
+        'is_active' => true, 'password' => '', 'send_password_link' => true,
+    ])->assertSessionHasNoErrors()->assertRedirect();
+
+    $customer = User::query()->where('email', 'sara.shop@example.com')->sole();
+    expect($customer->hasExactRoles('customer'))->toBeTrue()
+        ->and($customer->email_verified_at)->not->toBeNull();
+    Notification::assertSentTo($customer, ResetPassword::class);
+
+    $this->post(route('admin.customers.store'), ['name' => 'x', 'email' => 'sara.shop@example.com', 'locale' => 'ar'])->assertSessionHasErrors('email');
+});
+
+it('prefills a signed-in customer checkout with their last delivery address, and the cart assumes no region', function () {
+    $customer = User::factory()->create(['phone' => null])->assignRole('customer');
+    $previous = placeAdminTestOrder(['shipping_city' => 'الخليل', 'shipping_address' => 'شارع السلام 5']);
+    $previous->forceFill(['user_id' => $customer->id])->save();
+
+    $product = makeSimpleProduct(price: '15.00');
+    $this->actingAs($customer)->post(route('storefront.cart.store'), ['variant_id' => $product->defaultVariant->id, 'quantity' => 1]);
+
+    $this->get(route('storefront.cart'))->assertInertia(fn ($page) => $page->where('cart.shipping_selected', false));
+    $this->get(route('storefront.checkout'))->assertInertia(fn ($page) => $page
+        ->where('prefill.shipping_city', 'الخليل')
+        ->where('prefill.shipping_address', 'شارع السلام 5')
+        ->where('prefill.customer_phone', $previous->customer_phone)
+        ->where('cart.shipping_selected', false));
 });

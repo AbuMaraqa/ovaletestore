@@ -2,6 +2,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import Icon from '@/Components/Storefront/Icon.vue';
+import SocialIcon from '@/Components/Storefront/SocialIcon.vue';
 import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
 
@@ -36,9 +37,9 @@ const whatsappUrl = computed(() => {
             :href="whatsappUrl"
             target="_blank"
             rel="noopener"
-            class="flex items-center justify-center gap-2 rounded-full bg-[#128C7E] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#0f7a6d]"
+            class="flex items-center justify-center gap-2 rounded-full bg-whatsapp px-5 py-3 text-sm font-bold text-white transition hover:bg-whatsapp-dark"
         >
-            <Icon name="chat" class="size-5" />
+            <SocialIcon name="whatsapp" class="size-5" />
             {{ t('storefront.ask_whatsapp') }}
         </a>
     </div>

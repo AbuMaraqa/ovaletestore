@@ -20,14 +20,14 @@ final class Permissions
         'orders' => ['orders.view', 'orders.update_status', 'orders.delete'],
         'companies' => ['companies.view', 'companies.create', 'companies.update', 'companies.delete', 'companies.payments.create', 'companies.payments.delete'],
         'shipping' => ['shipping.view', 'shipping.create', 'shipping.update', 'shipping.delete'],
-        'customers' => ['customers.view', 'customers.update', 'customers.delete'],
+        'customers' => ['customers.view', 'customers.create', 'customers.update', 'customers.delete'],
         'traders' => ['traders.view', 'traders.approve'],
         'price_tiers' => ['price_tiers.view', 'price_tiers.create', 'price_tiers.update', 'price_tiers.delete'],
         'currencies' => ['currencies.view', 'currencies.create', 'currencies.update', 'currencies.delete', 'currencies.set_default'],
         'users' => ['users.view', 'users.create', 'users.update', 'users.delete'],
         'roles' => ['roles.view', 'roles.create', 'roles.update', 'roles.delete'],
-        'settings' => ['settings.general', 'settings.contact', 'settings.store', 'settings.seo', 'settings.mail'],
-        'pos' => ['pos.access'],
+        'settings' => ['settings.general', 'settings.contact', 'settings.store', 'settings.seo', 'settings.mail', 'settings.invoice'],
+        'pos' => ['pos.access', 'pos.companies.create', 'pos.companies.update'],
     ];
 
     /** Roles shipped with the system. super-admin passes every check (Gate::before) and cannot be edited. */
@@ -61,7 +61,7 @@ final class Permissions
             ],
             'customer' => [], // storefront account only — no admin access
             // iPad POS only: places on-account orders for companies; no admin panel.
-            'sales-rep' => ['pos.access'],
+            'sales-rep' => ['pos.access', 'pos.companies.create', 'pos.companies.update'],
         ];
     }
 

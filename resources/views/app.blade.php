@@ -44,9 +44,10 @@
         <meta name="robots" content="noindex,nofollow">
     @endif
 
-    @if ($favicon = app(\App\Settings\GeneralSettings::class)->favicon_path)
-        <link rel="icon" href="{{ asset('storage/'.$favicon) }}">
-    @endif
+    {{-- Generated icons (App\Support\SiteIcons): tab favicon, Apple/Android home screen, web manifest. --}}
+    @foreach (\App\Support\SiteIcons::links() as $icon)
+        <link @foreach ($icon as $attr => $value) {{ $attr }}="{{ $value }}" @endforeach>
+    @endforeach
 
     @routes($isAdmin ? 'admin' : 'storefront', Vite::cspNonce())
     @vite(['resources/js/app.ts', $isAdmin ? 'resources/css/admin.css' : 'resources/css/storefront.css'])

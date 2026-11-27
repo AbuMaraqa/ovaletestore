@@ -130,4 +130,9 @@ return [
     'increase_quantity' => 'הוספת כמות',
     'more_categories' => '+:count קטגוריות נוספות',
     'all_brands' => 'לכל המותגים',
+    'search_placeholder' => 'חיפוש מוצר…',
+    'search' => 'חיפוש',
+    'ask_on_whatsapp' => 'שאלו אותנו בוואטסאפ',
+    'maybe_looking_for' => 'אולי חיפשתם:',
+    'error_text' => 'משהו השתבש. נסו שוב בעוד רגע, או חזרו לדף הבית.',
 ];

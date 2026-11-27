@@ -21,7 +21,7 @@ const display = (number: string) => number.replace(/^\+97[02]/, '0');
         </div>
 
         <div class="container-store grid gap-5 py-12 md:grid-cols-3">
-            <a v-if="contact.whatsapp" :href="`https://wa.me/${contact.whatsapp}`" target="_blank" rel="noopener" class="group rounded-3xl bg-[#128C7E] p-7 text-white transition hover:-translate-y-1 hover:shadow-lift">
+            <a v-if="contact.whatsapp" :href="`https://wa.me/${contact.whatsapp}`" target="_blank" rel="noopener" class="group rounded-3xl bg-whatsapp p-7 text-white transition hover:-translate-y-1 hover:shadow-lift">
                 <SocialIcon name="whatsapp" class="size-10" />
                 <p class="mt-5 text-xl font-bold">{{ t('common.whatsapp_us') }}</p>
                 <p class="mt-1 text-white/90" dir="ltr">+{{ contact.whatsapp }}</p>

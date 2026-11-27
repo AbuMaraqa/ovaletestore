@@ -130,4 +130,9 @@ return [
     'increase_quantity' => 'زيادة الكمية',
     'more_categories' => '+:count قسم آخر',
     'all_brands' => 'عرض كل الماركات',
+    'search_placeholder' => 'ابحث عن منتج…',
+    'search' => 'بحث',
+    'ask_on_whatsapp' => 'اسألنا على واتساب',
+    'maybe_looking_for' => 'ربما تبحث عن:',
+    'error_text' => 'حدث خطأ غير متوقع. حاول مرة أخرى بعد قليل، أو عُد للصفحة الرئيسية.',
 ];

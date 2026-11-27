@@ -4,6 +4,7 @@ import DeleteButton from '@/Components/Admin/DeleteButton.vue';
 import OrderStatusBadge from '@/Components/Admin/OrderStatusBadge.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
+import KtIcon from '@/Components/UI/KtIcon.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useTrans } from '@/Composables/useTrans';
@@ -39,6 +40,7 @@ function record(): void {
         <template #actions>
             <KtButton :href="route('admin.companies.index')" variant="ghost">{{ t('common.back') }}</KtButton>
             <KtButton :href="route('admin.orders.index', { filter: { company_id: company.id } })" variant="ghost">{{ t('admin.view_orders') }}</KtButton>
+            <a :href="route('admin.companies.statement', company.id)" target="_blank" rel="noopener" class="kt-btn kt-btn-outline"><KtIcon name="printer" />{{ t('invoices.print_statement') }}</a>
             <KtButton :href="route('admin.companies.edit', company.id)" icon="pencil">{{ t('common.edit') }}</KtButton>
         </template>
     </PageHeader>

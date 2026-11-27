@@ -20,6 +20,9 @@ const props = defineProps<{
         channel: 'web' | 'pos'; payment_method: 'cod' | 'on_account'; company_id: number | null; sales_rep: string | null; customer_note: string | null;
         subtotal: string; shipping_total: string; total: string; placed_at: string;
         foreign_currency: { note: string; base_total: string } | null;
+        invoice: { number: string; url: string } | null;
+        label_url: string;
+        sales_order_url: string | null;
         items: { id: number; name: string; variant_label: string | null; sku: string | null; quantity: number; unit_price: string; line_total: string }[];
         notes: { id: number; body: string; author: string | null; date: string }[];
     };
@@ -56,6 +59,16 @@ async function submit(): Promise<void> {
     <PageHeader :title="`${t('orders.number')} ${order.number}`" :description="order.placed_at">
         <template #actions>
             <OrderStatusBadge :status="order.status" />
+            <!-- PDFs open in a new tab (not Inertia visits). -->
+            <a v-if="order.invoice" :href="order.invoice.url" target="_blank" rel="noopener" class="kt-btn kt-btn-outline" :title="order.invoice.number">
+                <KtIcon name="document" />{{ t('invoices.view') }}
+            </a>
+            <a v-if="order.sales_order_url" :href="order.sales_order_url" target="_blank" rel="noopener" class="kt-btn kt-btn-outline">
+                <KtIcon name="note-2" />{{ t('invoices.sales_order') }}
+            </a>
+            <a :href="order.label_url" target="_blank" rel="noopener" class="kt-btn kt-btn-outline">
+                <KtIcon name="delivery" />{{ t('invoices.print_label') }}
+            </a>
             <KtButton :href="route('admin.orders.index')" variant="outline">{{ t('common.back') }}</KtButton>
             <RowActions :delete-url="order.delete_url" :label="order.number" :activity="{ type: 'order', id: order.id }" />
         </template>
