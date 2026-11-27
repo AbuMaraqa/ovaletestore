@@ -11,7 +11,8 @@ final class Money
         $currency ??= self::storeCurrency();
         $locale ??= app()->getLocale();
 
-        $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+        // Western digits (0-9) in every language, as the owner asked: ICU's Arabic default is ٠-٩.
+        $formatter = new NumberFormatter($locale.'@numbers=latn', NumberFormatter::CURRENCY);
 
         return (string) $formatter->formatCurrency($minor / 100, $currency);
     }

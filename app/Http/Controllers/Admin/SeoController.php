@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Seo\SaveSeoOverrides;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
@@ -10,8 +11,6 @@ use App\Models\Seo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 /**
@@ -27,7 +26,7 @@ class SeoController extends Controller
         'brands' => [Brand::class, 'brands.update'],
     ];
 
-    public function update(Request $request, string $type, int $id): RedirectResponse
+    public function update(Request $request, string $type, int $id, SaveSeoOverrides $save): RedirectResponse
     {
         [$class, $permission] = self::TYPES[$type] ?? abort(404);
         $this->authorize($permission);
@@ -35,28 +34,10 @@ class SeoController extends Controller
         $model = $class::query()->findOrFail($id);
 
         $data = $request->validate([
-            'robots' => ['nullable', Rule::in(Seo::ROBOTS)],
-            'canonical_url' => ['nullable', 'url:https,http', 'max:255'],
+            ...SaveSeoOverrides::rules(),
             'image' => ['nullable', 'file', 'max:4096', 'mimetypes:image/jpeg,image/png,image/webp', 'dimensions:min_width=600,min_height=315'],
-            'remove_image' => ['boolean'],
         ]);
-
-        /** @var Seo $seo */
-        $seo = $model->seo()->firstOrNew();
-        $image = $seo->image;
-        if ($image && ($request->boolean('remove_image') || $request->hasFile('image'))) {
-            Storage::disk('public')->delete($image);
-            $image = null;
-        }
-        if ($file = $request->file('image')) {
-            $image = $file->storeAs('seo', Str::random(24).'.'.$file->extension(), 'public') ?: null;
-        }
-
-        $seo->fill([
-            'robots' => $data['robots'] ?? null,
-            'canonical_url' => $data['canonical_url'] ?? null,
-            'image' => $image,
-        ])->save();
+        $save->handle($model, $data, $request->file('image'));
 
         return back()->with('success', __('admin.updated'));
     }

@@ -151,18 +151,6 @@ parameters:
 			path: app/Http/Controllers/Admin/OrderController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Admin/ProductMediaController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/Admin/ProductMediaController.php
-
-		-
 			message: '#^Match expression does not handle remaining value\: string$#'
 			identifier: match.unhandled
 			count: 2

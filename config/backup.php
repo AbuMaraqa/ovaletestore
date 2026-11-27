@@ -224,9 +224,10 @@ return [
             BackupHasFailedNotification::class => ['mail'],
             UnhealthyBackupWasFoundNotification::class => ['mail'],
             CleanupHasFailedNotification::class => ['mail'],
-            BackupWasSuccessfulNotification::class => ['mail'],
-            HealthyBackupWasFoundNotification::class => ['mail'],
-            CleanupWasSuccessfulNotification::class => ['mail'],
+            // Success notices are silent: the owner only wants mail when something goes wrong.
+            BackupWasSuccessfulNotification::class => [],
+            HealthyBackupWasFoundNotification::class => [],
+            CleanupWasSuccessfulNotification::class => [],
         ],
 
         /*
@@ -236,7 +237,7 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('BACKUP_NOTIFICATION_EMAIL', 'info@ovaletestore.com'),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
@@ -365,7 +366,8 @@ return [
              * this amount of megabytes has been reached.
              * Set null for unlimited size.
              */
-            'delete_oldest_backups_when_using_more_megabytes_than' => 5000,
+            // Each backup is ~600 MB (code + media) and the server disk is small: keep about 3.
+            'delete_oldest_backups_when_using_more_megabytes_than' => (int) env('BACKUP_MAX_MB', 2000),
         ],
 
         /*

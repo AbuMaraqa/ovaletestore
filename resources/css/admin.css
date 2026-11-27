@@ -147,3 +147,185 @@
 .kt-menu-accordion[data-collapse] {
     display: flex;
 }
+
+/* ── Form system (Components/Forms/*, Composables/useFormKit.ts) ───────────────────────────────────────── */
+@layer components {
+    /* Field error: always visible (KTUI's .kt-form-message is display:none unless aria-invalid is set). */
+    .form-field-error {
+        @apply flex items-start gap-1.5 text-xs font-medium text-destructive;
+    }
+    .form-field [aria-invalid='true']:focus-visible {
+        @apply ring-destructive/25;
+    }
+    /* Brief highlight when an error-summary link jumps to the field. */
+    .field-flash :is(.kt-input, .kt-select, .kt-textarea, .rte) {
+        @apply ring-3 ring-destructive/30;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .field-flash :is(.kt-input, .kt-select, .kt-textarea, .rte) {
+            transition: box-shadow 200ms ease;
+        }
+    }
+
+    .form-section + .form-section {
+        @apply mt-6 border-t border-border pt-6;
+    }
+
+    /* Sticky form header: stays under the fixed admin header; bordered only once stuck. */
+    .form-toolbar {
+        @apply sticky z-20 -mx-5 mb-5 flex flex-wrap items-center justify-between gap-3 bg-background/85 px-5 py-3 backdrop-blur lg:-mx-7.5 lg:px-7.5;
+        top: var(--header-height);
+    }
+    .form-toolbar[data-stuck] {
+        @apply border-b border-border shadow-xs;
+    }
+
+    .segmented {
+        @apply inline-flex w-full rounded-lg border border-border bg-muted/50 p-0.5;
+    }
+    .segmented-item {
+        @apply flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-secondary-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none;
+    }
+    .segmented-item.is-active {
+        @apply bg-background text-foreground shadow-xs;
+    }
+
+    .locale-tabs {
+        @apply mb-5 flex gap-1 border-b border-border;
+    }
+    .locale-tabs-compact {
+        @apply mb-0 border-b-0;
+    }
+    .locale-tab {
+        @apply -mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none;
+    }
+    .locale-tab.is-active {
+        @apply border-primary text-primary;
+    }
+
+    /* Gallery */
+    .media-grid {
+        @apply grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5;
+    }
+    .media-tile {
+        @apply relative aspect-square overflow-hidden rounded-xl border border-border bg-white;
+    }
+    .media-tile.is-main {
+        @apply col-span-2 row-span-2;
+    }
+    .media-tile.is-error {
+        @apply border-destructive/60;
+    }
+    .media-tile > img {
+        @apply size-full object-contain p-2;
+    }
+    .media-tile.is-error > img {
+        @apply opacity-40;
+    }
+    .media-badge {
+        @apply absolute start-2 top-2 rounded-md bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-foreground;
+    }
+    .media-badge-new {
+        @apply bg-success;
+    }
+    .media-actions {
+        @apply absolute end-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100;
+    }
+    .media-btn {
+        @apply flex size-7 items-center justify-center rounded-md border border-border bg-background/95 text-sm shadow-xs hover:bg-accent;
+    }
+    .media-progress {
+        @apply absolute inset-x-2 bottom-2 h-1.5 overflow-hidden rounded-full bg-muted;
+    }
+    .media-progress > span {
+        @apply block h-full bg-primary transition-[width] duration-200;
+    }
+    .media-error {
+        @apply absolute inset-x-1.5 bottom-1.5 rounded-md bg-destructive px-1.5 py-1 text-[11px] leading-tight text-white;
+    }
+    .media-drop {
+        @apply flex h-40 w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-input bg-muted/30 text-center transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none dark:bg-muted/15;
+    }
+    .media-drop.is-compact {
+        @apply h-28;
+    }
+    .media-drop.is-over {
+        @apply border-primary bg-primary/5;
+    }
+
+    /* Rich text editor (Tiptap, injectCSS off for the CSP) */
+    .rte {
+        @apply overflow-hidden rounded-md border border-input bg-background shadow-xs shadow-black/5 transition-[color,box-shadow];
+    }
+    .rte:focus-within {
+        @apply border-ring ring-3 ring-ring/30;
+    }
+    .rte.rte-invalid {
+        @apply border-destructive/60;
+    }
+    .rte-toolbar {
+        @apply flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/40 p-1;
+    }
+    .rte-btn {
+        @apply inline-flex h-7 min-w-7 items-center justify-center rounded px-1.5 text-sm text-secondary-foreground hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40;
+    }
+    .rte-btn.is-active {
+        @apply bg-primary/10 text-primary;
+    }
+    .rte-sep {
+        @apply mx-1 h-5 w-px bg-border;
+    }
+    .rte-link {
+        @apply flex items-center gap-2 border-b border-border bg-muted/30 p-2;
+    }
+    .rte-content,
+    .rte-source {
+        @apply block w-full px-3.5 py-3 text-sm leading-7 text-foreground outline-none;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .rte-sm .rte-content,
+    .rte-sm .rte-source {
+        min-height: 7rem;
+    }
+    .rte-md .rte-content,
+    .rte-md .rte-source {
+        min-height: 12rem;
+    }
+    .rte-lg .rte-content,
+    .rte-lg .rte-source {
+        min-height: 18rem;
+    }
+    .rte-source {
+        @apply resize-y bg-transparent font-mono text-xs leading-5;
+    }
+    .rte-content :where(p) {
+        @apply my-1.5;
+    }
+    .rte-content :where(h2) {
+        @apply mt-4 mb-1.5 text-lg font-semibold text-mono;
+    }
+    .rte-content :where(h3, h4) {
+        @apply mt-3 mb-1 text-base font-semibold text-mono;
+    }
+    .rte-content :where(ul) {
+        @apply my-1.5 list-disc ps-6;
+    }
+    .rte-content :where(ol) {
+        @apply my-1.5 list-decimal ps-6;
+    }
+    .rte-content :where(blockquote) {
+        @apply my-2 border-s-4 border-primary/40 ps-3 text-secondary-foreground;
+    }
+    .rte-content :where(a) {
+        @apply text-primary underline underline-offset-2;
+    }
+    /* Tiptap placeholder (first empty paragraph) */
+    .rte-content p.is-editor-empty:first-child::before {
+        @apply pointer-events-none float-start h-0 text-muted-foreground;
+        content: attr(data-placeholder);
+    }
+    .rte-content .ProseMirror-selectednode {
+        @apply outline-2 outline-primary/50;
+    }
+}

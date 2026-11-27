@@ -1,8 +1,11 @@
 <?php
 
+use App\Actions\Products\AttachProductImages;
 use App\Migration\Woo\RemoteImageDownloader;
 use App\Models\User;
+use App\Support\StagedUploads;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 it('sends baseline security headers', function () {
     $this->get('/ar')->assertHeader('X-Content-Type-Options', 'nosniff')
@@ -17,26 +20,41 @@ it('marks admin responses as non-cacheable', function () {
 });
 
 it('rejects non-image uploads disguised with an image extension', function () {
-    $product = makeSimpleProduct();
+    Storage::fake('local');
     $this->actingAs(staffUser('product-manager'));
 
     $fake = UploadedFile::fake()->createWithContent('photo.jpg', '<?php echo "pwned"; ?>');
 
-    $this->post(route('admin.products.media.store', $product), ['images' => [$fake]])->assertSessionHasErrors('images.0');
-    expect($product->fresh()->getMedia('gallery'))->toHaveCount(0);
+    $this->postJson(route('admin.uploads.store'), ['file' => $fake])->assertUnprocessable()->assertJsonValidationErrors('file');
 });
 
-it('accepts a real image upload and stores it under a generated name', function () {
+it('stages a real image and attaches it on save under a generated name', function () {
+    Storage::fake('local');
     $product = makeSimpleProduct(overrides: ['translations' => ['en' => ['name' => 'Gallery Product']]]);
-    $this->actingAs(staffUser('product-manager'));
+    $user = staffUser('product-manager');
+    $this->actingAs($user);
 
-    $this->post(route('admin.products.media.store', $product), ['images' => [UploadedFile::fake()->image('../../evil name.png', 800, 800)]])
-        ->assertSessionHasNoErrors();
+    $id = $this->postJson(route('admin.uploads.store'), ['file' => UploadedFile::fake()->image('../../evil name.png', 800, 800)])
+        ->assertCreated()->json('id');
+
+    app(AttachProductImages::class)->handle($product, $user, [$id]);
 
     $media = $product->fresh()->getFirstMedia('gallery');
     expect($media)->not->toBeNull()
         ->and($media->file_name)->toStartWith('gallery-product-')
-        ->and($media->file_name)->not->toContain('..');
+        ->and($media->file_name)->not->toContain('..')
+        ->and(StagedUploads::path($user, $id))->toBeNull(); // moved, not copied
+});
+
+it('never lets one user claim a file another user staged', function () {
+    Storage::fake('local');
+    $owner = staffUser('product-manager');
+    $id = $this->actingAs($owner)->postJson(route('admin.uploads.store'), ['file' => UploadedFile::fake()->image('a.png', 400, 400)])->json('id');
+
+    expect(StagedUploads::path(staffUser('admin'), $id))->toBeNull()
+        ->and(StagedUploads::path($owner, $id))->not->toBeNull();
+
+    $this->actingAs(staffUser('order-manager'))->postJson(route('admin.uploads.store'), ['file' => UploadedFile::fake()->image('b.png', 400, 400)])->assertForbidden();
 });
 
 it('throttles repeated login attempts', function () {

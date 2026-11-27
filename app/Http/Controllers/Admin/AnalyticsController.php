@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Settings\SeoSettings;
 use App\Support\Analytics\SiteAnalytics;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,9 +21,6 @@ class AnalyticsController extends Controller
             'days' => $days,
             'periods' => SiteAnalytics::PERIODS,
             'configured' => SiteAnalytics::configured(),
-            // Where the server expects the key (relative to the project; the file itself never leaves the server).
-            'credentials_path' => is_string($path = config('analytics.service_account_credentials_json'))
-                ? Str::after(str_replace('\\', '/', $path), str_replace('\\', '/', base_path()).'/') : '',
             'tracking' => [
                 'measurement_id' => $seo->ga_measurement_id,
                 'enabled' => (bool) config('analytics.tracking'),

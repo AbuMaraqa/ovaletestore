@@ -11,7 +11,6 @@ defineProps<{
     days: number;
     periods: number[];
     configured: boolean;
-    credentials_path: string;
     tracking: { measurement_id: string | null; enabled: boolean };
     can_edit_settings: boolean;
     report?: Report;
@@ -55,7 +54,7 @@ const { t } = useTrans();
         </span>
     </div>
 
-    <AnalyticsSetup v-if="!configured" :credentials-path="credentials_path" />
+    <AnalyticsSetup v-if="!configured" />
 
     <Deferred v-else data="report">
         <template #fallback>
@@ -66,7 +65,8 @@ const { t } = useTrans();
             <KtIcon name="information-2" />
             <div>
                 <p class="font-medium">{{ t('analytics.error') }}</p>
-                <p class="text-sm opacity-80" dir="ltr">{{ report.message }}</p>
+                <!-- Google's technical message stays in the server log (SiteAnalytics reports it). -->
+                <p class="text-sm opacity-80">{{ t('analytics.error_help') }}</p>
             </div>
         </div>
         <AnalyticsReport v-else-if="report?.status === 'ok'" :report="report" />

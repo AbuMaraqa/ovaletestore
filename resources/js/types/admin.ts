@@ -58,6 +58,18 @@ export interface ProductForm {
     variants: VariantForm[];
     media?: { id: number; url: string; name: string; size: string }[];
     view_url?: string | null;
+    /** New gallery images: staged upload ids, attached on save (App\Support\StagedUploads). */
+    uploads?: string[];
+    /** laravel-seo overrides saved with the product. */
+    seo?: ProductSeoForm;
+    add_another?: boolean;
+}
+
+export interface ProductSeoForm {
+    robots: string | null;
+    canonical_url: string;
+    image_upload: string | null;
+    remove_image: boolean;
 }
 
 export interface AttributeOption {
@@ -83,5 +95,6 @@ export function emptyVariant(termIds: number[] = []): VariantForm {
         height_mm: null,
         is_active: true,
         is_default: false,
+        tier_prices: {}, // present from the start: filling it later would mark an untouched form as changed
     };
 }

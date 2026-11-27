@@ -30,6 +30,12 @@
     --color-cocoa: oklch(0.24 0.03 40);
     --color-cream: oklch(0.985 0.008 80);
 
+    /* Status colours: the same hues KTUI uses for kt-badge-success / -warning / -info, as utilities
+       (bg-success, text-warning, border-info…) — they were referenced but undefined, so they rendered nothing. */
+    --color-success: var(--color-green-500);
+    --color-warning: var(--color-amber-500);
+    --color-info: var(--color-violet-500);
+
     /* WhatsApp's official brand green (and its pressed shade). */
     --color-whatsapp: #25d366;
     --color-whatsapp-dark: #1da851;

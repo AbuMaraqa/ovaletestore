@@ -31,7 +31,7 @@ return [
     'bing_verification' => 'Bing Webmaster code',
     'analytics' => 'Google Analytics 4',
     'ga_measurement_id' => 'Measurement ID',
-    'ga_measurement_id_help' => 'Like G-XXXXXXXXXX — enables tracking on the store. Reports inside the panel also need the server setup (see the Analytics page).',
+    'ga_measurement_id_help' => 'Like G-XXXXXXXXXX — starts tracking store visits in Google Analytics.',
     'files' => 'Search engine files',
     'sitemap' => 'Sitemap',
     'robots_txt' => 'robots.txt',

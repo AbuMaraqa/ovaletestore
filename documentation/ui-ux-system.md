@@ -57,3 +57,9 @@ Real logo upload (Settings → General), hero photography/banners, brand strip o
 - `/{locale}/categories` (`storefront.categories`): every active category with published products as a 4:3 image tile, product count, and a "N offers" badge linking to `?sale=1` (live sales only: dates respected). Arabic-aware quick filter (ignores diacritics, unifies ا/أ/إ/آ, ة/ه, ى/ي) with an empty state that offers a product search. Linked from the header mega-menu, mobile menu, home category rail and footer; in the pages sitemap (with brands).
 - Product cards are identical in height everywhere: fixed rows (category 1 line — always reserved, name 2 lines, price 1 line), `h-full` in grids and rails, image 6:5 and 40px button → shorter card.
 - `useTrans` replaces placeholders in one pass, longest name first (`:to` no longer breaks `:total` — "40tal" bug on the shop count).
+
+## Digits
+Prices and numbers use Western digits (0-9) in every language (owner's choice). `App\Support\Money` formats with `@numbers=latn`, and the uploaded Arabic site font (Settings → General) is declared with a `unicode-range` that leaves out 0-9, so digits are drawn by Tajawal even where the Arabic font has Arabic-Indic digit glyphs.
+
+## Status colours
+`--color-success / --color-warning / --color-info` (theme.css) give `bg-success`, `text-warning`, `border-info`… the same hues as KTUI's badges.

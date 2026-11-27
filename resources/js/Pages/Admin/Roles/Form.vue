@@ -2,11 +2,10 @@
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FormField from '@/Components/Forms/FormField.vue';
-import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
-import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useCan } from '@/Composables/useCan';
+import FormPage from '@/Components/Forms/FormPage.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 interface Group {
@@ -41,22 +40,19 @@ function toggleGroup(g: Group): void {
 }
 const setAll = (on: boolean) => (form.permissions = on ? props.groups.flatMap(grantable) : form.permissions.filter((p) => !props.groups.flatMap(grantable).includes(p)));
 
-const submit = () => (props.role ? form.put(route('admin.roles.update', props.role.id), { preserveScroll: true }) : form.post(route('admin.roles.store')));
+type VisitHooks = { preserveScroll: boolean; onError: () => void; onSuccess: () => void };
+const submit = (hooks: VisitHooks) => (props.role ? form.put(route('admin.roles.update', props.role.id), hooks) : form.post(route('admin.roles.store'), hooks));
 </script>
 
 <template>
-    <PageHeader :title="role ? role.label : t('permissions.new_role')" :description="t('permissions.subtitle')">
-        <template #actions>
-            <KtButton :href="route('admin.roles.index')" variant="outline">{{ t('common.back') }}</KtButton>
-            <KtButton v-if="!readOnly" type="submit" form="role-form" :loading="form.processing" icon="check">{{ t('common.save') }}</KtButton>
-        </template>
-    </PageHeader>
 
-    <form id="role-form" class="grid gap-6 xl:grid-cols-12" @submit.prevent="submit">
+    <FormPage id="role-form" :form="form" :action="submit" :readonly="readOnly" :title="role ? role.label : t('permissions.new_role')" :back-href="route('admin.roles.index')">
+        <template #description>{{ t('permissions.subtitle') }}</template>
+        <div class="grid gap-6 xl:grid-cols-12">
         <aside class="space-y-6 xl:col-span-4">
             <KtCard :title="t('permissions.role')">
                 <div class="space-y-4">
-                    <FormField id="name" :label="t('permissions.name')" :error="form.errors.name">
+                    <FormField id="name" :label="t('permissions.name')" error-key="name">
                         <input id="name" v-model="form.name" class="kt-input" maxlength="60" required :disabled="readOnly || role?.built_in" />
                     </FormField>
                     <p v-if="role?.locked" class="flex gap-2 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300"><KtIcon name="crown" class="mt-0.5" />{{ t('permissions.locked') }}</p>
@@ -110,5 +106,6 @@ const submit = () => (props.role ? form.put(route('admin.roles.update', props.ro
                 </div>
             </section>
         </div>
-    </form>
+        </div>
+    </FormPage>
 </template>

@@ -75,7 +75,7 @@ it('shows the setup guide until Google Analytics is connected, and needs analyti
 
     $this->actingAs(staffUser('admin'))->get(route('admin.analytics.index'))->assertOk()
         ->assertInertia(fn ($page) => $page->component('Admin/Analytics/Index')->where('configured', false)
-            ->where('credentials_path', 'storage/app/analytics/service-account-credentials.json'));
+            ->missing('credentials_path')); // server setup is never shown to the store owner
 
     $this->actingAs(staffUser('order-manager'))->get(route('admin.analytics.index'))->assertForbidden();
     expect(app(SiteAnalytics::class)->report(28))->toBe(['status' => 'not_configured']);

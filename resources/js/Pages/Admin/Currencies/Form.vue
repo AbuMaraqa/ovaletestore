@@ -2,11 +2,10 @@
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FormField from '@/Components/Forms/FormField.vue';
-import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
-import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useCan } from '@/Composables/useCan';
+import FormPage from '@/Components/Forms/FormPage.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 const props = defineProps<{
@@ -26,7 +25,8 @@ const form = useForm({
 });
 const readOnly = !can(props.currency ? 'currencies.update' : 'currencies.create');
 const isBase = computed(() => props.currency?.is_default ?? false);
-const submit = () => (props.currency ? form.put(route('admin.currencies.update', props.currency.id)) : form.post(route('admin.currencies.store')));
+type VisitHooks = { preserveScroll: boolean; onError: () => void; onSuccess: () => void };
+const submit = (hooks: VisitHooks) => (props.currency ? form.put(route('admin.currencies.update', props.currency.id), hooks) : form.post(route('admin.currencies.store'), hooks));
 const errors = form.errors as Record<string, string>;
 
 /** Live check of the rate both ways: 1 unit in the base currency, and what a 100 base price becomes. */
@@ -44,38 +44,36 @@ const preview = computed(() => {
 </script>
 
 <template>
-    <PageHeader :title="currency ? `${currency.name.ar ?? currency.code} (${currency.code})` : t('currencies.new')" :description="t('currencies.help')">
-        <template #actions><KtButton :href="route('admin.currencies.index')" variant="outline">{{ t('common.back') }}</KtButton></template>
-    </PageHeader>
+    <FormPage id="currency-form" :form="form" :action="submit" :title="currency ? `${currency.name.ar ?? currency.code} (${currency.code})` : t('currencies.new')" :back-href="route('admin.currencies.index')" :readonly="readOnly">
+        <template #description>{{ t('currencies.help') }}</template>
 
     <div class="grid gap-6 xl:grid-cols-12">
         <KtCard class="xl:col-span-8">
-            <form class="space-y-5" @submit.prevent="submit">
+            <div class="space-y-5">
                 <div class="grid gap-5 md:grid-cols-3">
-                    <FormField v-for="l in locales" :id="`name-${l}`" :key="l" :label="`${t('admin.name')} (${l})`" :error="errors[`name.${l}`]" :required="l === 'ar'">
+                    <FormField v-for="l in locales" :id="`name-${l}`" :key="l" :label="`${t('admin.name')} (${l})`" :error-key="`name.${l}`" :required="l === 'ar'">
                         <input :id="`name-${l}`" v-model="form.name[l]" class="kt-input" maxlength="60" :dir="l === 'en' ? 'ltr' : 'rtl'" :disabled="readOnly" />
                     </FormField>
                 </div>
                 <div class="grid gap-5 md:grid-cols-3">
-                    <FormField id="code" :label="t('currencies.code')" :help="t('currencies.code_help')" :error="form.errors.code" required>
+                    <FormField id="code" :label="t('currencies.code')" :help="t('currencies.code_help')" error-key="code" required>
                         <input id="code" v-model="form.code" class="kt-input font-mono uppercase" dir="ltr" maxlength="3" pattern="[A-Za-z]{3}" :disabled="readOnly || isBase" />
                     </FormField>
-                    <FormField id="value" class="md:col-span-2" :label="t('currencies.value')" :help="t('currencies.value_help', { base })" :error="form.errors.value" required>
+                    <FormField id="value" class="md:col-span-2" :label="t('currencies.value')" :help="t('currencies.value_help', { base })" error-key="value" required>
                         <div class="kt-input-group" dir="ltr">
                             <span class="kt-input-addon font-mono">1 {{ form.code.toUpperCase() || 'USD' }} =</span>
                             <input id="value" v-model="form.value" type="number" min="0.0001" step="any" class="kt-input font-mono" placeholder="3.70" :disabled="readOnly || isBase" />
                             <span class="kt-input-addon font-mono">{{ base }}</span>
                         </div>
                     </FormField>
-                    <FormField id="sort" :label="t('admin.sort_order')" :error="form.errors.sort_order">
+                    <FormField id="sort" :label="t('admin.sort_order')" error-key="sort_order">
                         <input id="sort" v-model.number="form.sort_order" type="number" min="0" class="kt-input" dir="ltr" :disabled="readOnly" />
                     </FormField>
                 </div>
                 <p v-if="preview && !isBase" class="rounded-lg bg-muted/60 px-3 py-2 text-sm tabular-nums text-mono" dir="ltr">{{ preview }}</p>
                 <label class="flex items-center gap-3 text-sm"><input v-model="form.is_active" type="checkbox" class="kt-switch" :disabled="readOnly || isBase" /> {{ t('admin.active') }}</label>
                 <p v-if="!currency" class="text-xs text-muted-foreground">{{ t('currencies.new_inactive_hint') }}</p>
-                <div v-if="!readOnly" class="flex justify-end"><KtButton type="submit" :loading="form.processing" icon="check">{{ t('common.save') }}</KtButton></div>
-            </form>
+            </div>
         </KtCard>
 
         <aside class="space-y-4 xl:col-span-4">
@@ -88,4 +86,5 @@ const preview = computed(() => {
             </div>
         </aside>
     </div>
+    </FormPage>
 </template>

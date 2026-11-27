@@ -60,8 +60,10 @@ final class SiteFont
             if ($format === null) {
                 continue;
             }
+            // unicode-range leaves out 0-9: Arabic fonts such as OT Magnit draw them as Arabic-Indic (٠-٩); the owner
+            // wants Western digits (prices, phone numbers), so digits fall through to Tajawal.
             $faces .= sprintf(
-                "@font-face{font-family:'%s';src:url('%s') format('%s');font-weight:%d;font-style:normal;font-display:swap}",
+                "@font-face{font-family:'%s';src:url('%s') format('%s');font-weight:%d;font-style:normal;font-display:swap;unicode-range:U+0000-002F,U+003A-10FFFF}",
                 $font['name'], asset('storage/'.$path), $format, $weight,
             );
         }

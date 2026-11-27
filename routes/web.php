@@ -94,7 +94,9 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::post('notifications/read-all', [Admin\NotificationController::class, 'readAll'])->name('notifications.read-all');
 
             Route::resource('products', Admin\ProductController::class)->except('show');
-            Route::post('products/{product}/media', [Admin\ProductMediaController::class, 'store'])->name('products.media.store');
+            // Images are staged one by one while the form is open, then attached when the product is saved.
+            Route::post('uploads', [Admin\StagedUploadController::class, 'store'])->middleware('throttle:120,1')->name('uploads.store');
+            Route::delete('uploads/{id}', [Admin\StagedUploadController::class, 'destroy'])->whereUuid('id')->name('uploads.destroy');
             Route::patch('products/{product}/media/order', [Admin\ProductMediaController::class, 'reorder'])->name('products.media.reorder');
             Route::delete('products/{product}/media/{media}', [Admin\ProductMediaController::class, 'destroy'])->name('products.media.destroy');
 

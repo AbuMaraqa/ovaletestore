@@ -5,7 +5,7 @@ import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
-import PageHeader from '@/Components/UI/PageHeader.vue';
+import FormPage from '@/Components/Forms/FormPage.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 type Names = Record<'ar' | 'en' | 'he', { name: string }>;
@@ -28,29 +28,25 @@ const form = useForm({
 const errors = computed(() => form.errors as Record<string, string>);
 const langs = ['ar', 'en', 'he'] as const;
 
-function submit(): void {
-    props.attribute ? form.put(route('admin.attributes.update', props.attribute.id), { preserveScroll: true }) : form.post(route('admin.attributes.store'));
+type VisitHooks = { preserveScroll: boolean; onError: () => void; onSuccess: () => void };
+function submit(hooks: VisitHooks): void {
+    props.attribute ? form.put(route('admin.attributes.update', props.attribute.id), hooks) : form.post(route('admin.attributes.store'), hooks);
 }
 </script>
 
 <template>
-    <PageHeader :title="attribute ? t('admin.edit_attribute') : t('admin.new_attribute')">
-        <template #actions>
-            <KtButton :href="route('admin.attributes.index')" variant="ghost">{{ t('common.back') }}</KtButton>
-            <KtButton type="submit" form="attribute-form" :loading="form.processing" icon="check">{{ t('common.save') }}</KtButton>
-        </template>
-    </PageHeader>
 
-    <form id="attribute-form" class="space-y-6" @submit.prevent="submit">
+    <FormPage id="attribute-form" :form="form" :action="submit" :title="attribute ? t('admin.edit_attribute') : t('admin.new_attribute')" :back-href="route('admin.attributes.index')">
+        <div class="space-y-6">
         <KtCard :title="t('admin.general')">
             <div class="grid gap-5 md:grid-cols-3">
-                <FormField v-for="l in langs" :id="`name-${l}`" :key="l" :label="`${t('admin.name')} (${l})`" :error="errors[`translations.${l}.name`]" :required="l === 'ar'">
+                <FormField v-for="l in langs" :id="`name-${l}`" :key="l" :label="`${t('admin.name')} (${l})`" :error-key="`translations.${l}.name`" :required="l === 'ar'">
                     <input :id="`name-${l}`" v-model="form.translations[l].name" class="kt-input" :dir="l === 'en' ? 'ltr' : 'rtl'" />
                 </FormField>
-                <FormField id="code" :label="t('admin.code')" :error="errors.code">
+                <FormField id="code" :label="t('admin.code')" error-key="code">
                     <input id="code" v-model="form.code" class="kt-input font-mono" dir="ltr" />
                 </FormField>
-                <FormField id="display" :label="t('admin.display_type')" :error="errors.display_type">
+                <FormField id="display" :label="t('admin.display_type')" error-key="display_type">
                     <select id="display" v-model="form.display_type" class="kt-select">
                         <option v-for="d in displayTypes" :key="d" :value="d">{{ d }}</option>
                     </select>
@@ -64,7 +60,7 @@ function submit(): void {
             </template>
             <div class="space-y-3">
                 <div v-for="(term, i) in form.terms" :key="term.id ?? `new-${i}`" class="grid items-end gap-3 rounded-lg border border-border p-3 md:grid-cols-[repeat(3,1fr)_auto_auto]">
-                    <FormField v-for="l in langs" :id="`t${i}-${l}`" :key="l" :label="l.toUpperCase()" :error="errors[`terms.${i}.translations.${l}.name`]" :required="l === 'ar'">
+                    <FormField v-for="l in langs" :id="`t${i}-${l}`" :key="l" :label="l.toUpperCase()" :error-key="`terms.${i}.translations.${l}.name`" :required="l === 'ar'">
                         <input :id="`t${i}-${l}`" v-model="term.translations[l].name" class="kt-input" :dir="l === 'en' ? 'ltr' : 'rtl'" />
                     </FormField>
                     <FormField v-if="form.display_type === 'color'" :id="`c${i}`" :label="t('admin.color')">
@@ -75,5 +71,6 @@ function submit(): void {
                 </div>
             </div>
         </KtCard>
-    </form>
+        </div>
+    </FormPage>
 </template>

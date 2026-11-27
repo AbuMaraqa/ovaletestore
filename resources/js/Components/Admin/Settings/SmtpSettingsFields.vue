@@ -40,13 +40,13 @@ function usePreset(p: (typeof presets)[number]): void {
             </div>
 
             <div class="grid gap-5 md:grid-cols-4">
-                <FormField id="smtp_host" class="md:col-span-2" :label="t('admin.smtp_host')" :error="errors.smtp_host" required>
+                <FormField id="smtp_host" class="md:col-span-2" :label="t('admin.smtp_host')" error-key="smtp_host" required>
                     <input id="smtp_host" v-model="form.smtp_host" class="kt-input" dir="ltr" placeholder="smtp.example.com" autocomplete="off" />
                 </FormField>
-                <FormField id="smtp_port" :label="t('admin.smtp_port')" :error="errors.smtp_port" required>
+                <FormField id="smtp_port" :label="t('admin.smtp_port')" error-key="smtp_port" required>
                     <input id="smtp_port" v-model.number="form.smtp_port" type="number" min="1" max="65535" class="kt-input" dir="ltr" />
                 </FormField>
-                <FormField id="smtp_encryption" :label="t('admin.smtp_encryption')" :error="errors.smtp_encryption">
+                <FormField id="smtp_encryption" :label="t('admin.smtp_encryption')" error-key="smtp_encryption">
                     <select id="smtp_encryption" v-model="form.smtp_encryption" class="kt-select" dir="ltr">
                         <option value="tls">TLS (587)</option>
                         <option value="ssl">SSL (465)</option>
@@ -56,14 +56,14 @@ function usePreset(p: (typeof presets)[number]): void {
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <FormField id="smtp_username" :label="t('admin.smtp_username')" :error="errors.smtp_username">
+                <FormField id="smtp_username" :label="t('admin.smtp_username')" error-key="smtp_username">
                     <input id="smtp_username" v-model="form.smtp_username" class="kt-input" dir="ltr" autocomplete="off" />
                 </FormField>
                 <FormField
                     id="smtp_password"
                     :label="t('admin.smtp_password')"
                     :help="passwordSet ? t('admin.smtp_password_keep') : t('admin.smtp_password_help')"
-                    :error="errors.smtp_password"
+                    error-key="smtp_password"
                 >
                     <input id="smtp_password" v-model="form.smtp_password" type="password" class="kt-input" dir="ltr" autocomplete="new-password" :placeholder="passwordSet ? '••••••••' : ''" />
                 </FormField>

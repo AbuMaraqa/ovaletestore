@@ -2,6 +2,7 @@
 import { useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import FormField from '@/Components/Forms/FormField.vue';
+import ImageInput from '@/Components/Forms/ImageInput.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import SerpPreview from '@/Components/Admin/Seo/SerpPreview.vue';
@@ -35,16 +36,11 @@ const form = useForm({
     _method: 'put',
 });
 const errors = computed(() => form.errors as Record<string, string>);
-const fileInput = ref<HTMLInputElement | null>(null);
-
 function save(): void {
     form.post(props.data.update_url, {
         forceFormData: true,
         preserveScroll: true,
-        onSuccess: () => {
-            form.reset('image', 'remove_image');
-            if (fileInput.value) fileInput.value.value = '';
-        },
+        onSuccess: () => form.reset('image', 'remove_image'),
     });
 }
 </script>
@@ -89,16 +85,8 @@ function save(): void {
                     <input id="seo-canonical" v-model="form.canonical_url" type="url" class="kt-input" dir="ltr" placeholder="https://" />
                 </FormField>
                 <FormField id="seo-image" :label="t('seo.share_image')" :help="t('seo.share_image_help')" :error="errors.image">
-                    <img v-if="data.image && !form.remove_image" :src="data.image" alt="" class="mb-2 aspect-[1.91/1] w-48 rounded-lg object-cover" />
-                    <input
-                        id="seo-image"
-                        ref="fileInput"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        class="kt-input"
-                        @change="form.image = ($event.target as HTMLInputElement).files?.[0] ?? null"
-                    />
-                    <label v-if="data.image" class="mt-2 flex items-center gap-2 text-sm">
+                    <ImageInput id="seo-image" v-model="form.image" :current="form.remove_image ? null : data.image" accept="image/jpeg,image/png,image/webp" shape="wide" />
+                    <label v-if="data.image && !form.image" class="flex items-center gap-2 text-sm">
                         <input v-model="form.remove_image" type="checkbox" class="kt-checkbox" /> {{ t('seo.remove_image') }}
                     </label>
                 </FormField>

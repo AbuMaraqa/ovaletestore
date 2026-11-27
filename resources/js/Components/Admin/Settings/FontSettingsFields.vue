@@ -113,10 +113,10 @@ const previewStyle = computed(() => (previewFamily.value ? { fontFamily: `'${pre
 
         <template v-if="isCustom">
             <div class="grid gap-5 md:grid-cols-2">
-                <FormField id="font_name" :label="t('admin.font_name')" :help="t('admin.font_name_help')" :error="errors.font_name" required>
+                <FormField id="font_name" :label="t('admin.font_name')" :help="t('admin.font_name_help')" error-key="font_name" required>
                     <input id="font_name" v-model="form.font_name" class="kt-input" dir="ltr" maxlength="60" placeholder="OT Magnit Arabic" />
                 </FormField>
-                <FormField id="font_scope" :label="t('admin.font_scope')" :error="errors.font_scope">
+                <FormField id="font_scope" :label="t('admin.font_scope')" error-key="font_scope">
                     <select id="font_scope" v-model="form.font_scope" class="kt-select">
                         <option value="all">{{ t('admin.font_scope_all') }}</option>
                         <option value="storefront">{{ t('admin.font_scope_storefront') }}</option>
@@ -124,7 +124,7 @@ const previewStyle = computed(() => (previewFamily.value ? { fontFamily: `'${pre
                 </FormField>
             </div>
 
-            <FormField id="font_locales" :label="t('admin.font_locales')" :help="t('admin.font_locales_help')" :error="errors.font_locales">
+            <FormField id="font_locales" :label="t('admin.font_locales')" :help="t('admin.font_locales_help')" error-key="font_locales">
                 <div class="flex flex-wrap gap-4 pt-1">
                     <label v-for="l in locales" :key="l" class="flex items-center gap-2 text-sm">
                         <input v-model="form.font_locales" type="checkbox" class="kt-checkbox" :value="l" />

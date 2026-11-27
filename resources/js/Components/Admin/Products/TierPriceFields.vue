@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, type Ref } from 'vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
+import { useFormKitContext } from '@/Composables/useFormKit';
 import { useTrans } from '@/Composables/useTrans';
 import type { PriceTierOption, VariantForm } from '@/types/admin';
 
@@ -9,7 +10,9 @@ import type { PriceTierOption, VariantForm } from '@/types/admin';
  * regular price (shown as the placeholder). Tiers come from the product form (provide/inject).
  */
 const model = defineModel<VariantForm>({ required: true });
-const props = defineProps<{ errors: Record<string, string>; prefix: string }>();
+const props = defineProps<{ prefix: string }>();
+const kit = useFormKitContext();
+const error = (tierId: number) => kit?.errors.value[`${props.prefix}.tier_prices.${tierId}`];
 const tiers = inject<Ref<PriceTierOption[]>>('priceTiers');
 const { t } = useTrans();
 
@@ -19,11 +22,11 @@ const automatic = (tier: PriceTierOption) => {
     const regular = Number(model.value.regular_price);
     return regular > 0 ? (regular * (1 - tier.discount_percent / 100)).toFixed(2) : '';
 };
-const id = (tierId: number) => `${props.prefix.replace('.', '-')}-tier-${tierId}`;
+const id = (tierId: number) => `${props.prefix.replace(/\./g, '-')}-tier-${tierId}`;
 </script>
 
 <template>
-    <fieldset v-if="list.length" class="mt-5 rounded-xl border border-dashed border-border p-4">
+    <fieldset v-if="list.length" class="mt-6 rounded-xl border border-dashed border-border p-4">
         <legend class="flex items-center gap-2 px-1 text-sm font-semibold text-mono"><KtIcon name="shop" class="text-primary" />{{ t('traders.trader_prices') }}</legend>
         <p class="mb-3 text-xs text-secondary-foreground">{{ t('traders.trader_prices_help') }}</p>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -43,9 +46,10 @@ const id = (tierId: number) => `${props.prefix.replace('.', '-')}-tier-${tierId}
                     dir="ltr"
                     :placeholder="automatic(tier)"
                     :aria-describedby="`${id(tier.id)}-hint`"
+                    :aria-invalid="!!error(tier.id)"
                 />
                 <span :id="`${id(tier.id)}-hint`" class="sr-only">{{ t('traders.empty_uses_automatic') }}</span>
-                <p v-if="errors[`${prefix}.tier_prices.${tier.id}`]" class="text-xs text-destructive">{{ errors[`${prefix}.tier_prices.${tier.id}`] }}</p>
+                <p v-if="error(tier.id)" class="form-field-error">{{ error(tier.id) }}</p>
             </div>
         </div>
     </fieldset>

@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import FormField from '@/Components/Forms/FormField.vue';
-import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
-import PageHeader from '@/Components/UI/PageHeader.vue';
 import { useCan } from '@/Composables/useCan';
+import FormPage from '@/Components/Forms/FormPage.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 const props = defineProps<{
@@ -23,40 +22,39 @@ const form = useForm({
     sort_order: props.tier?.sort_order ?? 0,
 });
 const readOnly = !can(props.tier ? 'price_tiers.update' : 'price_tiers.create');
-const submit = () => (props.tier ? form.put(route('admin.price-tiers.update', props.tier.id)) : form.post(route('admin.price-tiers.store')));
+type VisitHooks = { preserveScroll: boolean; onError: () => void; onSuccess: () => void };
+const submit = (hooks: VisitHooks) => (props.tier ? form.put(route('admin.price-tiers.update', props.tier.id), hooks) : form.post(route('admin.price-tiers.store'), hooks));
 const errors = form.errors as Record<string, string>;
 </script>
 
 <template>
-    <PageHeader :title="tier ? tier.name.ar : t('traders.new_tier')" :description="t('traders.tiers_help')">
-        <template #actions><KtButton :href="route('admin.price-tiers.index')" variant="outline">{{ t('common.back') }}</KtButton></template>
-    </PageHeader>
+    <FormPage id="tier-form" :form="form" :action="submit" :title="tier ? tier.name.ar : t('traders.new_tier')" :back-href="route('admin.price-tiers.index')" :readonly="readOnly">
+        <template #description>{{ t('traders.tiers_help') }}</template>
 
     <div class="grid gap-6 xl:grid-cols-12">
         <KtCard class="xl:col-span-8">
-            <form class="space-y-5" @submit.prevent="submit">
+            <div class="space-y-5">
                 <div class="grid gap-5 md:grid-cols-3">
-                    <FormField v-for="l in locales" :id="`name-${l}`" :key="l" :label="`${t('admin.name')} (${l})`" :error="errors[`name.${l}`]" :required="l === 'ar'">
+                    <FormField v-for="l in locales" :id="`name-${l}`" :key="l" :label="`${t('admin.name')} (${l})`" :error-key="`name.${l}`" :required="l === 'ar'">
                         <input :id="`name-${l}`" v-model="form.name[l]" class="kt-input" maxlength="80" :dir="l === 'en' ? 'ltr' : 'rtl'" :disabled="readOnly" />
                     </FormField>
                 </div>
                 <div class="grid gap-5 md:grid-cols-3">
-                    <FormField id="code" :label="t('admin.code')" :help="t('traders.code_help')" :error="form.errors.code" required>
+                    <FormField id="code" :label="t('admin.code')" :help="t('traders.code_help')" error-key="code" required>
                         <input id="code" v-model="form.code" class="kt-input font-mono" dir="ltr" maxlength="40" pattern="[a-z0-9_-]+" :disabled="readOnly" />
                     </FormField>
-                    <FormField id="discount" :label="t('traders.automatic_discount')" :help="t('traders.automatic_discount_help')" :error="form.errors.discount_percent" required>
+                    <FormField id="discount" :label="t('traders.automatic_discount')" :help="t('traders.automatic_discount_help')" error-key="discount_percent" required>
                         <div class="kt-input-group">
                             <input id="discount" v-model.number="form.discount_percent" type="number" min="0" max="90" step="0.5" class="kt-input" dir="ltr" :disabled="readOnly" />
                             <span class="kt-input-addon">%</span>
                         </div>
                     </FormField>
-                    <FormField id="sort" :label="t('admin.sort_order')" :error="form.errors.sort_order">
+                    <FormField id="sort" :label="t('admin.sort_order')" error-key="sort_order">
                         <input id="sort" v-model.number="form.sort_order" type="number" min="0" class="kt-input" dir="ltr" :disabled="readOnly" />
                     </FormField>
                 </div>
                 <label class="flex items-center gap-3 text-sm"><input v-model="form.is_active" type="checkbox" class="kt-switch" :disabled="readOnly" /> {{ t('admin.active') }}</label>
-                <div v-if="!readOnly" class="flex justify-end"><KtButton type="submit" :loading="form.processing" icon="check">{{ t('common.save') }}</KtButton></div>
-            </form>
+            </div>
         </KtCard>
 
         <aside class="space-y-4 xl:col-span-4">
@@ -69,4 +67,5 @@ const errors = form.errors as Record<string, string>;
             </div>
         </aside>
     </div>
+    </FormPage>
 </template>

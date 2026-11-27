@@ -6,41 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * Secure uploads: real MIME sniffing (mimetypes), size + dimension limits, generated file names
- * (no user-controlled paths), originals preserved, conversions queued.
+ * Gallery of an existing product: reorder, remove. New images are staged (StagedUploadController) and attached on save.
  */
 class ProductMediaController extends Controller
 {
-    public function store(Request $request, Product $product): RedirectResponse
-    {
-        $this->authorize('update', $product);
-
-        $request->validate([
-            'images' => ['required', 'array', 'max:10'],
-            'images.*' => [
-                'required', 'file', 'max:10240',
-                'mimetypes:image/jpeg,image/png,image/webp,image/avif',
-                'dimensions:min_width=200,min_height=200,max_width=8000,max_height=8000',
-            ],
-        ]);
-
-        $baseName = Str::slug((string) ($product->translate('en', false)?->name ?? 'product')) ?: 'product';
-
-        foreach ($request->file('images') as $file) {
-            $product->addMedia($file)
-                ->usingName((string) $product->translate('ar', false)?->name)
-                ->usingFileName(Str::limit($baseName, 60, '').'-'.Str::lower(Str::random(8)).'.'.$file->guessExtension())
-                ->toMediaCollection('gallery');
-        }
-        $this->log($product, 'images_added', ['count' => count($request->file('images'))]);
-
-        return back()->with('success', __('admin.updated'));
-    }
-
     public function reorder(Request $request, Product $product): RedirectResponse
     {
         $this->authorize('update', $product);

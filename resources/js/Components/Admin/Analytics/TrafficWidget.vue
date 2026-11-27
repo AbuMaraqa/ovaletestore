@@ -38,7 +38,7 @@ const fmt = (n: number) => new Intl.NumberFormat(undefined).format(n);
 
         <p v-else-if="traffic.status === 'error'" class="flex items-center gap-2 text-sm text-destructive"><KtIcon name="information-2" /> {{ t('analytics.error') }}</p>
         <p v-else class="flex items-center gap-2 text-sm text-secondary-foreground">
-            <KtIcon name="chart-simple" class="text-primary" /> {{ t('analytics.setup_intro') }}
+            <KtIcon name="chart-simple" class="text-primary" /> {{ t('analytics.not_connected') }}
         </p>
     </KtCard>
 </template>

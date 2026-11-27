@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Actions\Products\AttachProductImages;
+use App\Actions\Seo\SaveSeoOverrides;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
 use App\Enums\StockStatus;
@@ -9,6 +11,7 @@ use App\Models\AttributeTerm;
 use App\Models\Product;
 use App\Models\ProductTranslation;
 use App\Support\Money;
+use App\Support\StagedUploads;
 use Astrotomic\Translatable\Validation\RuleFactory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -85,6 +88,63 @@ class ProductRequest extends FormRequest
             // Trader prices: {price_tier_id: price}; empty = the tier's automatic % applies.
             'variants.*.tier_prices' => ['nullable', 'array'],
             'variants.*.tier_prices.*' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
+
+            // New gallery images: ids of files staged while the form was open (StagedUploadController), in order.
+            'uploads' => ['nullable', 'array', 'max:'.AttachProductImages::MAX_FILES],
+            'uploads.*' => ['string', 'uuid', 'distinct'],
+            'add_another' => ['boolean'],
+
+            // Search-engine overrides (laravel-seo row), saved with the product; the share image is a staged upload.
+            'seo' => ['nullable', 'array'],
+            ...SaveSeoOverrides::rules('seo.'),
+            'seo.image_upload' => ['nullable', 'string', 'uuid'],
+        ];
+    }
+
+    /**
+     * Readable field names in messages ("Name (English) is required", not "translations.en.name"):
+     * the error summary lists these messages as they are.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        $locales = ['ar' => 'العربية', 'en' => 'English', 'he' => 'עברית'];
+        $translated = [];
+        foreach ($locales as $locale => $native) {
+            foreach (['name' => 'admin.name', 'slug' => 'forms.product.url', 'short_description' => 'forms.product.short_description',
+                'description' => 'admin.description', 'meta_title' => 'admin.meta_title', 'meta_description' => 'admin.meta_description'] as $field => $label) {
+                $translated["translations.{$locale}.{$field}"] = __($label)." ({$native})";
+            }
+        }
+
+        return [
+            ...$translated,
+            'status' => __('common.status'),
+            'type' => __('admin.type'),
+            'brand_id' => __('admin.brand'),
+            'published_at' => __('forms.product.publish_date'),
+            'category_ids' => __('admin.categories'),
+            'primary_category_id' => __('admin.primary_category'),
+            'attributes.*.term_ids' => __('admin.terms'),
+            'variants' => __('admin.variations'),
+            'variants.*.sku' => __('admin.sku'),
+            'variants.*.regular_price' => __('admin.regular_price'),
+            'variants.*.sale_price' => __('admin.sale_price'),
+            'variants.*.sale_starts_at' => __('forms.product.sale_starts_at'),
+            'variants.*.sale_ends_at' => __('forms.product.sale_ends_at'),
+            'variants.*.stock_quantity' => __('admin.stock_quantity'),
+            'variants.*.stock_status' => __('admin.stock_status'),
+            'variants.*.weight_grams' => __('forms.product.weight'),
+            'variants.*.length_mm' => __('forms.product.length'),
+            'variants.*.width_mm' => __('forms.product.width'),
+            'variants.*.height_mm' => __('forms.product.height'),
+            'variants.*.tier_prices.*' => __('traders.trader_prices'),
+            'uploads' => __('forms.product.media'),
+            'uploads.*' => __('forms.product.media'),
+            'seo.robots' => __('seo.robots'),
+            'seo.canonical_url' => __('seo.canonical_url'),
+            'seo.image_upload' => __('seo.share_image'),
         ];
     }
 
@@ -93,6 +153,8 @@ class ProductRequest extends FormRequest
         return [function (Validator $validator) {
             $this->validateTermsBelongToAttributes($validator);
             $this->validateTranslatedSlugsAreUnique($validator);
+            $this->validateStagedUploads($validator);
+            $this->validateStagedSeoImage($validator);
         }];
     }
 
@@ -127,6 +189,24 @@ class ProductRequest extends FormRequest
             if ($valid !== count(array_unique($termIds))) {
                 $validator->errors()->add("attributes.{$i}.term_ids", __('validation.exists', ['attribute' => __('admin.terms')]));
             }
+        }
+    }
+
+    /** Each id must be a file this user staged (and that was not pruned). */
+    private function validateStagedUploads(Validator $validator): void
+    {
+        foreach ((array) $this->input('uploads', []) as $i => $id) {
+            if (! is_string($id) || StagedUploads::path($this->user(), $id) === null) {
+                $validator->errors()->add("uploads.{$i}", __('forms.upload_expired'));
+            }
+        }
+    }
+
+    private function validateStagedSeoImage(Validator $validator): void
+    {
+        $id = $this->input('seo.image_upload');
+        if (is_string($id) && $id !== '' && StagedUploads::path($this->user(), $id) === null) {
+            $validator->errors()->add('seo.image_upload', __('forms.upload_expired'));
         }
     }
 

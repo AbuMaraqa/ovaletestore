@@ -31,7 +31,7 @@ return [
     'bing_verification' => 'קוד Bing Webmaster',
     'analytics' => 'Google Analytics 4',
     'ga_measurement_id' => 'מזהה מדידה (Measurement ID)',
-    'ga_measurement_id_help' => 'כמו G-XXXXXXXXXX — מפעיל מעקב בחנות. הדוחות בלוח הבקרה דורשים גם הגדרת שרת (ראו עמוד האנליטיקס).',
+    'ga_measurement_id_help' => 'כמו G-XXXXXXXXXX — מתחיל מעקב אחר ביקורים בחנות ב-Google Analytics.',
     'files' => 'קבצי מנועי חיפוש',
     'sitemap' => 'מפת האתר',
     'robots_txt' => 'קובץ robots.txt',

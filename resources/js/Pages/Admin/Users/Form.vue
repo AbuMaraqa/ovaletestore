@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import FormField from '@/Components/Forms/FormField.vue';
-import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
-import PageHeader from '@/Components/UI/PageHeader.vue';
+import FormPage from '@/Components/Forms/FormPage.vue';
 import { useTrans } from '@/Composables/useTrans';
 
 const props = defineProps<{
@@ -22,28 +21,24 @@ const form = useForm({
     roles: props.user?.roles ?? [],
 });
 
-function submit(): void {
-    const options = { preserveScroll: true, onSuccess: () => form.reset('password', 'password_confirmation') };
+type VisitHooks = { preserveScroll: boolean; onError: () => void; onSuccess: () => void };
+function submit(hooks: VisitHooks): void {
+    const options = { ...hooks, onSuccess: () => (form.reset('password', 'password_confirmation'), hooks.onSuccess()) };
     props.user ? form.put(route('admin.users.update', props.user.id), options) : form.post(route('admin.users.store'), options);
 }
 </script>
 
 <template>
-    <PageHeader :title="user ? t('admin.edit_user') : t('admin.new_user')">
-        <template #actions>
-            <KtButton :href="route('admin.users.index')" variant="ghost">{{ t('common.back') }}</KtButton>
-            <KtButton type="submit" form="user-form" :loading="form.processing" icon="check">{{ t('common.save') }}</KtButton>
-        </template>
-    </PageHeader>
 
-    <form id="user-form" class="grid gap-6 xl:grid-cols-12" autocomplete="off" @submit.prevent="submit">
+    <FormPage id="user-form" :form="form" :action="submit" :title="user ? t('admin.edit_user') : t('admin.new_user')" :back-href="route('admin.users.index')">
+        <div class="grid gap-6 xl:grid-cols-12">
         <KtCard :title="t('admin.general')" class="xl:col-span-8">
             <div class="grid gap-5 md:grid-cols-2">
-                <FormField id="name" :label="t('admin.name')" :error="form.errors.name" required><input id="name" v-model="form.name" class="kt-input" /></FormField>
-                <FormField id="email" :label="t('common.email')" :error="form.errors.email" required><input id="email" v-model="form.email" type="email" class="kt-input" dir="ltr" /></FormField>
-                <FormField id="phone" :label="t('admin.phone')" :error="form.errors.phone"><input id="phone" v-model="form.phone" type="tel" class="kt-input" dir="ltr" /></FormField>
+                <FormField id="name" :label="t('admin.name')" error-key="name" required><input id="name" v-model="form.name" class="kt-input" /></FormField>
+                <FormField id="email" :label="t('common.email')" error-key="email" required><input id="email" v-model="form.email" type="email" class="kt-input" dir="ltr" /></FormField>
+                <FormField id="phone" :label="t('admin.phone')" error-key="phone"><input id="phone" v-model="form.phone" type="tel" class="kt-input" dir="ltr" /></FormField>
                 <div />
-                <FormField id="password" :label="t('common.password')" :help="user ? t('admin.password_help') : undefined" :error="form.errors.password" :required="!user">
+                <FormField id="password" :label="t('common.password')" :help="user ? t('admin.password_help') : undefined" error-key="password" :required="!user">
                     <input id="password" v-model="form.password" type="password" class="kt-input" autocomplete="new-password" />
                 </FormField>
                 <FormField id="password_confirmation" :label="t('common.confirm_password')">
@@ -62,5 +57,6 @@ function submit(): void {
                 <p v-if="form.errors.roles" class="text-sm text-destructive">{{ form.errors.roles }}</p>
             </div>
         </KtCard>
-    </form>
+        </div>
+    </FormPage>
 </template>

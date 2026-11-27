@@ -32,7 +32,7 @@ return [
     'bing_verification' => 'رمز Bing Webmaster',
     'analytics' => 'Google Analytics 4',
     'ga_measurement_id' => 'معرّف القياس (Measurement ID)',
-    'ga_measurement_id_help' => 'مثل G-XXXXXXXXXX — يفعّل التتبع في المتجر. التقارير داخل اللوحة تحتاج أيضاً إعداد الخادم (انظر صفحة التحليلات).',
+    'ga_measurement_id_help' => 'مثل G-XXXXXXXXXX — يبدأ تتبع زيارات المتجر في Google Analytics.',
     'files' => 'ملفات محركات البحث',
     'sitemap' => 'خريطة الموقع',
     'robots_txt' => 'ملف robots.txt',
