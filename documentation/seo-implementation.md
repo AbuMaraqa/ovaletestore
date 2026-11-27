@@ -58,3 +58,10 @@ Dynamic (`SitemapController@robots`): disallows admin, cart, checkout, login, `?
 - **Contact page URL** (2026-11-28): `/{locale}/contact-us` (route `storefront.contact`, label «تواصل معنا»). The old
   `/{locale}/contact` answers with one 301 to it (`storefront.contact.legacy`), so existing links and indexed results
   keep working.
+- **robots.txt** (2026-11-28): served only by `SitemapController@robots` (private areas disallowed + `Sitemap:` line;
+  `Disallow: /` when indexing is off or outside production). Laravel's default `public/robots.txt` was deleted:
+  nginx serves a real file before PHP, so it silently replaced these rules on the live server. When deploying by
+  copying files, **delete `public/robots.txt` on the server too**. A test fails if the file comes back.
+- **Search Console "Couldn't fetch" on the child sitemaps** right after submitting `/sitemap.xml` is Google's
+  pending state (no "Last read" date yet): the files answer 200 with valid XML. It clears once Google crawls them
+  (hours to a few days); re-submit the index only if it persists.
