@@ -46,7 +46,9 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::get('/brand/{slug}', [Storefront\CatalogController::class, 'brand'])->name('brand');
             Route::get('/search/suggest', [Storefront\SearchController::class, 'suggest'])->middleware('throttle:60,1')->name('search.suggest');
             Route::post('/currency', Storefront\CurrencyController::class)->middleware('throttle:30,1')->name('currency');
-            Route::get('/contact', [Storefront\PageController::class, 'contact'])->name('contact');
+            Route::get('/contact-us', [Storefront\PageController::class, 'contact'])->name('contact');
+            // Old address of the contact page: one permanent redirect (keeps links and search results working).
+            Route::get('/contact', fn () => redirect()->route('storefront.contact', status: 301))->name('contact.legacy');
             Route::get('/about', [Storefront\PageController::class, 'about'])->name('about');
 
             Route::get('/cart', [Storefront\CartController::class, 'show'])->name('cart');

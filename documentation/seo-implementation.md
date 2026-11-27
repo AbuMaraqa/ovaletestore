@@ -55,3 +55,6 @@ Dynamic (`SitemapController@robots`): disallows admin, cart, checkout, login, `?
   breadcrumbs, internal links and the sitemap index. After launch: verify the domain in Search Console (code in
   Settings → SEO), submit `/sitemap.xml`; sitelinks typically appear once the site is indexed and people search the
   store by name. (Google retired the sitelinks *search box* in 2024; the `SearchAction` is kept for other engines.)
+- **Contact page URL** (2026-11-28): `/{locale}/contact-us` (route `storefront.contact`, label «تواصل معنا»). The old
+  `/{locale}/contact` answers with one 301 to it (`storefront.contact.legacy`), so existing links and indexed results
+  keep working.

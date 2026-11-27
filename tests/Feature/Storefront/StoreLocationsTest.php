@@ -76,3 +76,11 @@ it('allows only the Google Maps embed as a frame source', function () {
     expect($csp)->toContain('frame-src https://www.google.com')
         ->and($csp)->toContain("frame-ancestors 'self'");
 });
+
+it('serves the contact page at /contact-us and sends the old /contact address there permanently', function () {
+    $this->get('/ar/contact-us')->assertOk();
+    $this->get('/ar/contact')->assertStatus(301)->assertRedirect(route('storefront.contact'));
+
+    $this->useRouteLocale('en');
+    $this->get('/en/contact')->assertStatus(301)->assertRedirect('/en/contact-us');
+});

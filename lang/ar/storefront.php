@@ -75,7 +75,7 @@ return [
     'scroll_next' => 'التالي',
     'products' => 'المنتجات',
     'categories_nav' => 'التصنيفات',
-    'contact_us' => 'للتواصل',
+    'contact_us' => 'تواصل معنا',
     'about_us' => 'من نحن',
     'our_story' => 'قصتنا',
     'currency' => 'العملة',

@@ -75,7 +75,7 @@ return [
     'scroll_next' => 'Next',
     'products' => 'Products',
     'categories_nav' => 'Categories',
-    'contact_us' => 'Contact',
+    'contact_us' => 'Contact us',
     'about_us' => 'About us',
     'our_story' => 'Our story',
     'currency' => 'Currency',

@@ -116,3 +116,14 @@ it('marks up the home page for Google\'s site name: WebSite with the store name 
             return $website['name'] === 'أوفاليتي ستور' && $website['alternateName'] === ['Ovalete Store'];
         }));
 });
+
+it('serves robots.txt from the app (no static file shadowing it) with the sitemap and private areas', function () {
+    // nginx serves a real file before Laravel: a public/robots.txt would silently replace these rules.
+    expect(file_exists(public_path('robots.txt')))->toBeFalse();
+
+    app()->detectEnvironment(fn () => 'production');
+    $this->get('/robots.txt')->assertOk()
+        ->assertSee('Disallow: /*/admin')
+        ->assertSee('Disallow: /*/checkout')
+        ->assertSee('Sitemap: '.route('sitemap.index'));
+});
