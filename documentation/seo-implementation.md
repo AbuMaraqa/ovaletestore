@@ -44,3 +44,14 @@ Dynamic (`SitemapController@robots`): disallows admin, cart, checkout, login, `?
 - Tracking: Settings → SEO → Measurement ID (`G-…`). `app.blade.php` prints gtag.js on storefront pages only (never admin/POS/auth) when `config('analytics.tracking')` is on (default: production only, `ANALYTICS_TRACKING`); the CSP allows Google's hosts only then. `resources/js/analytics.ts` sends one `page_view` per Inertia visit (de-duplicated by URL).
 - Reports: Admin → Site traffic (`admin.analytics.index`, permission `analytics.view`) and a dashboard card. `App\Support\Analytics\SiteAnalytics` uses every package report (totals by date, visitors & views per page and per day, most visited pages, referrers, new vs returning, browsers, countries, OS) + `get()` for KPIs (users, views, sessions, engagement, avg. duration, bounce), channels and devices + `getRealtime()` (visitors in the last 30 min, own 60 s cache; the window is anchored on a full hour because the package's `Period::toMinuteRange()` derives "minutes ago" from the minute-of-hour).
 - Setup (server): `ANALYTICS_PROPERTY_ID` (numeric) in `.env`; service-account JSON at `storage/app/analytics/service-account-credentials.json` (or `ANALYTICS_CREDENTIALS_PATH`), the service account added as Viewer on the GA4 property. Until then the page shows the setup guide; API errors are shown as a short message and reported to the log. Responses are cached `ANALYTICS_CACHE_MINUTES` (60).
+
+## Site name, favicon & sitelinks in Google (2026-11-28)
+- **Site name** (the bold name above a result): the home page of every language prints `WebSite` JSON-LD with
+  `name` (store name in that language) and `alternateName` (its names in the other languages) — `JsonLd::website()`.
+- **Favicon in results**: `<link rel="icon">` now also lists the 192×192 PNG (Google wants a square icon, a multiple
+  of 48px); the 48px `.ico` stays for browsers.
+- **Sitelinks** (the extra rows under the result): chosen by Google automatically — there is no tag that turns them
+  on. What we control is done: a clear header menu with plain labels, unique titles/descriptions per page,
+  breadcrumbs, internal links and the sitemap index. After launch: verify the domain in Search Console (code in
+  Settings → SEO), submit `/sitemap.xml`; sitelinks typically appear once the site is indexed and people search the
+  store by name. (Google retired the sitelinks *search box* in 2024; the `SearchAction` is kept for other engines.)

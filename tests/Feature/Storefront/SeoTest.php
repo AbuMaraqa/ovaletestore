@@ -101,3 +101,18 @@ it('rebuilds every sitemap with sitemap:generate', function () {
     $this->artisan('sitemap:generate')->assertSuccessful();
     expect(cache()->has('sitemap:ar:products'))->toBeTrue()->and(cache()->has('sitemap:index'))->toBeTrue();
 });
+
+it('marks up the home page for Google\'s site name: WebSite with the store name and its other-language names', function () {
+    $general = app(GeneralSettings::class);
+    $general->site_name = ['ar' => 'أوفاليتي ستور', 'en' => 'Ovalete Store', 'he' => 'Ovalete Store'];
+    $general->save();
+
+    $this->get(route('storefront.home'))
+        ->assertInertia(fn ($page) => $page->where('seo', function ($tags) {
+            $website = collect($tags)
+                ->map(fn (string $tag) => json_decode(strip_tags($tag), true))
+                ->first(fn ($data) => is_array($data) && ($data['@type'] ?? null) === 'WebSite');
+
+            return $website['name'] === 'أوفاليتي ستور' && $website['alternateName'] === ['Ovalete Store'];
+        }));
+});

@@ -33,10 +33,22 @@ final class JsonLd
         return $org->toArray();
     }
 
+    /**
+     * Home-page WebSite markup: Google reads `name` / `alternateName` for the site name shown above results
+     * (the store's name in the other languages are its alternate names).
+     */
     public static function website(): array
     {
+        $general = app(GeneralSettings::class);
+        $name = $general->siteName();
+        $alternates = array_values(array_unique(array_filter(
+            array_map('trim', $general->site_name),
+            fn (string $other) => $other !== '' && $other !== $name,
+        )));
+
         return Schema::webSite()
-            ->name(app(GeneralSettings::class)->siteName())
+            ->name($name)
+            ->if($alternates !== [], fn ($site) => $site->alternateName($alternates))
             ->url(url('/'))
             ->potentialAction(
                 Schema::searchAction()

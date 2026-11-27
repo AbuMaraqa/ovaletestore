@@ -70,6 +70,8 @@ final class SiteIcons
         return [
             ['rel' => 'icon', 'href' => $url('favicon.ico'), 'sizes' => '48x48'],
             ['rel' => 'icon', 'href' => $url('favicon-32.png'), 'type' => 'image/png', 'sizes' => '32x32'],
+            // Google's search-result favicon prefers a large square icon (a multiple of 48px; 192 is listed).
+            ['rel' => 'icon', 'href' => $url('icon-192.png'), 'type' => 'image/png', 'sizes' => '192x192'],
             ['rel' => 'apple-touch-icon', 'href' => $url('apple-touch-icon.png'), 'sizes' => '180x180'],
             ['rel' => 'manifest', 'href' => route('manifest')],
         ];
