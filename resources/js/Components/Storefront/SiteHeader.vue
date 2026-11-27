@@ -212,7 +212,7 @@ const logout = () => router.post(route('logout'));
             </div>
         </div>
 
-        <MobileMenu v-model:open="mobileOpen" :categories="categories" />
+        <MobileMenu v-model:open="mobileOpen" />
         <SearchOverlay v-model:open="searchOpen" />
     </header>
 </template>

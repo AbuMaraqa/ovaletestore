@@ -82,3 +82,12 @@ Owner's brief: soft, professional, world-class — and **it must not look AI-gen
   Decorative (`aria-hidden`), runs only on screen, static with reduced motion.
 - **Pagination** (`Components/Storefront/Pagination.vue`): previous/next with arrows and a short window
   (1 … 4 5 6 … 22); phones show "Page 5 of 22". Page URLs keep every other query parameter.
+- **Phone menu** (`Components/Storefront/MobileMenu.vue`): account row on top, then six large rows with a chevron
+  (home, products, categories, brands, our story, contact) — categories is one row to the categories page, never a
+  long list in the drawer; WhatsApp / call buttons; language and currency as segmented controls at the bottom.
+  No country flags for languages (owner's decision, 2026-11-28): a language is shown by its native name.
+- **Scroll after navigation** (`syncScrollWithNavigation()` in `Composables/useMotion.ts`, used by
+  `StorefrontLayout`): Lenis is halted when a visit starts and sent to the top when the new page arrives (unless the
+  visit preserves scroll, e.g. add to cart), then synced to the real position. Before this, clicking a link while a
+  wheel scroll was still easing finished that old animation on the new page and landed shoppers on the footer.
+  Pagination links no longer preserve scroll either (a new page of products opens at the top).

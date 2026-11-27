@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/vue3';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -37,10 +38,39 @@ export function lockScroll(locked: boolean): void {
     else lenis?.start();
 }
 
-/** After an Inertia page swap: jump to top (unless preserved) and re-measure triggers. */
-export function afterPageChange(preserveScroll = false): void {
-    if (!preserveScroll) lenis?.scrollTo(0, { immediate: true, force: true });
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+/** Stop any smooth-scroll easing where it is (the next frame must not keep scrolling toward an old target). */
+function haltSmoothScroll(): void {
+    lenis?.scrollTo(window.scrollY, { immediate: true, force: true });
+}
+
+/**
+ * Keep Lenis in step with Inertia page swaps. Without this, clicking a link while Lenis is still easing a wheel
+ * scroll let it finish that old animation on the NEW page: Inertia had scrolled to the top, Lenis scrolled back to
+ * the old offset, which on a shorter page is the footer.
+ *  - visit starts → halt any easing;
+ *  - page swapped → for a normal visit jump to the top at once; then (next frame, after Inertia restored or kept the
+ *    position: back/forward, preserveScroll) sync Lenis to the real scroll position, re-measure, refresh triggers.
+ * Returns the unsubscribe function.
+ */
+export function syncScrollWithNavigation(): () => void {
+    let resetToTop = false;
+    const offStart = router.on('start', (event) => {
+        resetToTop = event.detail.visit.preserveScroll === false;
+        haltSmoothScroll();
+    });
+    const offNavigate = router.on('navigate', () => {
+        if (resetToTop) lenis?.scrollTo(0, { immediate: true, force: true });
+        resetToTop = false;
+        requestAnimationFrame(() => {
+            lenis?.resize();
+            haltSmoothScroll();
+            ScrollTrigger.refresh();
+        });
+    });
+    return () => {
+        offStart();
+        offNavigate();
+    };
 }
 
 /**

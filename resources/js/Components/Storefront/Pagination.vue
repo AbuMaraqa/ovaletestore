@@ -9,6 +9,7 @@ import type { PaginationLink } from '@/types';
  * Quiet pagination: "previous" / "next" with arrows and a short window of pages (1 … 4 5 6 … 22) instead of
  * Laravel's ten-plus circles. Phones show "Page 4 of 22" between the arrows. Built from the paginator's `links`
  * (works with both plain and API-resource paginators); page URLs keep every other query parameter (filters, sort).
+ * A new page opens at the top (no preserve-scroll: keeping the offset left shoppers looking at the footer).
  */
 const props = defineProps<{ links: PaginationLink[] }>();
 const { t } = useTrans();
@@ -55,7 +56,7 @@ const edge = 'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font
 
 <template>
     <nav v-if="last > 1" class="flex items-center justify-between gap-3 sm:justify-center sm:gap-6" :aria-label="t('storefront.page_of', { current, last })">
-        <Link v-if="prev?.url" :href="prev.url" preserve-scroll rel="prev" :class="[edge, 'text-cocoa hover:bg-sand']">
+        <Link v-if="prev?.url" :href="prev.url" rel="prev" :class="[edge, 'text-cocoa hover:bg-sand']">
             <Icon name="arrow" class="size-4 rotate-180 rtl:rotate-0" />
             {{ clean(prev.label) }}
         </Link>
@@ -77,7 +78,6 @@ const edge = 'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font
                 <Link
                     v-else
                     :href="urlFor(page) ?? '#'"
-                    preserve-scroll
                     class="inline-flex size-10 items-center justify-center rounded-full text-sm font-medium text-stone-600 tabular-nums transition hover:bg-sand hover:text-cocoa"
                 >
                     {{ page }}
@@ -86,7 +86,7 @@ const edge = 'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font
         </ol>
         <p class="text-sm text-stone-500 tabular-nums sm:hidden">{{ t('storefront.page_of', { current, last }) }}</p>
 
-        <Link v-if="next?.url" :href="next.url" preserve-scroll rel="next" :class="[edge, 'bg-cocoa text-white hover:bg-brand-800']">
+        <Link v-if="next?.url" :href="next.url" rel="next" :class="[edge, 'bg-cocoa text-white hover:bg-brand-800']">
             {{ clean(next.label) }}
             <Icon name="arrow" class="size-4 rtl:-scale-x-100" />
         </Link>

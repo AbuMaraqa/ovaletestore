@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
 import { onBeforeUnmount, onMounted } from 'vue';
 import FlashToast from '@/Components/Common/FlashToast.vue';
 import PageLoader from '@/Components/Common/PageLoader.vue';
 import SiteFooter from '@/Components/Storefront/SiteFooter.vue';
 import SiteHeader from '@/Components/Storefront/SiteHeader.vue';
 import WhatsAppButton from '@/Components/Storefront/WhatsAppButton.vue';
-import { afterPageChange, startSmoothScroll, stopSmoothScroll } from '@/Composables/useMotion';
+import { startSmoothScroll, stopSmoothScroll, syncScrollWithNavigation } from '@/Composables/useMotion';
 import { useTrans } from '@/Composables/useTrans';
 
 const { t } = useTrans();
 
-// Persistent layout: Lenis lives for the whole storefront session; triggers re-measure after each page swap.
+// Persistent layout: Lenis lives for the whole storefront session and is kept in step with every page swap
+// (new pages open at the top even if a smooth scroll was still easing when the link was clicked).
 let off: (() => void) | undefined;
 onMounted(() => {
     startSmoothScroll();
-    off = router.on('navigate', () => afterPageChange(true));
+    off = syncScrollWithNavigation();
 });
 onBeforeUnmount(() => {
     off?.();

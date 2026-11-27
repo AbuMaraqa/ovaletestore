@@ -138,4 +138,5 @@ return [
     'hero_stat_brands' => '{1} 1 brand|[2,*] :count brands',
     'hero_stat_categories' => '{1} 1 category|[2,*] :count categories',
     'page_of' => 'Page :current of :last',
+    'whatsapp' => 'WhatsApp',
 ];
