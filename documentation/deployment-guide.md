@@ -28,6 +28,8 @@ php artisan migrate --force
 php artisan db:seed --force            # first deploy only (roles + super-admin, random password printed once)
 php artisan storage:link
 php artisan config:cache && php artisan route:trans:cache && php artisan view:cache && php artisan event:cache
+php artisan permissions:sync         # new permissions (e.g. analytics.view)
+php artisan sitemap:generate          # warm the XML sitemaps (also nightly)
 php artisan queue:restart
 ```
 Use `route:trans:cache` (mcamara) instead of `route:cache` so each locale gets its own cached routes.
@@ -47,3 +49,6 @@ php artisan woo:verify             # writes documentation/migration-report.md
 
 ## Web server
 Serve `public/`. Keep the default Laravel `.htaccess`/nginx trailing-slash 301. Gzip/Brotli for text, long cache headers for `/build/*` and `/storage/*` (fingerprinted / immutable media paths).
+
+## Google Analytics (optional)
+See documentation/seo-implementation.md → Analytics: `ANALYTICS_PROPERTY_ID` + the service-account JSON in `storage/app/analytics/` (never in git), then `php artisan config:cache`.

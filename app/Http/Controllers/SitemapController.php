@@ -5,26 +5,27 @@ namespace App\Http\Controllers;
 use App\Settings\SeoSettings;
 use App\Support\Seo\SitemapBuilder;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 
 /**
- * Sitemap index → one sitemap per locale × type (pages, categories, products) with hreflang alternates.
- * Cached for an hour and flushed when catalog content changes (see SitemapBuilder::flush()).
+ * Sitemap index → one sitemap per locale × type (pages, categories, brands, products) with hreflang alternates.
+ * Built by App\Support\Seo\SitemapBuilder (spatie/laravel-sitemap), cached an hour, flushed on catalog changes,
+ * re-warmed nightly by `sitemap:generate`. X-Robots-Tag keeps the XML files themselves out of search results.
  */
 class SitemapController extends Controller
 {
     public function index(SitemapBuilder $builder): Response
     {
-        $xml = Cache::remember('sitemap:index', 3600, fn () => $builder->index()->render());
-
-        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+        return $this->xml($builder->xml());
     }
 
     public function show(SitemapBuilder $builder, string $locale, string $type): Response
     {
-        $xml = Cache::remember("sitemap:{$locale}:{$type}", 3600, fn () => $builder->build($locale, $type)->render());
+        return $this->xml($builder->xml($locale, $type));
+    }
 
-        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    private function xml(string $xml): Response
+    {
+        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8', 'X-Robots-Tag' => 'noindex']);
     }
 
     public function robots(SeoSettings $seo): Response

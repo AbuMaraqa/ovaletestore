@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Brand;
+use App\Models\BrandTranslation;
 use App\Models\Category;
 use App\Models\CategoryTranslation;
 use App\Models\Product;
 use App\Models\ProductTranslation;
 use App\Models\ProductVariant;
+use App\Models\Seo;
 use App\Models\User;
 use App\Observers\CatalogCacheObserver;
 use App\Support\CurrencyContext;
@@ -72,8 +75,9 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
         $this->configureActivityLog();
 
-        // ProductVariant too: prices and stock shown in the POS catalog.
-        foreach ([Product::class, ProductVariant::class, Category::class, ProductTranslation::class, CategoryTranslation::class] as $model) {
+        // ProductVariant too: prices and stock shown in the POS catalog. Brands + `seo` rows (noindex / canonical) shape the sitemaps.
+        foreach ([Product::class, ProductVariant::class, Category::class, ProductTranslation::class, CategoryTranslation::class,
+            Brand::class, BrandTranslation::class, Seo::class] as $model) {
             $model::observe(CatalogCacheObserver::class);
         }
     }

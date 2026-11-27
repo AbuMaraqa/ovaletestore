@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import SeoPanel, { type SeoOverrides } from '@/Components/Admin/Seo/SeoPanel.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import LocaleTabs from '@/Components/Forms/LocaleTabs.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
@@ -12,6 +13,7 @@ type Fields = { name: string; slug: string; description: string; meta_title: str
 const props = defineProps<{
     category: { id: number; parent_id: number | null; sort_order: number; is_active: boolean; image: string | null; translations: Record<string, Fields> } | null;
     parents: { id: number; name: string }[];
+    seo_overrides?: SeoOverrides;
 }>();
 
 const { t } = useTrans();
@@ -25,6 +27,13 @@ const form = useForm({
     _method: props.category ? 'put' : 'post',
 });
 const errors = computed(() => form.errors as Record<string, string>);
+
+// Live Google preview in the search-engine card: the same fallbacks as the server (meta field → content).
+const seoTexts = computed(() =>
+    Object.fromEntries(
+        Object.entries(form.translations).map(([l, f]) => [l, { title: f.meta_title || f.name, description: f.meta_description || f.description }]),
+    ),
+);
 
 function submit(): void {
     // POST + _method so file uploads work for updates too.
@@ -87,4 +96,5 @@ function submit(): void {
             </div>
         </KtCard>
     </form>
+    <SeoPanel v-if="seo_overrides" class="mt-6" :data="seo_overrides" :texts="seoTexts" />
 </template>

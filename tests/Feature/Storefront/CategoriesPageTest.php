@@ -27,7 +27,7 @@ it('lists categories that have products, with product and live-offer counts', fu
             ->where('categories.1.name', 'سيروبات')
             ->where('categories.1.products_count', 1) // the draft does not count
             ->where('categories.1.on_sale_count', 0)  // expired sale is not an offer
-            ->where('seo.title', fn (string $title) => str_contains($title, __('storefront.categories_title'))));
+            ->where('seo', fn ($tags) => str_contains(seoTag($tags, 'title'), __('storefront.categories_title'))));
 });
 
 it('is in every locale and in the pages sitemap', function () {

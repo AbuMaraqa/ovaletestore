@@ -6,7 +6,7 @@ it('shows the branded 404 page with the store layout data, even for URLs that ma
             ->where('status', 404)
             ->has('site.name')
             ->has('translations')
-            ->where('seo.robots', fn ($robots) => str_contains((string) $robots, 'noindex')));
+            ->where('seo', fn ($tags) => str_contains(seoTag($tags, 'meta-robots'), 'noindex')));
 });
 
 it('renders the 404 page in the language of the URL', function () {

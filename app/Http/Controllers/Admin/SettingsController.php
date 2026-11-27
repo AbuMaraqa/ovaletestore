@@ -105,7 +105,12 @@ class SettingsController extends Controller
             ] : [],
             'seo' => ($s = app(SeoSettings::class)) ? [
                 'home_title' => $s->home_title, 'home_description' => $s->home_description,
+                'default_description' => $s->default_description,
                 'og_image' => $url($s->og_image_path), 'allow_indexing' => $s->allow_indexing,
+                'twitter_username' => $s->twitter_username,
+                'google_verification' => $s->google_verification, 'bing_verification' => $s->bing_verification,
+                'ga_measurement_id' => $s->ga_measurement_id,
+                'sitemap_url' => route('sitemap.index'), 'robots_url' => route('robots'),
             ] : [],
             'mail' => $this->mailValues(app(MailSettings::class)),
             'invoice' => $this->invoiceValues(app(InvoiceSettings::class)),
@@ -372,10 +377,21 @@ class SettingsController extends Controller
             ...$this->localeRules('home_description', 'string|max:170'),
             'og_image' => ['nullable', 'file', 'max:4096', 'mimetypes:image/jpeg,image/png,image/webp', 'dimensions:min_width=600,min_height=315'],
             'allow_indexing' => ['boolean'],
+            ...$this->localeRules('default_description', 'string|max:170', requireArabic: false),
+            'twitter_username' => ['nullable', 'string', 'max:15', 'regex:/^@?[A-Za-z0-9_]{1,15}$/'],
+            // The content value only (never markup: it is printed inside a meta tag).
+            'google_verification' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9_\-]+$/'],
+            'bing_verification' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9_\-]+$/'],
+            'ga_measurement_id' => ['nullable', 'string', 'regex:/^G-[A-Z0-9]{4,16}$/'],
         ]);
 
         $settings->home_title = array_map('strval', array_filter($data['home_title']));
         $settings->home_description = array_map('strval', array_filter($data['home_description'] ?? []));
+        $settings->default_description = array_map('strval', array_filter($data['default_description'] ?? []));
+        $settings->twitter_username = isset($data['twitter_username']) ? ltrim($data['twitter_username'], '@') : null;
+        $settings->google_verification = $data['google_verification'] ?? null;
+        $settings->bing_verification = $data['bing_verification'] ?? null;
+        $settings->ga_measurement_id = $data['ga_measurement_id'] ?? null;
         $settings->og_image_path = $this->storeAsset($request->file('og_image'), 'branding', $settings->og_image_path);
         $settings->allow_indexing = (bool) ($data['allow_indexing'] ?? true);
         $settings->save();

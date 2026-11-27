@@ -12,7 +12,7 @@ final class Permissions
 {
     /** @var array<string, list<string>> */
     public const GROUPS = [
-        'panel' => ['admin.access', 'activity.view'],
+        'panel' => ['admin.access', 'activity.view', 'analytics.view'],
         'products' => ['products.view', 'products.create', 'products.update', 'products.delete'],
         'categories' => ['categories.view', 'categories.create', 'categories.update', 'categories.delete'],
         'attributes' => ['attributes.view', 'attributes.create', 'attributes.update', 'attributes.delete'],
@@ -53,7 +53,7 @@ final class Permissions
             'content-manager' => [
                 'admin.access', 'products.view', 'products.update',
                 ...self::GROUPS['categories'], ...self::GROUPS['brands'],
-                'settings.general', 'settings.contact', 'settings.seo',
+                'settings.general', 'settings.contact', 'settings.seo', 'analytics.view',
             ],
             'order-manager' => [
                 'admin.access', 'orders.view', 'orders.update_status', 'products.view', 'customers.view', 'traders.view',

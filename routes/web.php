@@ -8,6 +8,7 @@ use App\Http\Controllers\Storefront;
 use App\Http\Middleware\ApplyStorefrontCurrency;
 use App\Settings\GeneralSettings;
 use App\Support\ActivityLog;
+use App\Support\Seo\SitemapBuilder;
 use App\Support\SiteIcons;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -22,7 +23,7 @@ Route::get('/site.webmanifest', fn () => response()->json(
 ))->name('manifest');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemaps/{locale}-{type}.xml', [SitemapController::class, 'show'])
-    ->whereIn('locale', ['ar', 'en', 'he'])->whereIn('type', ['pages', 'categories', 'products'])
+    ->whereIn('locale', ['ar', 'en', 'he'])->whereIn('type', SitemapBuilder::TYPES)
     ->name('sitemap.show');
 
 /*
@@ -100,6 +101,9 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::resource('categories', Admin\CategoryController::class)->except('show');
             Route::resource('attributes', Admin\AttributeController::class)->except('show');
             Route::resource('brands', Admin\BrandController::class)->except('show');
+            // laravel-seo overrides (robots, canonical, share image) of a product / category / brand.
+            Route::put('seo/{type}/{id}', [Admin\SeoController::class, 'update'])
+                ->whereIn('type', array_keys(Admin\SeoController::TYPES))->whereNumber('id')->name('seo.update');
             Route::resource('shipping-methods', Admin\ShippingMethodController::class)->except('show');
             Route::get('companies/{company}/statement', [Admin\CompanyController::class, 'statementPdf'])->name('companies.statement');
             Route::resource('companies', Admin\CompanyController::class);
@@ -128,6 +132,7 @@ Route::prefix(LaravelLocalization::setLocale())
             Route::get('tables/{table}/export', Admin\TableExportController::class)->middleware('throttle:20,1')->name('tables.export');
             Route::post('tables/{table}/bulk', Admin\TableBulkController::class)->middleware('throttle:30,1')->name('tables.bulk');
 
+            Route::get('analytics', [Admin\AnalyticsController::class, 'index'])->name('analytics.index');
             Route::get('activity', [Admin\ActivityController::class, 'index'])->name('activity.index');
             Route::get('activity/{type}/{id}', [Admin\ActivityController::class, 'record'])
                 ->whereIn('type', array_keys(ActivityLog::SUBJECTS))->whereNumber('id')->name('activity.record');

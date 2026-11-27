@@ -163,3 +163,7 @@ Sales reps can add a company and correct its contact details from the POS (`pos.
 ## Site icons
 `php artisan branding:icons` (also runs after a logo or favicon upload) generates `favicon.ico`, the PNG favicons, home-screen icons and `/site.webmanifest`. Small sizes use a brand monogram; large sizes use the trimmed logo.
 
+## SEO & site traffic
+- Settings → SEO: home title/description, default description, share image, indexing switch, X account, Google/Bing verification codes, GA4 Measurement ID, links to the sitemap and robots.txt.
+- Product / category / brand edit screens: "Search engines" card (robots, canonical, share image, Google preview per language).
+- Site traffic page + dashboard card (GA4 via spatie/laravel-analytics), permission `analytics.view` (admin, content-manager). Details: documentation/seo-implementation.md.

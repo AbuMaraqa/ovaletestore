@@ -52,6 +52,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Form', [
             ...$this->formOptions(),
             'product' => new ProductFormResource($product),
+            'seo_overrides' => SeoController::props($product, 'products'),
         ]);
     }
 

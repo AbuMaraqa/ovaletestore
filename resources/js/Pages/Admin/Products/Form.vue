@@ -6,6 +6,7 @@ import ProductOrganization from '@/Components/Admin/Products/ProductOrganization
 import ProductTranslations from '@/Components/Admin/Products/ProductTranslations.vue';
 import VariantFields from '@/Components/Admin/Products/VariantFields.vue';
 import VariationsEditor from '@/Components/Admin/Products/VariationsEditor.vue';
+import SeoPanel, { type SeoOverrides } from '@/Components/Admin/Seo/SeoPanel.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
@@ -21,6 +22,7 @@ const props = defineProps<{
     attributes: AttributeOption[];
     locales: string[];
     tiers: PriceTierOption[];
+    seo_overrides?: SeoOverrides;
 }>();
 
 // Trader price fields inside every variant read the tiers from here.
@@ -49,6 +51,13 @@ const form = useForm<ProductForm>(
 
 const isEdit = computed(() => !!props.product?.id);
 const errors = computed(() => form.errors as Record<string, string>);
+
+// Live Google preview in the search-engine card: the same fallbacks as the server (meta field → content).
+const seoTexts = computed(() =>
+    Object.fromEntries(
+        Object.entries(form.translations).map(([l, f]) => [l, { title: f.meta_title || f.name, description: f.meta_description || f.short_description || f.description }]),
+    ),
+);
 
 function submit(): void {
     const options = { preserveScroll: true };
@@ -125,4 +134,5 @@ function onTypeChange(): void {
             />
         </aside>
     </form>
+    <SeoPanel v-if="seo_overrides" class="mt-6" :data="seo_overrides" :texts="seoTexts" />
 </template>

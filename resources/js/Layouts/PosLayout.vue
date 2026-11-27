@@ -3,7 +3,6 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FlashToast from '@/Components/Common/FlashToast.vue';
 import PageLoader from '@/Components/Common/PageLoader.vue';
-import SeoHead from '@/Components/Common/SeoHead.vue';
 import UserAvatar from '@/Components/Common/UserAvatar.vue';
 import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
@@ -22,7 +21,6 @@ const nav = computed(() => [
 </script>
 
 <template>
-    <SeoHead />
     <PageLoader content="#main" />
     <div class="flex min-h-dvh flex-col bg-stone-100 text-cocoa print:bg-white">
         <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur print:hidden">

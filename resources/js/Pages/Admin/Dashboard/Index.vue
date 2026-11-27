@@ -2,6 +2,8 @@
 import { Deferred, Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import OrderStatusBadge from '@/Components/Admin/OrderStatusBadge.vue';
+import TrafficWidget from '@/Components/Admin/Analytics/TrafficWidget.vue';
+import type { AnalyticsReport } from '@/Components/Admin/Analytics/types';
 import RevenueChart from '@/Components/Dashboard/RevenueChart.vue';
 import KtCard from '@/Components/UI/KtCard.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
@@ -14,6 +16,7 @@ type Kpi = { value: string | number; change: number | null };
 const props = defineProps<{
     kpis: { revenue: Kpi; orders: Kpi; average: Kpi; pending: Kpi } | null;
     chart?: { date: string; label: string; revenue: number; orders: number }[] | null;
+    traffic?: AnalyticsReport | null;
     currencySymbol: string;
     catalog: Record<'published' | 'drafts' | 'without_image' | 'without_english' | 'without_hebrew' | 'without_sku' | 'out_of_stock' | 'on_sale' | 'english_ratio', number>;
     topCategories: { id: number; name: string; count: number }[];
@@ -93,6 +96,12 @@ useGsap(root, ({ gsap }) => {
                 </div>
             </div>
         </div>
+
+        <!-- Site traffic (Google Analytics 4) -->
+        <Deferred v-if="traffic !== null" data="traffic">
+            <template #fallback><div class="mt-5 h-48 animate-pulse rounded-xl bg-accent" /></template>
+            <TrafficWidget v-if="traffic" class="mt-5" :traffic="traffic" />
+        </Deferred>
 
         <div class="mt-5 grid gap-5 lg:grid-cols-3">
             <!-- Revenue -->

@@ -12,7 +12,6 @@ use App\Support\Seo\SeoData;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class ProductController extends Controller
 {
@@ -51,20 +50,10 @@ class ProductController extends Controller
             'product' => new ProductDetailResource($product),
             'breadcrumbs' => $breadcrumbs,
             'related' => Inertia::defer(fn () => ProductCardResource::collection($this->related($product))),
-            'seo' => SeoData::make(
-                $product->meta_title ?: $product->name,
-                $product->meta_description ?: ($product->short_description ?: $product->description),
-            )
-                ->type('product')
-                ->image($imageUrl)
-                ->localized(fn (string $locale) => LaravelLocalization::getLocalizedURL(
-                    $locale,
-                    route('storefront.product', ['slug' => $product->translate($locale, true)->slug]),
-                    [],
-                    false,
-                ))
-                ->withJsonLd(JsonLd::product($product, $url, $imageUrl))
-                ->withJsonLd(JsonLd::breadcrumbs($breadcrumbs)),
+            // Title/description/image/hreflang from the product (HasSeoPage) + its `seo` row overrides.
+            'seo' => SeoData::for($product)
+                ->breadcrumbs($breadcrumbs)
+                ->withJsonLd(JsonLd::product($product, $url, $imageUrl)),
         ]);
     }
 

@@ -54,6 +54,7 @@ return [
         'currencies_set_default' => 'Change the default currency (converts all prices)',
         'admin_access' => 'Open the admin panel',
         'activity_view' => 'View the activity log',
+        'analytics_view' => 'View site traffic (Google Analytics)',
         'products_view' => 'View',
         'products_create' => 'Create',
         'products_update' => 'Edit',

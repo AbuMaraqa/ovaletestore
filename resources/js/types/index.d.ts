@@ -30,21 +30,6 @@ export interface AuthUser {
     pos_url: string | null;
 }
 
-export interface SeoAlternate {
-    hreflang: string;
-    href: string;
-}
-
-export interface Seo {
-    title: string;
-    description: string | null;
-    canonical: string;
-    robots: string;
-    alternates: SeoAlternate[];
-    og: { type: string; site_name: string; locale: string; image: string | null };
-    json_ld: Record<string, unknown>[];
-}
-
 export interface PhoneLine {
     number: string;
     label: string | null;
@@ -72,7 +57,8 @@ export interface SharedProps {
     currencies?: CurrencyOption[] | null;
     flash: { success: string | null; error: string | null };
     translations: Record<string, Record<string, unknown>>;
-    seo?: Seo;
+    /** <head> tags rendered by laravel-seo (server), applied by Inertia serverHead. */
+    seo?: string[];
     [key: string]: unknown;
 }
 

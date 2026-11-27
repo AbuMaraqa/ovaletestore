@@ -102,3 +102,15 @@ function registrationPayload(array $overrides = []): array
         ...honeypotFields(),
     ], $overrides);
 }
+
+/** One <head> tag of the `seo` page prop (laravel-seo, see App\Support\Seo\SeoData) by its data-inertia key; '' when absent. */
+function seoTag(iterable $tags, string $key): string
+{
+    foreach ($tags as $tag) {
+        if (str_contains($tag, 'data-inertia="'.$key.'"')) {
+            return $tag;
+        }
+    }
+
+    return '';
+}

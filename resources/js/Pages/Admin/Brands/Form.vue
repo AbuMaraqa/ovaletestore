@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import SeoPanel, { type SeoOverrides } from '@/Components/Admin/Seo/SeoPanel.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import LocaleTabs from '@/Components/Forms/LocaleTabs.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
@@ -11,6 +12,7 @@ import { useTrans } from '@/Composables/useTrans';
 type Fields = { name: string; slug: string; description: string };
 const props = defineProps<{
     brand: { id: number; sort_order: number; is_active: boolean; is_featured: boolean; logo: string | null; translations: Record<string, Fields> } | null;
+    seo_overrides?: SeoOverrides;
 }>();
 
 const { t } = useTrans();
@@ -24,6 +26,13 @@ const form = useForm({
     _method: props.brand ? 'put' : 'post',
 });
 const errors = computed(() => form.errors as Record<string, string>);
+
+// Live Google preview in the search-engine card: the same fallbacks as the server (meta field → content).
+const seoTexts = computed(() =>
+    Object.fromEntries(
+        Object.entries(form.translations).map(([l, f]) => [l, { title: f.name, description: f.description }]),
+    ),
+);
 
 function submit(): void {
     const url = props.brand ? route('admin.brands.update', props.brand.id) : route('admin.brands.store');
@@ -69,4 +78,5 @@ function submit(): void {
             </div>
         </KtCard>
     </form>
+    <SeoPanel v-if="seo_overrides" class="mt-6" :data="seo_overrides" :texts="seoTexts" />
 </template>

@@ -27,7 +27,10 @@ export interface MenuSection {
 
 export const adminMenu: MenuSection[] = [
     {
-        items: [{ label: 'admin.dashboard', icon: 'element-11', route: 'admin.dashboard', match: 'admin.dashboard', permission: 'admin.access' }],
+        items: [
+            { label: 'admin.dashboard', icon: 'element-11', route: 'admin.dashboard', match: 'admin.dashboard', permission: 'admin.access' },
+            { label: 'analytics.title', icon: 'chart-simple', route: 'admin.analytics.index', match: 'admin.analytics.*', permission: 'analytics.view' },
+        ],
     },
     {
         heading: 'admin.catalog',

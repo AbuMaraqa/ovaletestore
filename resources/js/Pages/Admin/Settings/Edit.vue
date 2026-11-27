@@ -6,6 +6,7 @@ import LocationsEditor from '@/Components/Admin/Settings/LocationsEditor.vue';
 import MailSettingsFields from '@/Components/Admin/Settings/MailSettingsFields.vue';
 import MailTestCard from '@/Components/Admin/Settings/MailTestCard.vue';
 import PhoneLinesEditor from '@/Components/Admin/Settings/PhoneLinesEditor.vue';
+import SeoSettingsFields from '@/Components/Admin/Settings/SeoSettingsFields.vue';
 import SmtpSettingsFields from '@/Components/Admin/Settings/SmtpSettingsFields.vue';
 import FormField from '@/Components/Forms/FormField.vue';
 import KtButton from '@/Components/UI/KtButton.vue';
@@ -44,7 +45,17 @@ const initial: Record<string, any> = {
         locations: (props.values.locations ?? []).map((l: any) => ({ name: fill(l.name), address: fill(l.address), coordinates: l.coordinates ?? '' })),
     },
     store: { ...props.values },
-    seo: { home_title: localized('home_title'), home_description: localized('home_description'), og_image: null, allow_indexing: props.values.allow_indexing },
+    seo: {
+        home_title: localized('home_title'),
+        home_description: localized('home_description'),
+        default_description: localized('default_description'),
+        og_image: null,
+        allow_indexing: props.values.allow_indexing,
+        twitter_username: props.values.twitter_username ?? '',
+        google_verification: props.values.google_verification ?? '',
+        bing_verification: props.values.bing_verification ?? '',
+        ga_measurement_id: props.values.ga_measurement_id ?? '',
+    },
     invoice: {
         business_name: props.values.business_name ?? '',
         registration_number: props.values.registration_number ?? '',
@@ -174,17 +185,7 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                 </template>
 
                 <template v-else>
-                    <FormField v-for="l in locales" :id="`ht-${l}`" :key="l" :label="`${t('admin.home_title')} (${l})`" :error="errors[`home_title.${l}`]" :required="l === 'ar'">
-                        <input :id="`ht-${l}`" v-model="form.home_title[l]" class="kt-input" maxlength="70" :dir="dirFor(l)" />
-                    </FormField>
-                    <FormField v-for="l in locales" :id="`hd-${l}`" :key="`hd${l}`" :label="`${t('admin.home_description')} (${l})`" :error="errors[`home_description.${l}`]">
-                        <textarea :id="`hd-${l}`" v-model="form.home_description[l]" class="kt-textarea" rows="2" maxlength="170" :dir="dirFor(l)" />
-                    </FormField>
-                    <FormField id="og" :label="t('admin.og_image')" help="1200×630" :error="errors.og_image">
-                        <img v-if="values.og_image" :src="values.og_image" alt="" class="mb-2 h-24 rounded object-cover" />
-                        <input id="og" type="file" accept="image/jpeg,image/png,image/webp" class="kt-input" @change="setFile('og_image', $event)" />
-                    </FormField>
-                    <label class="flex items-center gap-3 text-sm"><input v-model="form.allow_indexing" type="checkbox" class="kt-switch" /> {{ t('admin.allow_indexing') }}</label>
+                    <SeoSettingsFields v-model="form" :errors="errors" :values="values" :locales="locales" @file="setFile" />
                 </template>
             </div>
             <template #footer><KtButton type="submit" :loading="form.processing" icon="check" class="ms-auto">{{ t('common.save') }}</KtButton></template>

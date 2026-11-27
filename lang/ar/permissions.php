@@ -54,6 +54,7 @@ return [
         'currencies_set_default' => 'تغيير العملة الافتراضية (يحوّل كل الأسعار)',
         'admin_access' => 'الدخول إلى لوحة التحكم',
         'activity_view' => 'عرض سجل النشاطات',
+        'analytics_view' => 'عرض إحصائيات الزيارات (Google Analytics)',
         'products_view' => 'عرض',
         'products_create' => 'إضافة',
         'products_update' => 'تعديل',

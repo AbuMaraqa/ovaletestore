@@ -15,3 +15,6 @@ Schedule::command('activitylog:clean --force')->dailyAt('03:30');
 Schedule::command('backup:clean')->dailyAt('01:30');
 Schedule::command('backup:run')->dailyAt('02:00');
 Schedule::command('queue:prune-failed --hours=720')->weekly();
+
+// Rebuild the cached XML sitemaps nightly (they are also flushed whenever the catalog changes).
+Schedule::command('sitemap:generate')->dailyAt('04:00');

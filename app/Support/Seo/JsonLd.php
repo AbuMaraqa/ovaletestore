@@ -7,9 +7,10 @@ use App\Models\ProductVariant;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
 use App\Support\Money;
+use Illuminate\Support\Str;
 use Spatie\SchemaOrg\Schema;
 
-/** Typed schema.org builders (spatie/schema-org). */
+/** Typed schema.org builders (spatie/schema-org); breadcrumbs use laravel-seo's own markup (SeoData::breadcrumbs). */
 final class JsonLd
 {
     public static function organization(): array
@@ -45,15 +46,6 @@ final class JsonLd
             ->toArray();
     }
 
-    /** @param list<array{name:string, url:string}> $items */
-    public static function breadcrumbs(array $items): array
-    {
-        return Schema::breadcrumbList()->itemListElement(
-            collect($items)->values()->map(fn ($item, $i) => Schema::listItem()
-                ->position($i + 1)->name($item['name'])->item($item['url']))->all(),
-        )->toArray();
-    }
-
     public static function product(Product $product, string $url, ?string $image): array
     {
         $currency = Money::storeCurrency(); // structured data: base-currency prices
@@ -70,10 +62,15 @@ final class JsonLd
 
         $schema = Schema::product()
             ->name($product->name)
-            ->description(strip_tags((string) ($product->short_description ?: $product->description)))
             ->url($url)
             ->offers($offers);
 
+        // squish() also removes the &nbsp; WooCommerce left in empty descriptions.
+        $description = Str::of(html_entity_decode(strip_tags((string) ($product->short_description ?: $product->description))))
+            ->squish()->limit(5000)->toString();
+        if ($description !== '') {
+            $schema->description($description);
+        }
         if ($image) {
             $schema->image($image);
         }

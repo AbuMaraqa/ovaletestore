@@ -58,6 +58,7 @@ class CategoryController extends Controller
                 ]),
             ],
             'parents' => $this->parents($category),
+            'seo_overrides' => SeoController::props($category, 'categories'),
         ]);
     }
 

@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
 use App\Models\Concerns\HasOptimizedImages;
+use App\Models\Concerns\HasSeoPage;
 use App\Models\Concerns\HasTranslations;
 use App\Models\Concerns\RecordsActivity;
+use App\Support\Seo\SeoImage;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -15,8 +17,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use RalphJSmit\Laravel\SEO\Support\SEOData;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Sitemap\Contracts\Sitemapable;
 
 /**
  * Translated attributes (Astrotomic, current locale with fallback):
@@ -28,9 +32,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read string|null $meta_title
  * @property-read string|null $meta_description
  */
-class Product extends Model implements HasMedia, TranslatableContract
+class Product extends Model implements HasMedia, Sitemapable, TranslatableContract
 {
-    use HasOptimizedImages, HasTranslations, RecordsActivity, SoftDeletes;
+    use HasOptimizedImages, HasSeoPage, HasTranslations, RecordsActivity, SoftDeletes;
 
     /** @var list<string> */
     public array $translatedAttributes = ['name', 'slug', 'short_description', 'description', 'meta_title', 'meta_description'];
@@ -45,6 +49,38 @@ class Product extends Model implements HasMedia, TranslatableContract
             'is_featured' => 'boolean',
             'published_at' => 'datetime',
         ];
+    }
+
+    public function pageUrl(string $locale): string
+    {
+        return $this->localizedRoute($locale, 'storefront.product', ['slug' => (string) $this->translate($locale, true)?->getAttribute('slug')]);
+    }
+
+    /** laravel-seo: the product page head in the current locale (admin meta fields first, then the content). */
+    protected function seoDefaults(): SEOData
+    {
+        [$image, $imageMeta] = SeoImage::fromMedia($this->getFirstMedia('gallery')) ?? [null, null];
+
+        return new SEOData(
+            title: $this->meta_title ?: $this->name,
+            description: $this->meta_description ?: ($this->short_description ?: $this->description),
+            image: $image,
+            imageMeta: $imageMeta,
+            type: 'product',
+        );
+    }
+
+    protected function sitemapPriority(): float
+    {
+        return 0.6;
+    }
+
+    /** @return list<string> up to 10 gallery images (1600 px WebP when generated) for the image sitemap */
+    protected function sitemapImages(): array
+    {
+        return $this->getMedia('gallery')->take(10)
+            ->map(fn (Media $m) => $m->hasGeneratedConversion('large') ? $m->getUrl('large') : $m->getUrl())
+            ->values()->all();
     }
 
     /** @return BelongsTo<Brand, $this> */

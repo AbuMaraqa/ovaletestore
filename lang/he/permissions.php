@@ -54,6 +54,7 @@ return [
         'currencies_set_default' => 'שינוי מטבע ברירת המחדל (ממיר את כל המחירים)',
         'admin_access' => 'כניסה ללוח הבקרה',
         'activity_view' => 'צפייה ביומן הפעילות',
+        'analytics_view' => 'צפייה בנתוני תנועה (Google Analytics)',
         'products_view' => 'צפייה',
         'products_create' => 'הוספה',
         'products_update' => 'עריכה',

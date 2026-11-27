@@ -54,7 +54,7 @@ class BrandController extends Controller
             'translations' => collect(config('translatable.locales'))->mapWithKeys(fn ($l) => [
                 $l => collect(self::FIELDS)->mapWithKeys(fn ($f) => [$f => $brand->translate($l, false)?->{$f} ?? '']),
             ]),
-        ]]);
+        ], 'seo_overrides' => SeoController::props($brand, 'brands')]);
     }
 
     public function update(Request $request, Brand $brand): RedirectResponse
