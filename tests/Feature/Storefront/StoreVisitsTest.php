@@ -32,6 +32,15 @@ it('counts a real page view and keeps nothing personal', function () {
         ->and($visit->useragent)->toBeNull();
 });
 
+it('still counts the visit when PHP puts argv/argc arrays into $_SERVER (register_argc_argv = On)', function () {
+    // php-fpm on the production server: Mobile-Detect turns every $_SERVER value into a string and threw on arrays.
+    $this->withServerVariables(['argv' => ['q=1'], 'argc' => 1])
+        ->withHeaders(['User-Agent' => IPHONE])
+        ->get('/ar/shop')->assertOk();
+
+    expect(StoreVisit::query()->sole()->device_type)->toBe('mobile');
+});
+
 it('treats clicks inside the store as navigation, not as a new source', function () {
     $this->withHeaders(['User-Agent' => CHROME, 'Referer' => url('/ar')])->get('/ar/categories')->assertOk();
     $this->flushHeaders()->withHeaders(['User-Agent' => CHROME])->get('/ar/brands')->assertOk();

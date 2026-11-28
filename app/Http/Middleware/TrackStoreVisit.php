@@ -30,6 +30,14 @@ class TrackStoreVisit
     {
         $response = $next($request);
 
+        // With register_argc_argv = On (php-fpm on the server) $_SERVER holds argv/argc arrays; Mobile-Detect — used
+        // here and by the package's driver on this same request — casts every server value to a string and throws.
+        foreach ($request->server->all() as $key => $value) {
+            if (! is_string($value) && ! is_int($value) && ! is_float($value)) {
+                $request->server->remove($key);
+            }
+        }
+
         if ($this->shouldTrack($request, $response)) {
             try {
                 $fields = $this->fields($request);
