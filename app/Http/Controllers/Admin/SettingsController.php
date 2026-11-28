@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Home\StoreHeroImage;
 use App\Http\Controllers\Controller;
 use App\Settings\ContactSettings;
 use App\Settings\GeneralSettings;
+use App\Settings\HomeSettings;
 use App\Settings\InvoiceSettings;
 use App\Settings\MailSettings;
 use App\Settings\SeoSettings;
@@ -29,14 +31,15 @@ use Inertia\Response;
 use Spatie\LaravelSettings\Settings;
 use Throwable;
 
-/** One controller, five typed settings groups. Secrets never live here (they stay in .env). */
+/** One controller, the typed settings groups. Secrets never live here (they stay in .env). */
 class SettingsController extends Controller
 {
-    public const GROUPS = ['general', 'contact', 'store', 'seo', 'mail', 'invoice'];
+    public const GROUPS = ['general', 'home', 'contact', 'store', 'seo', 'mail', 'invoice'];
 
     /** @var array<string, class-string<Settings>> */
     public const SETTINGS = [
         'general' => GeneralSettings::class,
+        'home' => HomeSettings::class,
         'contact' => ContactSettings::class,
         'store' => StoreSettings::class,
         'seo' => SeoSettings::class,
@@ -67,6 +70,7 @@ class SettingsController extends Controller
 
         match ($group) {
             'general' => $this->updateGeneral($request, $settings),
+            'home' => $this->updateHome($request, $settings),
             'contact' => $this->updateContact($request, $settings),
             'store' => $this->updateStore($request, $settings),
             'seo' => $this->updateSeo($request, $settings),
@@ -90,6 +94,7 @@ class SettingsController extends Controller
                 'font_family' => $s->font_family, 'font_name' => $s->font_name, 'font_scope' => $s->font_scope, 'font_locales' => $s->font_locales,
                 'font_files' => array_map(fn ($path) => $url($path), $s->font_files),
             ] : [],
+            'home' => $this->homeValues(app(HomeSettings::class)),
             'contact' => ($s = app(ContactSettings::class)) ? [
                 'phone' => $s->phone, 'whatsapp' => $s->whatsapp, 'email' => $s->email,
                 'social_links' => $s->social_links, 'phone_lines' => $s->phone_lines,
@@ -267,6 +272,41 @@ class SettingsController extends Controller
         if ($iconsChanged) {
             SiteIcons::generate(); // favicon + home-screen icons follow the new logo/favicon
         }
+    }
+
+    /** @return array{hero_title: array<string, string>, hero_subtitle: array<string, string>, hero_image: string|null} */
+    private function homeValues(HomeSettings $s): array
+    {
+        $largest = collect($s->hero_image)->sortKeys(SORT_NUMERIC)->last();
+
+        return [
+            'hero_title' => $s->hero_title,
+            'hero_subtitle' => $s->hero_subtitle,
+            'hero_image' => $largest ? asset('storage/'.$largest) : null,
+        ];
+    }
+
+    /** Homepage hero: photo (converted to WebP sizes by StoreHeroImage), headline and subtitle per language. */
+    private function updateHome(Request $request, HomeSettings $settings): void
+    {
+        $data = $request->validate([
+            ...$this->localeRules('hero_title', 'string|max:120'),
+            ...$this->localeRules('hero_subtitle', 'string|max:300', requireArabic: false),
+            'hero_image' => ['nullable', 'file', 'max:10240', 'mimetypes:image/jpeg,image/png,image/webp', 'dimensions:min_width=1200,min_height=700'],
+        ], [], [
+            'hero_image' => __('admin.hero_image'),
+            ...collect(config('translatable.locales'))->flatMap(fn (string $l) => [
+                "hero_title.{$l}" => __('admin.hero_title').' ('.(config("laravellocalization.supportedLocales.{$l}.native") ?? $l).')',
+                "hero_subtitle.{$l}" => __('admin.hero_subtitle').' ('.(config("laravellocalization.supportedLocales.{$l}.native") ?? $l).')',
+            ])->all(),
+        ]);
+
+        $settings->hero_title = array_map('strval', array_filter($data['hero_title']));
+        $settings->hero_subtitle = array_map('strval', array_filter($data['hero_subtitle'] ?? []));
+        if ($file = $request->file('hero_image')) {
+            $settings->hero_image = app(StoreHeroImage::class)->handle($file, $settings->hero_image);
+        }
+        $settings->save();
     }
 
     private function updateContact(Request $request, ContactSettings $settings): void

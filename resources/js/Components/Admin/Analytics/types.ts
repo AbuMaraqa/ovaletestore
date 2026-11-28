@@ -12,6 +12,7 @@ export interface AnalyticsKpis {
 
 export interface AnalyticsReport {
     status: 'ok' | 'error' | 'not_configured';
+    source?: 'google' | 'internal';
     message?: string;
     kpis?: AnalyticsKpis;
     trend?: TrafficPoint[];

@@ -175,3 +175,10 @@ Sales reps can add a company and correct its contact details from the POS (`pos.
 - **Parts:** `FormCard` (title, icon, error count, collapsible), `FormSection`, `SwitchRow`, `SegmentedControl`, `LocaleTabs` (`v-model:active`, error counts, arrow keys mirrored in RTL), `RichTextEditor` (Tiptap 3, toolbar = the `App\Support\RichText` whitelist, HTML source toggle, Tiptap CSS injection off for the CSP), `ImageInput` (one image with preview), `MediaGallery`.
 - **Product images on the add screen:** `MediaGallery` uploads each file as soon as it is picked (`POST admin/uploads`, one image per request, progress + per-file errors) to `App\Support\StagedUploads` (private disk, per-user folder); the product save sends only the ids (`uploads[]`, in the arranged order) and `AttachProductImages` moves them into the gallery. Unclaimed files are pruned hourly after 24 h. Search-engine overrides (robots, canonical, share image) are saved with the product (`seo.*`, `SaveSeoOverrides`); categories/brands keep their own card (`admin.seo.update`).
 - **Product page:** content (per language) → images → price & inventory (simple/variable switch; sale scheduling; stock; shipping with units; trader prices) → search engines; publishing + categories (chips with ★ main, tree with search) + brand on the side. "Save & add another" on the add screen.
+
+## Settings → Homepage (2026-11-28)
+- The homepage hero (photo, headline, text under it per language) is edited from **Settings → Homepage**
+  (`HomeSettings`, permission `settings.home`: admin + content manager). Run `php artisan permissions:sync` on deploy.
+- The photo is converted by `App\Actions\Home\StoreHeroImage` into WebP at 960 and 1920 px (never upscaled) under
+  fresh random names (no stale caches); the previous WebP files are deleted, the uploaded original is kept under
+  `home/originals`. Upload rules: JPG/PNG/WebP, ≥ 1200×700 px, ≤ 10 MB.

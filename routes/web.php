@@ -6,6 +6,7 @@ use App\Http\Controllers\Pos;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Storefront;
 use App\Http\Middleware\ApplyStorefrontCurrency;
+use App\Http\Middleware\TrackStoreVisit;
 use App\Settings\GeneralSettings;
 use App\Support\ActivityLog;
 use App\Support\Seo\SitemapBuilder;
@@ -36,7 +37,8 @@ Route::prefix(LaravelLocalization::setLocale())
         // Fortify (login, logout, password reset, 2FA) inside the locale prefix.
         require __DIR__.'/auth.php';
 
-        Route::name('storefront.')->middleware(ApplyStorefrontCurrency::class)->group(function () {
+        // TrackStoreVisit: internal traffic counter (shetabit/visitor) behind Admin → Site traffic.
+        Route::name('storefront.')->middleware([ApplyStorefrontCurrency::class, TrackStoreVisit::class])->group(function () {
             Route::get('/', Storefront\HomeController::class)->name('home');
             Route::get('/shop', [Storefront\CatalogController::class, 'index'])->name('shop');
             Route::get('/categories', [Storefront\CatalogController::class, 'categories'])->name('categories');

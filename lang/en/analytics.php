@@ -50,4 +50,9 @@ return [
         'Unassigned' => 'Unassigned',
     ],
     'device_names' => ['mobile' => 'Mobile', 'desktop' => 'Desktop', 'tablet' => 'Tablet'],
+    'source_internal' => 'Store counter',
+    'source_internal_help' => 'Numbers from the store\'s own visit counter: every page a real visitor opens (no bots, no staff browsing). No personal data is kept.',
+    'source_google' => 'Google Analytics',
+    'source_google_help' => 'Numbers from Google Analytics 4.',
+    'source' => 'Data source',
 ];

@@ -97,6 +97,7 @@ return [
         'roles_update' => 'Edit',
         'roles_delete' => 'Delete',
         'settings_general' => 'General settings',
+        'settings_home' => 'Homepage',
         'settings_contact' => 'Contact & branches',
         'settings_store' => 'Store settings',
         'settings_seo' => 'SEO',

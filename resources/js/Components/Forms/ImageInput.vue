@@ -8,7 +8,7 @@ import { useTrans } from '@/Composables/useTrans';
  * The File goes in the page form (`v-model`), sent with forceFormData. `id` lands on the button for labels/focus.
  */
 const model = defineModel<File | null>({ required: true });
-const props = withDefaults(defineProps<{ id: string; current?: string | null; accept?: string; shape?: 'square' | 'wide' | 'round'; fit?: 'cover' | 'contain' }>(), {
+const props = withDefaults(defineProps<{ id: string; current?: string | null; accept?: string; shape?: 'square' | 'wide' | 'round' | 'banner'; fit?: 'cover' | 'contain' }>(), {
     current: null,
     accept: 'image/jpeg,image/png,image/webp,image/avif',
     shape: 'square',
@@ -35,13 +35,13 @@ onBeforeUnmount(() => preview.value && URL.revokeObjectURL(preview.value));
 </script>
 
 <template>
-    <div class="flex items-center gap-4">
+    <div :class="['flex gap-4', shape === 'banner' ? 'flex-col items-start sm:flex-row sm:items-end' : 'items-center']">
         <button
             :id="id"
             type="button"
             :class="[
                 'group relative shrink-0 overflow-hidden border border-border bg-muted/40 transition-colors hover:border-primary focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none',
-                shape === 'wide' ? 'aspect-[1.91/1] w-48 rounded-xl' : shape === 'round' ? 'size-24 rounded-full' : 'size-24 rounded-xl',
+                shape === 'banner' ? 'aspect-[3/2] w-full max-w-md rounded-xl' : shape === 'wide' ? 'aspect-[1.91/1] w-48 rounded-xl' : shape === 'round' ? 'size-24 rounded-full' : 'size-24 rounded-xl',
             ]"
             :aria-label="t('forms.choose_image')"
             @click="input?.click()"

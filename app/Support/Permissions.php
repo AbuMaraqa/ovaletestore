@@ -26,7 +26,7 @@ final class Permissions
         'currencies' => ['currencies.view', 'currencies.create', 'currencies.update', 'currencies.delete', 'currencies.set_default'],
         'users' => ['users.view', 'users.create', 'users.update', 'users.delete'],
         'roles' => ['roles.view', 'roles.create', 'roles.update', 'roles.delete'],
-        'settings' => ['settings.general', 'settings.contact', 'settings.store', 'settings.seo', 'settings.mail', 'settings.invoice'],
+        'settings' => ['settings.general', 'settings.home', 'settings.contact', 'settings.store', 'settings.seo', 'settings.mail', 'settings.invoice'],
         'pos' => ['pos.access', 'pos.companies.create', 'pos.companies.update'],
     ];
 
@@ -53,7 +53,7 @@ final class Permissions
             'content-manager' => [
                 'admin.access', 'products.view', 'products.update',
                 ...self::GROUPS['categories'], ...self::GROUPS['brands'],
-                'settings.general', 'settings.contact', 'settings.seo', 'analytics.view',
+                'settings.general', 'settings.home', 'settings.contact', 'settings.seo', 'analytics.view',
             ],
             'order-manager' => [
                 'admin.access', 'orders.view', 'orders.update_status', 'products.view', 'customers.view', 'traders.view',

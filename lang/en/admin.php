@@ -304,4 +304,9 @@ return [
     'smtp_password_clear' => 'Remove the saved password',
     'smtp_security_note' => 'The password is stored encrypted and never shown again. After saving, use "Send test email" to check.',
     'terms_count' => 'Values',
+    'home' => 'Homepage',
+    'hero_image' => 'Hero photo',
+    'hero_image_help' => 'Shown at the top of the homepage. A clear landscape photo, 1920×1280 px or larger (JPG, PNG or WebP, up to 10 MB).',
+    'hero_title' => 'Headline',
+    'hero_subtitle' => 'Text under the headline',
 ];

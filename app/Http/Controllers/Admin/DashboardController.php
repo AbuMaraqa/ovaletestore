@@ -9,7 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductTranslation;
 use App\Models\ProductVariant;
-use App\Support\Analytics\SiteAnalytics;
+use App\Support\Analytics\StoreVisits;
 use App\Support\CurrencyContext;
 use App\Support\Money;
 use Carbon\CarbonPeriod;
@@ -27,12 +27,11 @@ class DashboardController extends Controller
         return Inertia::render('Admin/Dashboard/Index', [
             'kpis' => $canSeeOrders ? $this->kpis() : null,
             'chart' => $canSeeOrders ? Inertia::defer(fn () => $this->revenueChart()) : null,
-            // GA4 traffic card (spatie/laravel-analytics): deferred, the Google API never slows the dashboard down.
-            'traffic' => match (true) {
-                ! $request->user()->can('analytics.view') => null,
-                ! SiteAnalytics::configured() => ['status' => 'not_configured'],
-                default => Inertia::defer(fn () => app(SiteAnalytics::class)->summary(), 'traffic'),
-            },
+            // Traffic card: the store's own counter (StoreVisits) — instant and always on; Google Analytics has its own
+            // tab on the Site traffic page. Deferred.
+            'traffic' => $request->user()->can('analytics.view')
+                ? Inertia::defer(fn () => app(StoreVisits::class)->summary(), 'traffic')
+                : null,
             'currencySymbol' => app(CurrencyContext::class)->base()->symbol(),
             'catalog' => $this->catalogHealth(),
             'topCategories' => Category::query()->with('translations')

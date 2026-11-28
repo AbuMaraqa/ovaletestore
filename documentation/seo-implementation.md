@@ -65,3 +65,16 @@ Dynamic (`SitemapController@robots`): disallows admin, cart, checkout, login, `?
 - **Search Console "Couldn't fetch" on the child sitemaps** right after submitting `/sitemap.xml` is Google's
   pending state (no "Last read" date yet): the files answer 200 with valid XML. It clears once Google crawls them
   (hours to a few days); re-submit the index only if it persists.
+
+## Internal visit counter + Google Analytics side by side (2026-11-28)
+Admin → Site traffic has a source switch (`?source=internal|google`, default internal):
+- **Store counter** — `shetabit/visitor` (most-used Laravel visit logger, Laravel 13). `App\Http\Middleware\TrackStoreVisit`
+  on the storefront route group logs one row per real page view (full load or Inertia visit; GET 200 only; no bots via
+  the package's crawler detection, no prefetch/partial reloads, no redirects/JSON helpers, no staff). Written after the
+  response (`defer`). `App\Models\StoreVisit` (config `visitor.model`) **scrubs headers (session cookies!), request
+  input, IP and user agent** — the package stores all of them by default — and keeps report columns: path, slug,
+  daily-rotating visitor hash, session hash, device type, channel (entrances only), referrer host, locale.
+  `App\Support\Analytics\StoreVisits` returns the same report shape as `SiteAnalytics` (no countries, no new/returning).
+  Rows older than 400 days: `model:prune` daily 03:45. The dashboard traffic card uses this counter.
+- **Google Analytics** — unchanged (`SiteAnalytics`); shows "not connected yet" until the Data API key is installed.
+- Deploy: `php artisan migrate` (visits table + report columns).

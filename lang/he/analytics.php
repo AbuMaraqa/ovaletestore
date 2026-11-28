@@ -50,4 +50,9 @@ return [
         'Unassigned' => 'לא משויך',
     ],
     'device_names' => ['mobile' => 'נייד', 'desktop' => 'מחשב', 'tablet' => 'טאבלט'],
+    'source_internal' => 'מונה החנות',
+    'source_internal_help' => 'המספרים ממונה הביקורים הפנימי של החנות: כל דף שמבקר אמיתי פותח (ללא בוטים וללא גלישת צוות). לא נשמר מידע אישי.',
+    'source_google' => 'Google Analytics',
+    'source_google_help' => 'המספרים מ-Google Analytics 4.',
+    'source' => 'מקור הנתונים',
 ];

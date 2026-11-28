@@ -70,15 +70,31 @@ it('saves the SEO settings and rejects markup in verification codes', function (
         ->and($seo->default_description)->toBe(['en' => 'Sweets and baking supplies']);
 });
 
-it('shows the setup guide until Google Analytics is connected, and needs analytics.view', function () {
+it('uses the store counter until Google Analytics is connected, and needs analytics.view', function () {
     config(['analytics.property_id' => null]);
 
     $this->actingAs(staffUser('admin'))->get(route('admin.analytics.index'))->assertOk()
-        ->assertInertia(fn ($page) => $page->component('Admin/Analytics/Index')->where('configured', false)
+        ->assertInertia(fn ($page) => $page->component('Admin/Analytics/Index')->where('source', 'internal')
             ->missing('credentials_path')); // server setup is never shown to the store owner
 
     $this->actingAs(staffUser('order-manager'))->get(route('admin.analytics.index'))->assertForbidden();
     expect(app(SiteAnalytics::class)->report(28))->toBe(['status' => 'not_configured']);
+});
+
+it('shows both sources side by side: the store counter and Google Analytics', function () {
+    config(['analytics.property_id' => null]);
+    $admin = staffUser('admin');
+
+    $this->actingAs($admin)->get(route('admin.analytics.index', ['source' => 'google', 'days' => 7]))->assertOk()
+        ->assertInertia(fn ($page) => $page->where('source', 'google')->where('google_connected', false)->where('days', 7)
+            ->loadDeferredProps(fn ($reload) => $reload->where('report.status', 'not_configured')));
+
+    $this->actingAs($admin)->get(route('admin.analytics.index', ['source' => 'internal']))->assertOk()
+        ->assertInertia(fn ($page) => $page->where('source', 'internal')
+            ->loadDeferredProps(fn ($reload) => $reload->where('report.status', 'ok')->where('report.source', 'internal')));
+
+    // An unknown source falls back to the store counter.
+    $this->actingAs($admin)->get(route('admin.analytics.index', ['source' => 'other']))->assertInertia(fn ($page) => $page->where('source', 'internal'));
 });
 
 it('turns every laravel-analytics report into the page data', function () {

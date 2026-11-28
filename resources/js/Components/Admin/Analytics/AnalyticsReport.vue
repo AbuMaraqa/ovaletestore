@@ -7,7 +7,11 @@ import KtCard from '@/Components/UI/KtCard.vue';
 import KtIcon from '@/Components/UI/KtIcon.vue';
 import { useTrans } from '@/Composables/useTrans';
 
-/** Every GA4 report SiteAnalytics returns: KPIs, daily trend, pages, sources, audience and technology. */
+/**
+ * The traffic report (Google Analytics via SiteAnalytics, or the store counter via StoreVisits): KPIs, daily trend,
+ * pages, sources, audience and technology. Lists a source does not provide (countries, new vs returning for the
+ * store counter) are left out.
+ */
 const props = defineProps<{ report: AnalyticsReport }>();
 const { t } = useTrans();
 const fmt = (n: number) => new Intl.NumberFormat(undefined).format(n);
@@ -78,8 +82,8 @@ const pages = computed(() => (props.report.pages ?? []).map((p) => ({ label: p.t
         <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <RankList :title="t('analytics.channels')" :rows="channels" />
             <RankList :title="t('analytics.referrers')" :rows="referrers" />
-            <RankList :title="t('analytics.user_types')" :rows="userTypes" />
-            <RankList :title="t('analytics.countries')" :rows="rows(report.countries)" />
+            <RankList v-if="report.user_types" :title="t('analytics.user_types')" :rows="userTypes" />
+            <RankList v-if="report.countries" :title="t('analytics.countries')" :rows="rows(report.countries)" />
             <RankList :title="t('analytics.devices')" :rows="devices" />
             <RankList :title="t('analytics.browsers')" :rows="rows(report.browsers)" />
             <RankList :title="t('analytics.systems')" :rows="rows(report.systems)" />

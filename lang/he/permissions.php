@@ -97,6 +97,7 @@ return [
         'roles_update' => 'עריכה',
         'roles_delete' => 'מחיקה',
         'settings_general' => 'הגדרות כלליות',
+        'settings_home' => 'דף הבית',
         'settings_contact' => 'יצירת קשר וסניפים',
         'settings_store' => 'הגדרות חנות',
         'settings_seo' => 'קידום אתרים',

@@ -2,6 +2,7 @@
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FontSettingsFields from '@/Components/Admin/Settings/FontSettingsFields.vue';
+import HomeSettingsFields from '@/Components/Admin/Settings/HomeSettingsFields.vue';
 import LocationsEditor from '@/Components/Admin/Settings/LocationsEditor.vue';
 import MailSettingsFields from '@/Components/Admin/Settings/MailSettingsFields.vue';
 import MailTestCard from '@/Components/Admin/Settings/MailTestCard.vue';
@@ -18,7 +19,7 @@ import { useTrans } from '@/Composables/useTrans';
 import type { SharedProps } from '@/types';
 
 type Localized = Record<string, string>;
-const props = defineProps<{ group: 'general' | 'contact' | 'store' | 'seo' | 'mail' | 'invoice'; groups: string[]; values: Record<string, any>; locales: string[] }>();
+const props = defineProps<{ group: 'general' | 'home' | 'contact' | 'store' | 'seo' | 'mail' | 'invoice'; groups: string[]; values: Record<string, any>; locales: string[] }>();
 const { t } = useTrans();
 
 /** File inputs are separate keys (logo/favicon/og_image); existing URLs are display-only. */
@@ -37,6 +38,11 @@ const initial: Record<string, any> = {
         font_regular: null,
         font_medium: null,
         font_bold: null,
+    },
+    home: {
+        hero_title: localized('hero_title'),
+        hero_subtitle: localized('hero_subtitle'),
+        hero_image: null,
     },
     contact: {
         phone: props.values.phone ?? '',
@@ -137,6 +143,10 @@ const dirFor = (l: string) => (l === 'en' ? 'ltr' : 'rtl');
                     </div>
                     <!-- Edits the fields of this same form object in place. -->
                     <FontSettingsFields :model-value="form as any" :uploaded="values.font_files ?? {}" :locales="locales" :errors="errors" />
+                </template>
+
+                <template v-else-if="group === 'home'">
+                    <HomeSettingsFields v-model="form" :values="values" :locales="locales" />
                 </template>
 
                 <template v-else-if="group === 'invoice'">

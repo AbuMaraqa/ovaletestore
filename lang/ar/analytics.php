@@ -50,4 +50,9 @@ return [
         'Unassigned' => 'غير محدد',
     ],
     'device_names' => ['mobile' => 'جوال', 'desktop' => 'كمبيوتر', 'tablet' => 'تابلت'],
+    'source_internal' => 'عدّاد المتجر',
+    'source_internal_help' => 'الأرقام من عدّاد الزيارات الداخلي في المتجر: كل صفحة يفتحها زائر حقيقي (بدون الروبوتات وبدون تصفّح الموظفين). لا تُحفظ أي بيانات شخصية.',
+    'source_google' => 'Google Analytics',
+    'source_google_help' => 'الأرقام من Google Analytics 4.',
+    'source' => 'مصدر الأرقام',
 ];

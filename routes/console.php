@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\StoreVisit;
 use App\Support\StagedUploads;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -19,6 +20,9 @@ Schedule::command('queue:prune-failed --hours=720')->weekly();
 
 // Rebuild the cached XML sitemaps nightly (they are also flushed whenever the catalog changes).
 Schedule::command('sitemap:generate')->dailyAt('04:00');
+
+// Internal traffic counter: keep about 13 months of page views (App\Models\StoreVisit::prunable).
+Schedule::command('model:prune', ['--model' => [StoreVisit::class]])->dailyAt('03:45');
 
 // Product images staged on a form that was never saved (App\Support\StagedUploads).
 Schedule::call(fn () => StagedUploads::prune(24))->name('staged-uploads:prune')->hourly();
