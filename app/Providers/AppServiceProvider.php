@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -29,6 +30,7 @@ use Illuminate\Validation\Rules\Password;
 use Mcamara\LaravelLocalization\Traits\LoadsTranslatedCachedRoutes;
 use Spatie\Activitylog\Actions\LogActivityAction;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
+use Spatie\Analytics\AnalyticsClient;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +43,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrencyContext::class);
         // SMTP server saved in Admin → Settings → Email (encrypted password) overrides .env when enabled.
         $this->app->afterResolving('mail.manager', fn () => MailServer::apply());
+        // laravel-analytics caches Google's raw protobuf bytes in the default store; the database cache's text
+        // column rejects them on MySQL ("Incorrect string value"). Keep these responses in a file store instead.
+        // (extend() survives the package re-binding the client while it boots.)
+        $this->app->extend(AnalyticsClient::class, fn (AnalyticsClient $client) => (new AnalyticsClient(
+            $client->getAnalyticsService(),
+            Cache::store((string) config('analytics.response_cache_store', 'file')),
+        ))->setCacheLifeTimeInMinutes((int) config('analytics.cache_lifetime_in_minutes')));
     }
 
     public function boot(): void

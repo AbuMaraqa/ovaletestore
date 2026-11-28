@@ -2,9 +2,12 @@
 
 use App\Settings\SeoSettings;
 use App\Support\Analytics\SiteAnalytics;
+use Illuminate\Cache\DatabaseStore;
+use Illuminate\Cache\FileStore;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Analytics\AnalyticsClient;
 use Spatie\Analytics\Facades\Analytics;
 
 /** Admin side of laravel-seo (per-record overrides, settings) and spatie/laravel-analytics (reports, tracking). */
@@ -139,4 +142,17 @@ it('loads gtag.js on storefront pages only, and allows it in the CSP only then',
     $off = $this->get(route('storefront.home'));
     expect($off->getContent())->not->toContain('googletagmanager')
         ->and((string) $off->headers->get('Content-Security-Policy'))->not->toContain('googletagmanager');
+});
+
+it('caches Google responses outside the database cache: their protobuf bytes are not valid text for MySQL', function () {
+    config(['cache.default' => 'database', 'analytics.service_account_credentials_json' => [
+        'type' => 'service_account', 'project_id' => 'test', 'client_email' => 'svc@test.iam.gserviceaccount.com',
+        'client_id' => '1', 'private_key_id' => 'k', 'private_key' => "-----BEGIN PRIVATE KEY-----\nMII\n-----END PRIVATE KEY-----\n",
+    ]]);
+
+    $client = app(AnalyticsClient::class);
+    $store = (fn () => $this->cache)->call($client)->getStore();
+
+    expect($store)->not->toBeInstanceOf(DatabaseStore::class)
+        ->and($store)->toBeInstanceOf(FileStore::class);
 });
